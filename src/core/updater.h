@@ -30,6 +30,9 @@ signals:
     /// \param version Version number of the new release.
     void version(QString version);
 
+    /// This signal is emitted when the update check has a final result.
+    void checked(QString version, bool updateAvailable, QString error);
+
     /// This signal is emitted after the update check is done.
     void finished();
 
@@ -72,6 +75,9 @@ signals:
     /// This signal is emitted when the application update is available.
     /// \param version Version number of the new release.
     void version(QString version);
+
+    /// This signal is emitted when the update check has a final result.
+    void checked(QString version, bool updateAvailable, QString error);
 };
 
 #endif // UPDATER_H

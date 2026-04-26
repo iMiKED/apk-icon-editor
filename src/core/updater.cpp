@@ -17,6 +17,7 @@ void Updater::check() const
 
     connect(thread, SIGNAL(started()), worker, SLOT(check()));
     connect(worker, SIGNAL(version(QString)), this, SIGNAL(version(QString)));
+    connect(worker, SIGNAL(checked(QString,bool,QString)), this, SIGNAL(checked(QString,bool,QString)));
     connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
@@ -71,6 +72,10 @@ void UpdateWorker::check() const
 
 void UpdateWorker::catchReply(QNetworkReply *reply)
 {
+    QString latest;
+    QString error;
+    bool updateAvailable = false;
+
     if (reply->error() == QNetworkReply::NoError) {
 
         const int CODE = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -80,14 +85,23 @@ void UpdateWorker::catchReply(QNetworkReply *reply)
             if (URL.indexOf(Url::VERSION) != -1) {
 
                 const QString JSON = reply->readAll().trimmed();
-                const QString VERSION = parse(JSON);
-                if (Updater::compare(VERSION, VER)) {
-                    emit version(VERSION);
+                latest = parse(JSON);
+                updateAvailable = Updater::compare(latest, VER);
+                if (updateAvailable) {
+                    emit version(latest);
+                }
+                if (latest.isEmpty()) {
+                    error = tr("Could not find release version in the update response.");
                 }
             }
+        } else {
+            error = tr("Update server returned HTTP %1.").arg(CODE);
         }
+    } else {
+        error = reply->errorString();
     }
 
+    emit checked(latest, updateAvailable, error);
     reply->deleteLater();
     emit finished();
 }

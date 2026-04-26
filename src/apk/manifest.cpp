@@ -60,9 +60,9 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
     regexTargetSdk.setPatternOptions(QRegularExpression::MultilineOption);
     regexVersionCode.setPatternOptions(QRegularExpression::MultilineOption);
     regexVersionName.setPatternOptions(QRegularExpression::MultilineOption);
-    regexMinSdk.setPattern("(?<=^  minSdkVersion: ')\\d+(?='$)");
-    regexTargetSdk.setPattern("(?<=^  targetSdkVersion: ')\\d+(?='$)");
-    regexVersionCode.setPattern("(?<=^  versionCode: ')\\d+(?='$)");
+    regexMinSdk.setPattern("(^\\s*minSdkVersion:\\s*'?)\\d+('?$)");
+    regexTargetSdk.setPattern("(^\\s*targetSdkVersion:\\s*'?)\\d+('?$)");
+    regexVersionCode.setPattern("(^\\s*versionCode:\\s*'?)\\d+('?$)");
     regexVersionName.setPattern("(?<=^  versionName: ).+(?=$)");
 
     ymlFile = new QFile(ymlPath);
@@ -70,9 +70,9 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
         QTextStream stream(ymlFile);
         setUtf8Encoding(stream);
         yml = stream.readAll();
-        minSdk = regexMinSdk.match(yml).captured().toInt();
-        targetSdk = regexTargetSdk.match(yml).captured().toInt();
-        versionCode = regexVersionCode.match(yml).captured().toInt();
+        minSdk = regexMinSdk.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
+        targetSdk = regexTargetSdk.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
+        versionCode = regexVersionCode.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
         versionName = regexVersionName.match(yml).captured();
 #ifdef QT_DEBUG
         qDebug() << "Parsed minumum SDK: " << minSdk;
@@ -179,7 +179,7 @@ void Manifest::setMinSdk(int value)
 {
     value = qMax(0, value);
     minSdk = value;
-    yml.replace(regexMinSdk, QString::number(value));
+    yml.replace(regexMinSdk, QString("\\1%1\\2").arg(value));
     saveYml();
 }
 
@@ -187,7 +187,7 @@ void Manifest::setTargetSdk(int value)
 {
     value = qMax(1, value);
     targetSdk = value;
-    yml.replace(regexTargetSdk, QString::number(value));
+    yml.replace(regexTargetSdk, QString("\\1%1\\2").arg(value));
     saveYml();
 }
 
@@ -195,7 +195,7 @@ void Manifest::setVersionCode(int value)
 {
     value = qMax(0, value);
     versionCode = value;
-    yml.replace(regexVersionCode, QString::number(value));
+    yml.replace(regexVersionCode, QString("\\1%1\\2").arg(value));
     saveYml();
 }
 

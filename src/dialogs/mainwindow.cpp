@@ -9,6 +9,7 @@
 #include <QMimeData>
 #include <QRegularExpression>
 #include <QDesktopServices>
+#include <QProcess>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
 
@@ -80,6 +81,7 @@ void MainWindow::init_core()
     apkManager = new ApkManager(this);
     updater = new Updater(this);
     recent = NULL;
+    manualUpdateCheck = false;
 
     dropbox = new Dropbox(this);
     gdrive = new GoogleDrive(this);
@@ -510,7 +512,7 @@ void MainWindow::init_slots()
     connect(actFaq, SIGNAL(triggered()), this, SLOT(browseFaq()));
     connect(actLogFile, SIGNAL(triggered()), this, SLOT(openLogFile()));
     connect(actLogPath, SIGNAL(triggered()), this, SLOT(openLogPath()));
-    connect(actUpdate, SIGNAL(triggered()), updater, SLOT(check()));
+    connect(actUpdate, SIGNAL(triggered()), this, SLOT(checkUpdates()));
     connect(actAbout, SIGNAL(triggered()), about, SLOT(exec()));
     connect(actAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(btnPack, SIGNAL(clicked()), this, SLOT(apk_save()));
@@ -555,6 +557,7 @@ void MainWindow::init_slots()
     connect(uploadDialog, SIGNAL(rejected()), gdrive, SLOT(cancel()));
     connect(uploadDialog, SIGNAL(rejected()), onedrive, SLOT(cancel()));
     connect(updater, SIGNAL(version(QString)), this, SLOT(newVersion(QString)));
+    connect(updater, SIGNAL(checked(QString,bool,QString)), this, SLOT(updateChecked(QString,bool,QString)));
     connect(this, SIGNAL(reqsChecked(QString, QString, QString)), about, SLOT(setVersions(QString, QString, QString)));
 }
 
@@ -1199,9 +1202,22 @@ void MainWindow::browseBugs() const
     QDesktopServices::openUrl(Url::CONTACT);
 }
 
-void MainWindow::browseFaq() const
+void MainWindow::browseFaq()
 {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(Path::Data::shared() + "faq.txt"));
+    const QString path = Path::Data::shared() + "faq.txt";
+    if (!QFile::exists(path)) {
+        warning(tr("FAQ"), tr("Could not find FAQ file:\n%1").arg(path));
+        return;
+    }
+#ifdef Q_OS_WIN
+    if (!QProcess::startDetached("notepad.exe", QStringList() << QDir::toNativeSeparators(path))) {
+        warning(tr("FAQ"), tr("Could not open FAQ file:\n%1").arg(path));
+    }
+#else
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path))) {
+        warning(tr("FAQ"), tr("Could not open FAQ file:\n%1").arg(path));
+    }
+#endif
 }
 
 void MainWindow::openLogFile() const
@@ -1224,6 +1240,12 @@ void MainWindow::browseTranslate() const
     QDesktopServices::openUrl(Url::TRANSLATE);
 }
 
+void MainWindow::checkUpdates()
+{
+    manualUpdateCheck = true;
+    updater->check();
+}
+
 bool MainWindow::newVersion(QString version)
 {
     QMessageBox msgBox(
@@ -1239,6 +1261,29 @@ bool MainWindow::newVersion(QString version)
     }
     else {
         return false;
+    }
+}
+
+void MainWindow::updateChecked(QString version, bool updateAvailable, QString error)
+{
+    if (!manualUpdateCheck) {
+        return;
+    }
+    manualUpdateCheck = false;
+
+    if (updateAvailable) {
+        return;
+    }
+
+    if (!error.isEmpty()) {
+        warning(tr("Update"), tr("Could not check for updates."), error);
+        return;
+    }
+
+    if (version.isEmpty()) {
+        success(tr("Update"), tr("No release version was found."));
+    } else {
+        success(tr("Update"), tr("%1 is up to date.").arg(APP), tr("Latest version: %1").arg(version));
     }
 }
 
