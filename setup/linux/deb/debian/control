@@ -2,15 +2,15 @@ Source: apk-icon-editor
 Section: editors
 Priority: optional
 Maintainer: iMiKED <imiked@users.noreply.github.com>
-Build-Depends: debhelper (>=9)
-Standards-Version: 3.9.7
-Homepage: https://qwertycube.com/apk-icon-editor/
-Vcs-Git: git://github.com/kefir500/apk-icon-editor.git
-Vcs-Browser: https://github.com/kefir500/apk-icon-editor
+Build-Depends: debhelper (>= 13), qt6-base-dev, qt6-tools-dev-tools, g++, make, zlib1g-dev
+Standards-Version: 4.7.0
+Homepage: https://github.com/iMiKED/apk-icon-editor
+Vcs-Git: https://github.com/iMiKED/apk-icon-editor.git
+Vcs-Browser: https://github.com/iMiKED/apk-icon-editor
 
 Package: apk-icon-editor
 Architecture: any
-Depends: zipalign, default-jre-headless | java7-runtime-headless | java7-runtime, ${shlibs:Depends}, ${misc:Depends}
+Depends: zipalign, default-jdk-headless | java17-runtime-headless | java17-runtime, ${shlibs:Depends}, ${misc:Depends}
 Description: Simple APK resource editor
  APK editor designed to easily change
  APK icons, name, version and other resources.

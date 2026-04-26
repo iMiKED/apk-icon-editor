@@ -5,6 +5,8 @@ apk-icon-editor (3.0.0~beta1-1) unstable; urgency=low
   * Added fork author information.
   * Fixed FAQ, update check, Apktool 3.x metadata parsing, Windows packing, and progress log issues.
   * Synchronized displayed application version with the v3.0.0-beta1 prerelease tag.
+  * Prepared Linux Debian and macOS packaging metadata for Qt 6.8 builds.
+  * Updated fork metadata links used by FAQ, installers, and platform bundles.
 
  -- iMiKED <imiked@users.noreply.github.com>  Sun, 26 Apr 2026 21:00:00 +0700
 

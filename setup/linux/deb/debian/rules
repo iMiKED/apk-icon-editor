@@ -1,9 +1,10 @@
 #!/usr/bin/make -f
-	export QT_SELECT=qt6
+
+export QT_SELECT=qt6
 
 %:
 	dh $@
 
 override_dh_auto_build:
-	qmake PACKAGE=deb
+	qmake6 PACKAGE=deb
 	make

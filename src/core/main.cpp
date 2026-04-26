@@ -8,7 +8,7 @@
 ///
 /// \section Details
 /// - Written in: C++/Qt
-/// - Source code: [GitHub](https://github.com/kefir500/apk-icon-editor)
+/// - Source code: [GitHub](https://github.com/iMiKED/apk-icon-editor)
 /// - License: [GNU GPL v3.0](http://www.gnu.org/licenses/gpl-3.0.html)
 ///
 

@@ -34,11 +34,12 @@ This repository is a fork of the original [APK Icon Editor](https://github.com/k
 
 #### Linux
 - Install Qt 6 development packages, `make`, `g++`, and zlib development headers.
-- Run `qmake && make`.
+- Run `qmake6 && make`.
 - Debian packaging is driven by `setup/linux/deb/build.sh`.
 
 #### macOS
-- Install Qt 6.8.3 for macOS and make sure `~/Qt/6.8.3/macos/bin` exists.
+- Install Qt 6.8.3 for macOS and Xcode 15 or newer.
+- The build script uses `~/Qt/6.8.3/macos/bin` by default; set `QT_BIN=/path/to/Qt/bin` to override it.
 - Run `setup/macosx/BUILD.command` to build and package the app bundle.
 
 ## Notice

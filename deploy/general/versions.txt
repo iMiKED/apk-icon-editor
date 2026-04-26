@@ -11,6 +11,8 @@
 * Added visible packing/unpacking progress log.
 * Synchronized displayed application version with the *v3.0.0-beta1* prerelease tag.
 * Fixed update checks to include GitHub prereleases.
+* Prepared Linux Debian and macOS packaging metadata for Qt 6.8 builds.
+* Updated fork metadata links used by FAQ, installers, and platform bundles.
 
 ## 2.2.0
 * Added *Android 9 Pie* support.

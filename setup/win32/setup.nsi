@@ -9,8 +9,8 @@
 !define VERSIONPATCH 0
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
 !define VERSIONDISPLAY "${VERSION}-beta1"
-!define ABOUTURL "https://qwertycube.com/apk-icon-editor/"
-!define UPDATEURL "https://qwertycube.com/apk-icon-editor/download/#update"
+!define ABOUTURL "https://github.com/iMiKED/apk-icon-editor"
+!define UPDATEURL "https://github.com/iMiKED/apk-icon-editor/releases"
 !define EXE "$INSTDIR\apk-icon-editor.exe"
 
 Name "${APPNAME} v${VERSIONDISPLAY}"
