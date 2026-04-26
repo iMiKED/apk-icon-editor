@@ -103,11 +103,18 @@ QString UpdateWorker::parse(QString json) const
 #else
     const QString OS = "windows";
 #endif
-    const QString LATEST = QJsonDocument::fromJson(json.toUtf8())
-                           .object()["1.3.0"]
-                           .toObject()[OS]
-                           .toObject()["version"].toString();
+    Q_UNUSED(OS);
+    const QJsonObject object = QJsonDocument::fromJson(json.toUtf8()).object();
+    QString LATEST = object["tag_name"].toString();
+    if (LATEST.isEmpty()) {
+        LATEST = object["name"].toString();
+    }
+    LATEST.remove(QRegularExpression("^v", QRegularExpression::CaseInsensitiveOption));
 
-    qDebug() << qPrintable(QString("Updater: v%1\n").arg(LATEST));
+    if (!LATEST.isEmpty()) {
+        qDebug() << qPrintable(QString("Updater: v%1\n").arg(LATEST));
+    } else {
+        qDebug() << "Updater: no release version found\n";
+    }
     return LATEST;
 }

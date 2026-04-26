@@ -79,7 +79,6 @@ void MainWindow::init_core()
     apk = NULL;
     apkManager = new ApkManager(this);
     updater = new Updater(this);
-    mapRecent = new QSignalMapper(this);
     recent = NULL;
 
     dropbox = new Dropbox(this);
@@ -435,8 +434,6 @@ void MainWindow::init_languages()
 {
     translator = new QTranslator(this);
     translatorQt = new QTranslator(this);
-    mapLang = new QSignalMapper(this);
-    connect(mapLang, SIGNAL(mapped(QString)), this, SLOT(setLanguage(QString)));
 
     // Add default English:
 
@@ -463,8 +460,7 @@ void MainWindow::init_languages()
         QAction *actLang = new QAction(this);
         actLang->setText(title);
         actLang->setIcon(QIcon(QString("%1/flag.%2.png").arg(LANGPATH.absolutePath(), locale)));
-        connect(actLang, SIGNAL(triggered()), mapLang, SLOT(map()));
-        mapLang->setMapping(actLang, locale);
+        connect(actLang, &QAction::triggered, [=]() { setLanguage(locale); });
         menuLang->addAction(actLang);
     }
 
@@ -518,7 +514,6 @@ void MainWindow::init_slots()
     connect(actAbout, SIGNAL(triggered()), about, SLOT(exec()));
     connect(actAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(btnPack, SIGNAL(clicked()), this, SLOT(apk_save()));
-    connect(mapRecent, SIGNAL(mapped(QString)), this, SLOT(apk_open(QString)));
     connect(actAddIconLdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Ldpi); });
     connect(actAddIconMdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Mdpi); });
     connect(actAddIconHdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Hdpi); });
@@ -734,8 +729,7 @@ void MainWindow::recent_update()
             QAction *actRecent = new QAction(RECENT.filename, menuRecent);
             actRecent->setIcon(RECENT.icon);
             menuRecent->addAction(actRecent);
-            connect(actRecent, SIGNAL(triggered()), mapRecent, SLOT(map()));
-            mapRecent->setMapping(actRecent, RECENT.filename);
+            connect(actRecent, &QAction::triggered, [=]() { apk_open(RECENT.filename); });
         }
         menuRecent->addSeparator();
         menuRecent->addAction(actRecentClear);

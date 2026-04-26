@@ -10,7 +10,6 @@
 #include <QPushButton>
 #include <QColorDialog>
 #include <QDialogButtonBox>
-#include <QSignalMapper>
 
 /// \brief Dialog for customizing icon graphic effects.
 
@@ -36,7 +35,6 @@ private:
     QSlider *slideCorners;
     QColorDialog *colorDialog;
     QDialogButtonBox *buttons;
-    QSignalMapper *mapRotate;
 
 public:
     explicit EffectsDialog(QWidget *parent = 0);

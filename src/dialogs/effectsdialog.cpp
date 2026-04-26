@@ -77,16 +77,10 @@ EffectsDialog::EffectsDialog(QWidget *parent) : QDialog(parent)
     layoutEffects->addWidget(slideBlur, 0, 1);
     layout->addWidget(buttons);
 
-    mapRotate = new QSignalMapper(this);
-    connect(mapRotate, SIGNAL(mapped(int)), this, SIGNAL(rotate(int)));
-    connect(btnRotate0, SIGNAL(clicked()), mapRotate, SLOT(map()));
-    connect(btnRotate90, SIGNAL(clicked()), mapRotate, SLOT(map()));
-    connect(btnRotate180, SIGNAL(clicked()), mapRotate, SLOT(map()));
-    connect(btnRotate270, SIGNAL(clicked()), mapRotate, SLOT(map()));
-    mapRotate->setMapping(btnRotate0, 0);
-    mapRotate->setMapping(btnRotate90, 90);
-    mapRotate->setMapping(btnRotate180, 180);
-    mapRotate->setMapping(btnRotate270, 270);
+    connect(btnRotate0, &QPushButton::clicked, [=]() { emit rotate(0); });
+    connect(btnRotate90, &QPushButton::clicked, [=]() { emit rotate(90); });
+    connect(btnRotate180, &QPushButton::clicked, [=]() { emit rotate(180); });
+    connect(btnRotate270, &QPushButton::clicked, [=]() { emit rotate(270); });
 
     connect(groupColor, SIGNAL(clicked(bool)), this, SIGNAL(colorActivated(bool)));
     connect(btnFlipX, SIGNAL(clicked(bool)), this, SIGNAL(flipX(bool)));

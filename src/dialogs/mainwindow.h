@@ -13,7 +13,6 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QActionGroup>
-#include <QSignalMapper>
 #include <QTranslator>
 #include <QCloseEvent>
 #include "about.h"
@@ -308,8 +307,6 @@ private:
 
     // Other:
 
-    QSignalMapper *mapLang;
-    QSignalMapper *mapRecent;
     QTranslator *translator;
     QTranslator *translatorQt;
     QString currentApk;

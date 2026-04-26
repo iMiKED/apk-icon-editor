@@ -85,7 +85,7 @@ void Packer::pack(Apk::File *apk, QString temp)
         }
     });
 
-    apktool->start(QString("java -jar \"%1\" b \"%2\" -f -o \"%3\" -p \"%4\"").arg(APKTOOL, CONTENTS, TEMPAPK, temp + "/framework/"));
+    apktool->start("java", QStringList() << "-jar" << APKTOOL << "b" << CONTENTS << "-f" << "-o" << TEMPAPK << "-p" << temp + "/framework/");
 }
 
 void Packer::cancel()
@@ -229,10 +229,15 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
         }
     });
 
-    const QString procString = isApksigner
-        ? "java -jar \"%1/signer/apksigner.jar\" sign --key \"%3\" --cert \"%2\" \"%4\""
-        : "java -jar \"%1/signer/signapk.jar\" \"%2\" \"%3\" \"%4\" \"%5\"";
-    signer->start(procString.arg(Path::Data::shared(), pem, pk8, apkPath, apkDest));
+    QStringList args;
+    if (isApksigner) {
+        args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
+             << "sign" << "--key" << pk8 << "--cert" << pem << apkPath;
+    } else {
+        args << "-jar" << Path::Data::shared() + "signer/signapk.jar"
+             << pem << pk8 << apkPath << apkDest;
+    }
+    signer->start("java", args);
 }
 
 void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
@@ -276,10 +281,20 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
     });
 
     qDebug() << "Packing...";
-    QString procString = isApksigner
-        ? "java -jar \"%6/signer/apksigner.jar\" sign --ks \"%1\" --ks-key-alias \"%2\" --ks-pass pass:\"%3\" --key-pass pass:\"%4\" \"%5\""
-        : "jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore \"%1\" \"%5\" -storepass \"%3\" -keypass \"%4\" \"%2\"";
-    signer->start(procString.arg(keystore, alias, passKeystore, passAlias, apkPath, Path::Data::shared()));
+    QStringList args;
+    if (isApksigner) {
+        args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
+             << "sign" << "--ks" << keystore << "--ks-key-alias" << alias
+             << "--ks-pass" << QString("pass:%1").arg(passKeystore)
+             << "--key-pass" << QString("pass:%1").arg(passAlias)
+             << apkPath;
+        signer->start("java", args);
+    } else {
+        args << "-verbose" << "-sigalg" << "SHA1withRSA" << "-digestalg" << "SHA1"
+             << "-keystore" << keystore << apkPath << "-storepass" << passKeystore
+             << "-keypass" << passAlias << alias;
+        signer->start("jarsigner", args);
+    }
 }
 
 void Packer::zipalign(Apk::File *apk, QString apkPath)
@@ -329,7 +344,7 @@ void Packer::zipalign(Apk::File *apk, QString apkPath)
         }
     });
 
-    zipaligner->start(QString("zipalign -f 4 \"%1\" \"%2\"").arg(apkPath, apkDest));
+    zipaligner->start("zipalign", QStringList() << "-f" << "4" << apkPath << apkDest);
 }
 
 void Packer::finalize(Apk::File *apk, QString apkPath) const

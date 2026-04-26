@@ -25,7 +25,7 @@ QString Apk::getApktoolVersion()
 {
     if (whichJava(JRE)) {
         QProcess p;
-        p.start(QString("java -jar \"%1\" -version").arg(Settings::get_apktool()));
+        p.start("java", QStringList() << "-jar" << Settings::get_apktool() << "-version");
         if (p.waitForStarted(-1)) {
             p.waitForFinished(-1);
             return p.readAllStandardOutput().trimmed();
@@ -43,10 +43,13 @@ QString Apk::getJavaVersion(Java java)
 {
     if (whichJava(java)) {
         QProcess p;
-        p.start(QString("%1 -version").arg(java == JRE ? "java" : "javac"));
+        p.start(java == JRE ? "java" : "javac", QStringList() << "-version");
         if (p.waitForStarted(-1)) {
             p.waitForFinished(-1);
-            const QString VERSION = p.readAllStandardError().replace("\r\n", "\n").trimmed();
+            QString VERSION = p.readAllStandardError().replace("\r\n", "\n").trimmed();
+            if (VERSION.isEmpty()) {
+                VERSION = p.readAllStandardOutput().replace("\r\n", "\n").trimmed();
+            }
             return VERSION;
         }
         else {
