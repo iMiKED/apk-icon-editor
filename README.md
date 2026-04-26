@@ -20,25 +20,25 @@ This repository is a fork of the original [APK Icon Editor](https://github.com/k
 ## Requirements
 #### Recommended:
 - [JDK 64-bit 17](https://adoptium.net/temurin/releases/) (or later) or another current JDK available in `PATH`.
-- [Qt 5.15.2](https://download.qt.io/archive/qt/5.15/5.15.2/) for building the 3.0 beta branch.
+- [Qt 6.8.3 LTS](https://download.qt.io/archive/qt/6.8/6.8.3/) for building the 3.0 beta branch.
 - [Apktool 3.0.2](https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_3.0.2.jar) is bundled as `deploy/general/apktool.jar`.
 #### Note for macOS users:
 - Install a full JDK instead of a JRE so `java` and `javac` are available in `PATH`.
 
 ## Build
 #### Windows
-- Install Qt 5.15.2 with the MSVC 2019 component.
-- Install Visual Studio 2019 Build Tools with the C++ workload.
+- Install Qt 6.8.3 with the `msvc2022_64` component.
+- Install Visual Studio 2022 Build Tools with the C++ workload.
 - Run `qmake "DEFINES+=CI"` and then build with `nmake`.
 - Optional installer packaging uses NSIS; see `setup/win32/README.txt`.
 
 #### Linux
-- Install Qt 5 development packages, `make`, `g++`, and zlib development headers.
+- Install Qt 6 development packages, `make`, `g++`, and zlib development headers.
 - Run `qmake && make`.
 - Debian packaging is driven by `setup/linux/deb/build.sh`.
 
 #### macOS
-- Install Qt 5.15.2 for clang and make sure `~/Qt/5.15.2/clang_64/bin` exists.
+- Install Qt 6.8.3 for macOS and make sure `~/Qt/6.8.3/macos/bin` exists.
 - Run `setup/macosx/BUILD.command` to build and package the app bundle.
 
 ## Notice

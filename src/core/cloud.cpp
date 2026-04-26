@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QHttpMultiPart>
 #include <QDesktopServices>
+#include <QRegularExpression>
 
 // Dropbox:
 const QString DROPBOX_AUTH      = QString("https://www.dropbox.com/oauth2/authorize?response_type=code&client_id=%1").arg(DROPBOX_ID);
@@ -154,12 +155,12 @@ void Cloud::auth()
 void Cloud::login(QString code)
 {
     QByteArray params;
-    params.append(QString("%1=%2").arg("code", code));
-    params.append(QString("&%1=%2").arg("grant_type", "authorization_code"));
-    params.append(QString("&%1=%2").arg("client_id", clientID));
-    params.append(QString("&%1=%2").arg("client_secret", secret));
+    params.append(QString("%1=%2").arg("code", code).toUtf8());
+    params.append(QString("&%1=%2").arg("grant_type", "authorization_code").toUtf8());
+    params.append(QString("&%1=%2").arg("client_id", clientID).toUtf8());
+    params.append(QString("&%1=%2").arg("client_secret", secret).toUtf8());
     if (!urlRedirect.isEmpty()) {
-        params.append(QString("&%1=%2").arg("redirect_uri", urlRedirect));
+        params.append(QString("&%1=%2").arg("redirect_uri", urlRedirect).toUtf8());
     }
 
     QNetworkRequest request;
@@ -173,12 +174,10 @@ void Cloud::login(QString code)
 void Cloud::parseToken(QString json)
 {
     token.clear();
-    QRegExp rx;
-    rx.setMinimal(true);
-    rx.setPattern("\\\"access_token\\\"\\s*:\\s*\\\"(.+)\\\"");
-    rx.indexIn(json);
-    if (rx.capturedTexts().size() > 1) {
-        token = rx.capturedTexts().at(1);
+    QRegularExpression rx("\\\"access_token\\\"\\s*:\\s*\\\"(.+?)\\\"");
+    const QRegularExpressionMatch match = rx.match(json);
+    if (match.hasMatch()) {
+        token = match.captured(1);
     }
 }
 
@@ -294,12 +293,10 @@ bool GoogleDrive::processReply(QNetworkReply *reply)
         const QString URL = reply->url().toString();
         if (URL.contains(urlFiles)) {
             QString r = reply->readAll();
-            QRegExp rx;
-            rx.setMinimal(true);
-            rx.setPattern("\"id\": \"(.+)\"");
-            rx.indexIn(r);
-            if (rx.capturedTexts().size() > 1) {
-                folder = rx.capturedTexts().at(1);
+            QRegularExpression rx("\"id\": \"(.+?)\"");
+            const QRegularExpressionMatch match = rx.match(r);
+            if (match.hasMatch()) {
+                folder = match.captured(1);
             }
             if (!folder.isEmpty()) {
                 // Folder found!

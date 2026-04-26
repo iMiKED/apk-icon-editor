@@ -7,7 +7,7 @@
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QMimeData>
-#include <QTextCodec>
+#include <QRegularExpression>
 #include <QDesktopServices>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
@@ -46,23 +46,21 @@ void MainWindow::checkReqs()
         const QString JRE = Apk::getJreVersion();
         const QString JDK = Apk::getJdkVersion();
 
-        QRegExp rx;
-        QStringList cap;
+        QRegularExpression rx;
+        QRegularExpressionMatch match;
 
         rx.setPattern("version \"(.+)\"");
-        rx.indexIn(JRE);
-        cap = rx.capturedTexts();
-        if (cap.size() > 1) {
-            version_jre = cap[1];
+        match = rx.match(JRE);
+        if (match.hasMatch()) {
+            version_jre = match.captured(1);
             Settings::set_java_version(version_jre);
             toolDialog->reset();
         }
 
         rx.setPattern("javac (.+)");
-        rx.indexIn(JDK);
-        cap = rx.capturedTexts();
-        if (cap.size() > 1) {
-            version_jdk = cap[1];
+        match = rx.match(JDK);
+        if (match.hasMatch()) {
+            version_jdk = match.captured(1);
         }
 
         qDebug() << "JRE version:" << qPrintable(!JRE.isNull() ? version_jre : "---");
@@ -369,7 +367,7 @@ void MainWindow::init_gui()
     layoutIcons->addLayout(layoutDevices);
     layoutIcons->addWidget(listIcons);
     layoutIcons->addLayout(layoutIconsButtons);
-    layoutIcons->setMargin(4);
+    layoutIcons->setContentsMargins(4, 4, 4, 4);
     layoutIcons->setSpacing(6);
 
     tabTranslations = new QWidget(this);
@@ -383,7 +381,7 @@ void MainWindow::init_gui()
     btnApplyAppName = new QPushButton(this);
     layoutTranslations->addWidget(tableTitles);
     layoutTranslations->addWidget(btnApplyAppName);
-    layoutTranslations->setMargin(4);
+    layoutTranslations->setContentsMargins(4, 4, 4, 4);
 
     tabProperties = new QWidget(this);
     QVBoxLayout *layoutProperties = new QVBoxLayout(tabProperties);
@@ -394,7 +392,7 @@ void MainWindow::init_gui()
     tableManifest->setHorizontalScrollMode(QTableView::ScrollPerPixel);
     tableManifest->setVerticalScrollMode(QTableView::ScrollPerPixel);
     layoutProperties->addWidget(tableManifest);
-    layoutProperties->setMargin(4);
+    layoutProperties->setContentsMargins(4, 4, 4, 4);
 
     tabs = new QTabWidget(this);
     tabs->addTab(tabIcons, NULL);
@@ -415,7 +413,7 @@ void MainWindow::init_gui()
 
     QWidget *sidebar = new QWidget(this);
     QVBoxLayout *layoutSide = new QVBoxLayout(sidebar);
-    layoutSide->setMargin(0);
+    layoutSide->setContentsMargins(0, 0, 0, 0);
     layoutSide->addWidget(tabs);
     layoutSide->addWidget(checkDropbox);
     layoutSide->addWidget(checkGDrive);
@@ -1017,7 +1015,7 @@ bool MainWindow::icon_revert()
 
 bool MainWindow::setPreviewColor()
 {
-    const QColor DEFAULT = drawArea->palette().color(QPalette::Background);
+    const QColor DEFAULT = drawArea->palette().color(QPalette::Window);
     const QColor COLOR = QColorDialog::getColor(DEFAULT, this);
     if (COLOR.isValid()) {
         drawArea->setBackground(COLOR);

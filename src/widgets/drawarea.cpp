@@ -18,7 +18,7 @@ DrawArea::DrawArea(QWidget *parent) : QLabel(parent)
 
     icon = NULL;
     bounds = QSize(0, 0);
-    background = palette().color(QPalette::Background);
+    background = palette().color(QPalette::Window);
 }
 
 void DrawArea::setIcon(Icon *icon)

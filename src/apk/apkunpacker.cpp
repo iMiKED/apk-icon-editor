@@ -36,7 +36,7 @@ void Unpacker::unpack(QString filepath, QString destination, QString apktoolPath
     args << "-o" << destination;
     args << "-p" << frameworks;
 
-    connect(apktool, static_cast<void(QProcess::*)(int)>(&QProcess::finished), [=](int code) {
+    connect(apktool, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [=](int code, QProcess::ExitStatus) {
         const int QPROCESS_KILL_CODE = 62097;
         switch (code) {
             case 0: {
@@ -63,7 +63,7 @@ void Unpacker::unpack(QString filepath, QString destination, QString apktoolPath
         }
     });
 
-    connect(apktool, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), [=](QProcess::ProcessError processError) {
+    connect(apktool, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::errorOccurred), [=](QProcess::ProcessError processError) {
         if (processError == QProcess::FailedToStart) {
             if (isJavaInstalled()) {
                 const QString errorText = apktool->errorString();

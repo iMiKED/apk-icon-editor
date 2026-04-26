@@ -1,6 +1,18 @@
 #include "manifest.h"
 #include <QTextStream>
 #include <QDebug>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
+
+static void setUtf8Encoding(QTextStream &stream)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    stream.setEncoding(QStringConverter::Utf8);
+#else
+    stream.setCodec("UTF-8");
+#endif
+}
 
 Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 {
@@ -9,7 +21,7 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
     xmlFile = new QFile(xmlPath);
     if (xmlFile->open(QFile::ReadWrite | QFile::Text)) {
         QTextStream stream(xmlFile);
-        stream.setCodec("UTF-8");
+        setUtf8Encoding(stream);
         xml.setContent(stream.readAll());
 
         // Parse <application> node:
@@ -56,7 +68,7 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
     ymlFile = new QFile(ymlPath);
     if (ymlFile->open(QFile::ReadWrite | QFile::Text)) {
         QTextStream stream(ymlFile);
-        stream.setCodec("UTF-8");
+        setUtf8Encoding(stream);
         yml = stream.readAll();
         minSdk = regexMinSdk.match(yml).captured().toInt();
         targetSdk = regexTargetSdk.match(yml).captured().toInt();
@@ -253,7 +265,7 @@ bool Manifest::saveXml()
     if (xmlFile->isWritable()) {
         xmlFile->resize(0);
         QTextStream stream(xmlFile);
-        stream.setCodec("UTF-8");
+        setUtf8Encoding(stream);
         xml.save(stream, 4);
         return true;
     } else {
@@ -267,7 +279,7 @@ bool Manifest::saveYml()
     if (ymlFile->isWritable()) {
         ymlFile->resize(0);
         QTextStream stream(ymlFile);
-        stream.setCodec("UTF-8");
+        setUtf8Encoding(stream);
         stream << yml;
         return true;
     } else {
