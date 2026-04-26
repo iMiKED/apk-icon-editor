@@ -1,10 +1,11 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: apk-icon-editor
-Upstream-Contact: Alexander Gorishnyak <kefir500@gmail.com>
-Source: https://github.com/kefir500/apk-icon-editor
+Upstream-Contact: iMiKED <imiked@users.noreply.github.com>
+Source: https://github.com/iMiKED/apk-icon-editor
 
 Files: *
-Copyright: 2014-2016 Alexander Gorishnyak <kefir500@gmail.com>
+Copyright: 2014-2019 Alexander Gorishnyak <kefir500@gmail.com>
+           2026 iMiKED
 License: GPL-3.0+
 
 Files: deploy/general/apktool.jar

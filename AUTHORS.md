@@ -1,5 +1,6 @@
 ## Authors
 - [Alexander Gorishnyak](https://github.com/kefir500) – [APK Icon Editor](https://github.com/kefir500/apk-icon-editor)
+- [iMiKED from 4PDA](https://4pda.to/forum/index.php?showuser=1017942) - [APK Icon Editor fork](https://github.com/iMiKED/apk-icon-editor)
 - [Connor Tumbleson](https://github.com/iBotPeaches) – [Apktool](https://github.com/iBotPeaches/Apktool)
 - [Ryszard Wiśniewski](https://github.com/brutall) – [Apktool (original)](https://github.com/brutall/brut.apktool)
 - [Ben Gruver](https://github.com/JesusFreke) – [smali/baksmali](https://github.com/JesusFreke/smali)

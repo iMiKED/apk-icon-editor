@@ -1,3 +1,10 @@
+apk-icon-editor (3.0.0-1) unstable; urgency=low
+
+  * Updated dependencies: JDK recommendation, Qt to v5.15.2, and Apktool to v3.0.2.
+  * Added fork author information.
+
+ -- iMiKED <imiked@users.noreply.github.com>  Sun, 26 Apr 2026 21:00:00 +0700
+
 apk-icon-editor (2.2.0-1) unstable; urgency=low
 
   * Added Android 9 Pie support.

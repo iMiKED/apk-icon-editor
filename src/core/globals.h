@@ -79,7 +79,7 @@ namespace Url {
     const QString TRANSLATE = "https://crowdin.com/project/apk-icon-editor";
     const QString DONATE    = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=kefir500@gmail.com&item_name=APK%20Icon%20Editor%20-%20Donation&quantity=1";
     const QString JRE       = "https://www.java.com/en/download/manual.jsp";
-    const QString JDK       = "httpS://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html";
+    const QString JDK       = "https://adoptium.net/temurin/releases/";
 }
 
 #endif // GLOBALS_H

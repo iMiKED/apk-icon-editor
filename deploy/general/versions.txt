@@ -1,5 +1,9 @@
 # Version History
 
+## 3.0.0 beta
+* Updated dependencies: JDK recommendation, Qt to *v5.15.2*, and *Apktool* to *v3.0.2*.
+* Added fork author information.
+
 ## 2.2.0
 * Added *Android 9 Pie* support.
 * Added *Android Activities* support.

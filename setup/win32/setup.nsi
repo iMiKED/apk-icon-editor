@@ -3,9 +3,9 @@
 !include nsProcess.nsh
 
 !define APPNAME "APK Icon Editor"
-!define COMPANYNAME "Alexander Gorishnyak"
-!define VERSIONMAJOR 2
-!define VERSIONMINOR 2
+!define COMPANYNAME "Alexander Gorishnyak / iMiKED"
+!define VERSIONMAJOR 3
+!define VERSIONMINOR 0
 !define VERSIONPATCH 0
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
 !define ABOUTURL "https://qwertycube.com/apk-icon-editor/"
