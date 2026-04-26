@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export DEBEMAIL="kefir500@gmail.com"
-export DEBFULLNAME="Alexander Gorishnyak"
+export DEBEMAIL="imiked@users.noreply.github.com"
+export DEBFULLNAME="iMiKED"
 
 clean() {
     rm ../apk-icon-editor_*.tar.xz ../apk-icon-editor_*.tar.gz ../apk-icon-editor_*.dsc ../apk-icon-editor_*.changes ../apk-icon-editor_*.build 2> /dev/null

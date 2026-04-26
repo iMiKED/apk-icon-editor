@@ -1,11 +1,9 @@
 # APK Icon Editor
 
-[![Build Status (Travis CI)](https://travis-ci.org/kefir500/apk-icon-editor.svg?branch=master)](https://travis-ci.org/kefir500/apk-icon-editor/builds)
-[![Build Status (Appveyor)](https://ci.appveyor.com/api/projects/status/github/kefir500/apk-icon-editor?branch=master&svg=true)](https://ci.appveyor.com/project/kefir500/apk-icon-editor/history)
-[![Latest Release](https://img.shields.io/github/release/kefir500/apk-icon-editor.svg?maxAge=86400)](https://github.com/kefir500/apk-icon-editor/releases/latest)
-[![License](https://img.shields.io/badge/license-GPLv3-blue.svg?maxAge=2592000)](https://raw.githubusercontent.com/kefir500/apk-icon-editor/master/LICENSE)
-[![Download Count](https://img.shields.io/github/downloads/kefir500/apk-icon-editor/total.svg?maxAge=86400)](https://github.com/kefir500/apk-icon-editor/releases)
-[![PayPal Donate](https://img.shields.io/badge/donate-PayPal-orange.svg?logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=kefir500@gmail.com&item_name=APK%20Icon%20Editor%20-%20Donation&quantity=1)
+This repository is a fork of the original [APK Icon Editor](https://github.com/kefir500/apk-icon-editor) maintained by [iMiKED from 4PDA](https://4pda.to/forum/index.php?showuser=1017942).
+
+[![Latest Release](https://img.shields.io/github/v/release/iMiKED/apk-icon-editor?include_prereleases&label=release)](https://github.com/iMiKED/apk-icon-editor/releases)
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/iMiKED/apk-icon-editor/blob/master/LICENSE)
 
 ## Description
 **APK Icon Editor** is a cross-platform APK editor designed to easily edit and replace APK resources such as icons, strings, images, application name and version, etc. Written in C++/Qt.
@@ -21,13 +19,27 @@
 
 ## Requirements
 #### Recommended:
-- [JRE 64-bit 1.8](https://www.java.com/en/download/manual.jsp) (or later).
+- [JDK 64-bit 17](https://adoptium.net/temurin/releases/) (or later) or another current JDK available in `PATH`.
+- [Qt 5.15.2](https://download.qt.io/archive/qt/5.15/5.15.2/) for building the 3.0 beta branch.
+- [Apktool 3.0.2](https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_3.0.2.jar) is bundled as `deploy/general/apktool.jar`.
 #### Note for macOS users:
-- [JDK 64-bit 1.8](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) (or later) is recommended because JRE for macOS doesn't add Java to the PATH environment variable automatically.
-#### Note for older Java versions:
-In case you want to use Java 1.7:
-- [JRE 64-bit 1.7](https://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html) to sign APK files using PEM/PK8.
-- [JDK 64-bit 1.7](https://www.oracle.com/technetwork/java/javase/downloads/java-archive-downloads-javase7-521261.html) to sign APK files using PEM/PK8 or KeyStore.
+- Install a full JDK instead of a JRE so `java` and `javac` are available in `PATH`.
+
+## Build
+#### Windows
+- Install Qt 5.15.2 with the MSVC 2019 component.
+- Install Visual Studio 2019 Build Tools with the C++ workload.
+- Run `qmake "DEFINES+=CI"` and then build with `nmake`.
+- Optional installer packaging uses NSIS; see `setup/win32/README.txt`.
+
+#### Linux
+- Install Qt 5 development packages, `make`, `g++`, and zlib development headers.
+- Run `qmake && make`.
+- Debian packaging is driven by `setup/linux/deb/build.sh`.
+
+#### macOS
+- Install Qt 5.15.2 for clang and make sure `~/Qt/5.15.2/clang_64/bin` exists.
+- Run `setup/macosx/BUILD.command` to build and package the app bundle.
 
 ## Notice
 - You may not use **APK Icon Editor** for any illegal purposes;

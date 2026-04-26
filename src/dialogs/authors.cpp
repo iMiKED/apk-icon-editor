@@ -56,6 +56,10 @@ void Authors::parse()
             }
             else {
                 if (!line.isEmpty()) {
+                    QRegExp rxMarkdown("\\[([^\\]]+)\\]\\((https?://[^\\)]+)\\)");
+                    rxMarkdown.setMinimal(true);
+                    line = line.replace(rxMarkdown, "<a href=\"\\2\">\\1</a>");
+
                     QRegExp rx("\\(www.(.+)\\)");
                     rx.setMinimal(true);
                     line = line.replace(rx, "(<a href=\"http://www.\\1\">www.\\1</a>)");

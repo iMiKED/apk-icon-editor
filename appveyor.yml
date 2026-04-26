@@ -1,8 +1,8 @@
 install:
-  - set QTDIR=C:\Qt\5.6\msvc2015
+  - set QTDIR=C:\Qt\5.15.2\msvc2019
   - set PATH=%PATH%;%QTDIR%\bin
 
 build_script:
   - qmake "DEFINES+=CI"
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
   - nmake
