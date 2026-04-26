@@ -4,6 +4,11 @@
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
 * Migrated Windows builds to *MSVC 2022 x64*.
 * Added fork author information.
+* Fixed FAQ opening on Windows, macOS, and Linux.
+* Fixed update checks so manual checks report success, missing release data, or errors.
+* Fixed parsing of Apktool 3.x SDK and version metadata in APK properties.
+* Fixed APK packing on Windows by closing manifest files before running Apktool.
+* Added visible packing/unpacking progress log.
 
 ## 2.2.0
 * Added *Android 9 Pie* support.

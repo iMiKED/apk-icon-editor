@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QProgressBar>
 #include <QLabel>
+#include <QPlainTextEdit>
 #include <QSpinBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -170,6 +171,7 @@ private:
     QLabel *label;              ///< Dialog progress text.
     QLabel *icon;               ///< Dialog icon.
     QProgressBar *progress;     ///< Dialog progress bar.
+    QPlainTextEdit *log;        ///< Dialog action log.
     QDialogButtonBox *buttons;  ///< Dialog buttons.
     bool isWinExtras;           ///< If \c true, allows using QtWinExtras.
     bool allowCancel;           ///< If \c false, the dialog cannot be rejected.

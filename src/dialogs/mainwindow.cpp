@@ -1209,15 +1209,23 @@ void MainWindow::browseFaq()
         warning(tr("FAQ"), tr("Could not find FAQ file:\n%1").arg(path));
         return;
     }
-#ifdef Q_OS_WIN
-    if (!QProcess::startDetached("notepad.exe", QStringList() << QDir::toNativeSeparators(path))) {
-        warning(tr("FAQ"), tr("Could not open FAQ file:\n%1").arg(path));
-    }
+
+    QString program;
+    QStringList args;
+#if defined(Q_OS_WIN)
+    program = "notepad.exe";
+    args << QDir::toNativeSeparators(path);
+#elif defined(Q_OS_MAC) || defined(Q_OS_MACOS) || defined(Q_OS_OSX)
+    program = "open";
+    args << path;
 #else
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path))) {
+    program = "xdg-open";
+    args << path;
+#endif
+
+    if (!QProcess::startDetached(program, args)) {
         warning(tr("FAQ"), tr("Could not open FAQ file:\n%1").arg(path));
     }
-#endif
 }
 
 void MainWindow::openLogFile() const

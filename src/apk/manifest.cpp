@@ -16,11 +16,14 @@ static void setUtf8Encoding(QTextStream &stream)
 
 Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 {
+    this->xmlPath = xmlPath;
+    this->ymlPath = ymlPath;
+
     // XML:
 
-    xmlFile = new QFile(xmlPath);
-    if (xmlFile->open(QFile::ReadWrite | QFile::Text)) {
-        QTextStream stream(xmlFile);
+    QFile xmlFile(xmlPath);
+    if (xmlFile.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream stream(&xmlFile);
         setUtf8Encoding(stream);
         xml.setContent(stream.readAll());
 
@@ -65,9 +68,9 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
     regexVersionCode.setPattern("(^\\s*versionCode:\\s*'?)\\d+('?$)");
     regexVersionName.setPattern("(?<=^  versionName: ).+(?=$)");
 
-    ymlFile = new QFile(ymlPath);
-    if (ymlFile->open(QFile::ReadWrite | QFile::Text)) {
-        QTextStream stream(ymlFile);
+    QFile ymlFile(ymlPath);
+    if (ymlFile.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream stream(&ymlFile);
         setUtf8Encoding(stream);
         yml = stream.readAll();
         minSdk = regexMinSdk.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
@@ -85,8 +88,6 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 
 Manifest::~Manifest()
 {
-    delete xmlFile;
-    delete ymlFile;
 }
 
 QDomAttr Manifest::getXmlAttribute(QStringList &tree) const
@@ -262,9 +263,9 @@ bool Manifest::addApplicationBanner()
 
 bool Manifest::saveXml()
 {
-    if (xmlFile->isWritable()) {
-        xmlFile->resize(0);
-        QTextStream stream(xmlFile);
+    QFile xmlFile(xmlPath);
+    if (xmlFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        QTextStream stream(&xmlFile);
         setUtf8Encoding(stream);
         xml.save(stream, 4);
         return true;
@@ -276,9 +277,9 @@ bool Manifest::saveXml()
 
 bool Manifest::saveYml()
 {
-    if (ymlFile->isWritable()) {
-        ymlFile->resize(0);
-        QTextStream stream(ymlFile);
+    QFile ymlFile(ymlPath);
+    if (ymlFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        QTextStream stream(&ymlFile);
         setUtf8Encoding(stream);
         stream << yml;
         return true;
