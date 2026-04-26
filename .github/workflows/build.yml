@@ -1,0 +1,166 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  QT_VERSION: 6.8.3
+  APP_VERSION: 3.0.0-beta1
+
+jobs:
+  desktop:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows win64 zip
+            os: windows-2022
+            target: windows
+          - name: Linux portable tar.gz and deb
+            os: ubuntu-24.04
+            target: linux
+          - name: macOS app zip and dmg
+            os: macos-15-intel
+            target: macos
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: matrix.target == 'windows' || matrix.target == 'macos'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Qt for Windows
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip aqtinstall
+          python -m aqt install-qt windows desktop $env:QT_VERSION win64_msvc2022_64 --outputdir C:\Qt --archives qtbase qttools
+          "C:\Qt\$env:QT_VERSION\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Build Windows
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vs) { throw "Visual Studio C++ toolchain was not found." }
+          $vcvars = Join-Path $vs 'VC\Auxiliary\Build\vcvars64.bat'
+          & cmd.exe /d /s /c "call `"$vcvars`" && cd /d `"$pwd\src`" && qmake `"DEFINES+=CI`" && nmake"
+          windeployqt --release --no-compiler-runtime bin\win64\apk-icon-editor.exe
+          Compress-Archive -Path bin\win64\* -DestinationPath "apk-icon-editor_${env:APP_VERSION}_win64.zip" -Force
+
+      - name: Upload Windows artifact
+        if: matrix.target == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-icon-editor-${{ env.APP_VERSION }}-win64
+          path: apk-icon-editor_${{ env.APP_VERSION }}_win64.zip
+
+      - name: Install Linux dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential debhelper devscripts dh-make qt6-base-dev qt6-tools-dev-tools zlib1g-dev default-jdk-headless zipalign
+
+      - name: Build Debian package
+        if: matrix.target == 'linux'
+        run: |
+          ./setup/linux/deb/build.sh
+          mkdir -p artifacts/deb
+          cp ../apk-icon-editor_*.deb artifacts/deb/
+
+      - name: Build Linux portable package
+        if: matrix.target == 'linux'
+        run: |
+          tar -C bin -czf "apk-icon-editor_${APP_VERSION}_linux-x86_64.tar.gz" linux
+
+      - name: Upload Linux artifacts
+        if: matrix.target == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-icon-editor-${{ env.APP_VERSION }}-linux
+          path: |
+            apk-icon-editor_${{ env.APP_VERSION }}_linux-x86_64.tar.gz
+            artifacts/deb/*.deb
+
+      - name: Install Qt for macOS
+        if: matrix.target == 'macos'
+        run: |
+          python -m pip install --upgrade pip aqtinstall
+          python -m aqt install-qt mac desktop "$QT_VERSION" clang_64 --outputdir "$HOME/Qt" --archives qtbase qttools
+
+      - name: Install macOS packaging tools
+        if: matrix.target == 'macos'
+        run: npm install -g appdmg
+
+      - name: Build macOS
+        if: matrix.target == 'macos'
+        run: |
+          chmod +x setup/macosx/BUILD.command
+          setup/macosx/BUILD.command
+
+      - name: Upload macOS artifacts
+        if: matrix.target == 'macos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-icon-editor-${{ env.APP_VERSION }}-macos
+          path: |
+            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}.app.zip
+            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}.dmg
+
+  rpm:
+    name: Linux RPM on Fedora
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build RPM in Fedora container
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work fedora:40 bash -lc '
+            dnf install -y git gzip rpm-build qt6-qtbase-devel qt6-qttools-devel gcc-c++ make zlib-devel java-17-openjdk-devel hicolor-icon-theme &&
+            git config --global --add safe.directory /work &&
+            ./setup/linux/rpm/build.sh
+          '
+
+      - name: Upload RPM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-icon-editor-${{ env.APP_VERSION }}-rpm
+          path: |
+            setup/linux/rpm/build/RPMS/**/*.rpm
+            setup/linux/rpm/build/SRPMS/*.rpm
+
+  release:
+    name: Upload release assets
+    needs: [desktop, rpm]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Upload assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --prerelease --title "$GITHUB_REF_NAME" --notes "Automated prerelease build."
+          mapfile -d '' files < <(find dist -type f -print0)
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
