@@ -25,7 +25,7 @@ resources such as icons, strings, images, application name, and version.
 %autosetup -n %{name}-%{app_version}
 
 %build
-qmake6 PREFIX=%{_prefix}
+qmake6 PREFIX=%{_prefix} "DEFINES+=CI"
 %make_build
 
 %install

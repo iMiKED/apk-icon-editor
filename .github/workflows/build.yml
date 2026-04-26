@@ -58,7 +58,7 @@ jobs:
           $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           if (-not $vs) { throw "Visual Studio C++ toolchain was not found." }
           $vcvars = Join-Path $vs 'VC\Auxiliary\Build\vcvars64.bat'
-          & cmd.exe /d /s /c "call `"$vcvars`" && cd /d `"$pwd\src`" && qmake `"DEFINES+=CI`" && nmake"
+          & cmd.exe /d /s /c "call `"$vcvars`" && cd /d `"$pwd`" && qmake `"DEFINES+=CI`" && nmake"
           windeployqt --release --no-compiler-runtime bin\win64\apk-icon-editor.exe
           Compress-Archive -Path bin\win64\* -DestinationPath "apk-icon-editor_${env:APP_VERSION}_win64.zip" -Force
 

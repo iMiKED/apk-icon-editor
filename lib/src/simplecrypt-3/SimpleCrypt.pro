@@ -11,7 +11,4 @@ HEADERS += simplecrypt.h
 
 DESTDIR = $$PWD/../../bin
 
-macx {
-    QMAKE_MAC_SDK = macosx10.7
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
-}
+macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.0

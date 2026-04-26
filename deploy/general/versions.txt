@@ -15,6 +15,7 @@
 * Updated fork metadata links used by FAQ, installers, and platform bundles.
 * Added RPM packaging files for Fedora and Red Hat compatible distributions.
 * Added GitHub Actions builds for Windows, Linux, RPM, and macOS artifacts.
+* Fixed continuous integration build settings for SimpleCrypt and CI credentials.
 
 ## 2.2.0
 * Added *Android 9 Pie* support.

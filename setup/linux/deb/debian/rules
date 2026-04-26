@@ -5,6 +5,8 @@ export QT_SELECT=qt6
 %:
 	dh $@
 
+override_dh_auto_configure:
+	qmake6 PACKAGE=deb "DEFINES+=CI"
+
 override_dh_auto_build:
-	qmake6 PACKAGE=deb
 	make
