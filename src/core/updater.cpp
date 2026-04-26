@@ -1,6 +1,7 @@
 #include "updater.h"
 #include "globals.h"
 #include <QNetworkReply>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDesktopServices>
@@ -82,7 +83,7 @@ void UpdateWorker::catchReply(QNetworkReply *reply)
 
         if (CODE >= 200 && CODE < 300) {
             const QString URL = reply->url().toString();
-            if (URL.indexOf(Url::VERSION) != -1) {
+            if (URL.indexOf(Url::VERSION) != -1 || URL.indexOf("api.github.com/repos/iMiKED/apk-icon-editor/releases") != -1) {
 
                 const QString JSON = reply->readAll().trimmed();
                 latest = parse(JSON);
@@ -118,7 +119,10 @@ QString UpdateWorker::parse(QString json) const
     const QString OS = "windows";
 #endif
     Q_UNUSED(OS);
-    const QJsonObject object = QJsonDocument::fromJson(json.toUtf8()).object();
+    const QJsonDocument document = QJsonDocument::fromJson(json.toUtf8());
+    const QJsonObject object = document.isArray()
+                               ? document.array().at(0).toObject()
+                               : document.object();
     QString LATEST = object["tag_name"].toString();
     if (LATEST.isEmpty()) {
         LATEST = object["name"].toString();

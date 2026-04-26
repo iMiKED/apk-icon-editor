@@ -8,12 +8,13 @@
 !define VERSIONMINOR 0
 !define VERSIONPATCH 0
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
+!define VERSIONDISPLAY "${VERSION}-beta1"
 !define ABOUTURL "https://qwertycube.com/apk-icon-editor/"
 !define UPDATEURL "https://qwertycube.com/apk-icon-editor/download/#update"
 !define EXE "$INSTDIR\apk-icon-editor.exe"
 
-Name "${APPNAME} v${VERSION}"
-OutFile "apk-icon-editor_${VERSION}.exe"
+Name "${APPNAME} v${VERSIONDISPLAY}"
+OutFile "apk-icon-editor_${VERSIONDISPLAY}.exe"
 InstallDir "$PROGRAMFILES\${APPNAME}"
 InstallDirRegKey HKCU "Software\apk-icon-editor" "InstallDir"
 RequestExecutionLevel admin
@@ -86,12 +87,12 @@ Section
 	File "..\..\res\icons\win32\icon.ico"
 	WriteUninstaller "$INSTDIR\uninstall.exe"
 	SetOutPath "$INSTDIR"
-	CreateShortCut "$SMPROGRAMS\${APPNAME}.lnk" ${EXE} "" "" "" "" "" "${APPNAME} v${VERSION}"
+	CreateShortCut "$SMPROGRAMS\${APPNAME}.lnk" ${EXE} "" "" "" "" "" "${APPNAME} v${VERSIONDISPLAY}"
 	${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
 	IntFmt $0 "0x%08X" $0
 	WriteRegStr HKCU "Software\apk-icon-editor" "InstallDir" "$INSTDIR"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
-	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayVersion" "${VERSION}"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayVersion" "${VERSIONDISPLAY}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$\"$INSTDIR\gfx\icon.ico$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "Publisher" "${COMPANYNAME}"
@@ -106,7 +107,7 @@ SectionEnd
 
 Section "Desktop Shortcut" SEC_DESKTOP
 	SetOutPath "$INSTDIR"
-	CreateShortCut "$DESKTOP\${APPNAME}.lnk" ${EXE} "" "" "" "" "" "${APPNAME} v${VERSION}"
+	CreateShortCut "$DESKTOP\${APPNAME}.lnk" ${EXE} "" "" "" "" "" "${APPNAME} v${VERSIONDISPLAY}"
 SectionEnd
 
 Section "Associate APK" SEC_ASSOCIATE

@@ -73,7 +73,7 @@ namespace Path {
 
 namespace Url {
     const QString WEBSITE   = "https://github.com/iMiKED/apk-icon-editor";
-    const QString VERSION   = "https://api.github.com/repos/iMiKED/apk-icon-editor/releases/latest";
+    const QString VERSION   = "https://api.github.com/repos/iMiKED/apk-icon-editor/releases?per_page=10";
     const QString UPDATE    = WEBSITE + "/releases";
     const QString CONTACT   = WEBSITE + "/issues";
     const QString TRANSLATE = "https://crowdin.com/project/apk-icon-editor";
