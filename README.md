@@ -36,6 +36,7 @@ This repository is a fork of the original [APK Icon Editor](https://github.com/k
 - Install Qt 6 development packages, `make`, `g++`, and zlib development headers.
 - Run `qmake6 && make`.
 - Debian packaging is driven by `setup/linux/deb/build.sh`.
+- Fedora/RHEL RPM packaging is driven by `setup/linux/rpm/build.sh` and requires `rpm-build`, `qt6-qtbase-devel`, `qt6-qttools-devel`, `gcc-c++`, `make`, `zlib-devel`, and `java-17-openjdk-devel`.
 
 #### macOS
 - Install Qt 6.8.3 for macOS and Xcode 15 or newer.

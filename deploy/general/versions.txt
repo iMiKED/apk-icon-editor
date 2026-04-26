@@ -13,6 +13,7 @@
 * Fixed update checks to include GitHub prereleases.
 * Prepared Linux Debian and macOS packaging metadata for Qt 6.8 builds.
 * Updated fork metadata links used by FAQ, installers, and platform bundles.
+* Added RPM packaging files for Fedora and Red Hat compatible distributions.
 
 ## 2.2.0
 * Added *Android 9 Pie* support.

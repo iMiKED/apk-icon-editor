@@ -1,0 +1,4 @@
+*.sh text eol=lf
+*.spec text eol=lf
+*.command text eol=lf
+setup/linux/deb/debian/rules text eol=lf

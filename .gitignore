@@ -4,6 +4,7 @@
 /lang/
 !/lang/README
 /lib/bin/
+/setup/linux/rpm/build/
 /.qmake.cache
 /.qmake.stash
 *.autosave
