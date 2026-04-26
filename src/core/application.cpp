@@ -1,8 +1,10 @@
 #include "application.h"
 #include "globals.h"
 #include <QDir>
-#include <QTextCodec>
 #include <QFontDatabase>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QTextCodec>
+#endif
 
 QFile *Application::log;
 
@@ -79,7 +81,9 @@ bool Application::initLog() const
 
 void Application::initFonts() const
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+#endif
     QFontDatabase::addApplicationFont(":/fonts/OpenSans-Light.ttf");
 }
 

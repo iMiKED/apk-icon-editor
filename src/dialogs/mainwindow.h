@@ -13,7 +13,6 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QActionGroup>
-#include <QSignalMapper>
 #include <QTranslator>
 #include <QCloseEvent>
 #include "about.h"
@@ -91,7 +90,7 @@ public slots:
     void browseSite() const;        ///< Opens website URL in the default browser.
     void browseBugs() const;        ///< Opens bugs webpage in the default browser.
     void browseTranslate() const;   ///< Opens Crowdin URL in the default browser.
-    void browseFaq() const;         ///< Opens FAQ text document.
+    void browseFaq();               ///< Opens FAQ text document.
     void openLogFile() const;       ///< Opens log file.
     void openLogPath() const;       ///< Opens log directory.
 
@@ -134,6 +133,7 @@ private slots:
     void cloneIcons();              ///< Clones the current icon for to all sizes.
     void applyAppName();            ///< Applies the global application name to all translations.
     void enableUpload(bool enable); ///< Enables or disables upload to cloud services.
+    void checkUpdates();            ///< Checks updates and shows the manual check result.
 
     // Dialogs:
 
@@ -143,6 +143,7 @@ private slots:
     /// Displays the "New version available" dialog.
     /// \param version Number representing the new version.
     bool newVersion(QString version);
+    void updateChecked(QString version, bool updateAvailable, QString error);
 
     /// Displays a message.
     /// \param title   Message brief title.
@@ -301,6 +302,7 @@ private:
     Apk::File *apk;
     ApkManager *apkManager;
     Recent *recent;
+    bool manualUpdateCheck;
     Updater *updater;
     Dropbox *dropbox;
     GoogleDrive *gdrive;
@@ -308,8 +310,6 @@ private:
 
     // Other:
 
-    QSignalMapper *mapLang;
-    QSignalMapper *mapRecent;
     QTranslator *translator;
     QTranslator *translatorQt;
     QString currentApk;

@@ -5,6 +5,9 @@
 #include <QRegularExpression>
 #include <QCoreApplication>
 #include <QDebug>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
 
 TitlesModel::~TitlesModel()
 {
@@ -19,7 +22,11 @@ void TitlesModel::add(const QString &filepath, const QString &key)
     QFile xml(filepath);
     if (xml.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream stream(&xml);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        stream.setEncoding(QStringConverter::Utf8);
+#else
         stream.setCodec("UTF-8");
+#endif
         QDomDocument xmlDocument;
         xmlDocument.setContent(stream.readAll());
 

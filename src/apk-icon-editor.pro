@@ -20,8 +20,6 @@ RESOURCES    += $$PWD/../res/resources.qrc
 win32 {
     isEqual(QT_MAJOR_VERSION, 5) {
         greaterThan(QT_MINOR_VERSION, 1): QT += winextras
-    } else:greaterThan(QT_MAJOR_VERSION, 5) {
-        QT += winextras
     }
 }
 
@@ -31,7 +29,7 @@ include(widgets/widgets.pri)
 include(dialogs/dialogs.pri)
 
 INCLUDEPATH += $$PWD/../lib/include
-INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+lessThan(QT_MAJOR_VERSION, 6): INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
 
 LIBS += -L$$PWD/../lib/bin
 LIBS += -lsimplecrypt
@@ -40,7 +38,11 @@ unix: LIBS += -lz
 # Build:
 
 win32 {
-    DESTDIR = $$PWD/../bin/win32
+    contains(QMAKE_TARGET.arch, x86_64) {
+        DESTDIR = $$PWD/../bin/win64
+    } else {
+        DESTDIR = $$PWD/../bin/win32
+    }
     RC_ICONS = $$PWD/../res/icons/win32/icon.ico \
                $$PWD/../res/icons/win32/icon-apk.ico
 }

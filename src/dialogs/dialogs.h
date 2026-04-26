@@ -10,12 +10,13 @@
 #include <QLineEdit>
 #include <QProgressBar>
 #include <QLabel>
+#include <QPlainTextEdit>
 #include <QSpinBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QToolButton>
 
-#if defined(Q_OS_WIN) && (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if defined(Q_OS_WIN) && (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)) && (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     #define WINEXTRAS
 #endif
 
@@ -170,6 +171,7 @@ private:
     QLabel *label;              ///< Dialog progress text.
     QLabel *icon;               ///< Dialog icon.
     QProgressBar *progress;     ///< Dialog progress bar.
+    QPlainTextEdit *log;        ///< Dialog action log.
     QDialogButtonBox *buttons;  ///< Dialog buttons.
     bool isWinExtras;           ///< If \c true, allows using QtWinExtras.
     bool allowCancel;           ///< If \c false, the dialog cannot be rejected.

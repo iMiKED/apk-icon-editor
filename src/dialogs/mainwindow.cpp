@@ -7,8 +7,9 @@
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QMimeData>
-#include <QTextCodec>
+#include <QRegularExpression>
 #include <QDesktopServices>
+#include <QProcess>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
 
@@ -46,23 +47,21 @@ void MainWindow::checkReqs()
         const QString JRE = Apk::getJreVersion();
         const QString JDK = Apk::getJdkVersion();
 
-        QRegExp rx;
-        QStringList cap;
+        QRegularExpression rx;
+        QRegularExpressionMatch match;
 
         rx.setPattern("version \"(.+)\"");
-        rx.indexIn(JRE);
-        cap = rx.capturedTexts();
-        if (cap.size() > 1) {
-            version_jre = cap[1];
+        match = rx.match(JRE);
+        if (match.hasMatch()) {
+            version_jre = match.captured(1);
             Settings::set_java_version(version_jre);
             toolDialog->reset();
         }
 
         rx.setPattern("javac (.+)");
-        rx.indexIn(JDK);
-        cap = rx.capturedTexts();
-        if (cap.size() > 1) {
-            version_jdk = cap[1];
+        match = rx.match(JDK);
+        if (match.hasMatch()) {
+            version_jdk = match.captured(1);
         }
 
         qDebug() << "JRE version:" << qPrintable(!JRE.isNull() ? version_jre : "---");
@@ -81,8 +80,8 @@ void MainWindow::init_core()
     apk = NULL;
     apkManager = new ApkManager(this);
     updater = new Updater(this);
-    mapRecent = new QSignalMapper(this);
     recent = NULL;
+    manualUpdateCheck = false;
 
     dropbox = new Dropbox(this);
     gdrive = new GoogleDrive(this);
@@ -369,7 +368,7 @@ void MainWindow::init_gui()
     layoutIcons->addLayout(layoutDevices);
     layoutIcons->addWidget(listIcons);
     layoutIcons->addLayout(layoutIconsButtons);
-    layoutIcons->setMargin(4);
+    layoutIcons->setContentsMargins(4, 4, 4, 4);
     layoutIcons->setSpacing(6);
 
     tabTranslations = new QWidget(this);
@@ -383,7 +382,7 @@ void MainWindow::init_gui()
     btnApplyAppName = new QPushButton(this);
     layoutTranslations->addWidget(tableTitles);
     layoutTranslations->addWidget(btnApplyAppName);
-    layoutTranslations->setMargin(4);
+    layoutTranslations->setContentsMargins(4, 4, 4, 4);
 
     tabProperties = new QWidget(this);
     QVBoxLayout *layoutProperties = new QVBoxLayout(tabProperties);
@@ -394,7 +393,7 @@ void MainWindow::init_gui()
     tableManifest->setHorizontalScrollMode(QTableView::ScrollPerPixel);
     tableManifest->setVerticalScrollMode(QTableView::ScrollPerPixel);
     layoutProperties->addWidget(tableManifest);
-    layoutProperties->setMargin(4);
+    layoutProperties->setContentsMargins(4, 4, 4, 4);
 
     tabs = new QTabWidget(this);
     tabs->addTab(tabIcons, NULL);
@@ -415,7 +414,7 @@ void MainWindow::init_gui()
 
     QWidget *sidebar = new QWidget(this);
     QVBoxLayout *layoutSide = new QVBoxLayout(sidebar);
-    layoutSide->setMargin(0);
+    layoutSide->setContentsMargins(0, 0, 0, 0);
     layoutSide->addWidget(tabs);
     layoutSide->addWidget(checkDropbox);
     layoutSide->addWidget(checkGDrive);
@@ -437,8 +436,6 @@ void MainWindow::init_languages()
 {
     translator = new QTranslator(this);
     translatorQt = new QTranslator(this);
-    mapLang = new QSignalMapper(this);
-    connect(mapLang, SIGNAL(mapped(QString)), this, SLOT(setLanguage(QString)));
 
     // Add default English:
 
@@ -465,8 +462,7 @@ void MainWindow::init_languages()
         QAction *actLang = new QAction(this);
         actLang->setText(title);
         actLang->setIcon(QIcon(QString("%1/flag.%2.png").arg(LANGPATH.absolutePath(), locale)));
-        connect(actLang, SIGNAL(triggered()), mapLang, SLOT(map()));
-        mapLang->setMapping(actLang, locale);
+        connect(actLang, &QAction::triggered, [=]() { setLanguage(locale); });
         menuLang->addAction(actLang);
     }
 
@@ -516,11 +512,10 @@ void MainWindow::init_slots()
     connect(actFaq, SIGNAL(triggered()), this, SLOT(browseFaq()));
     connect(actLogFile, SIGNAL(triggered()), this, SLOT(openLogFile()));
     connect(actLogPath, SIGNAL(triggered()), this, SLOT(openLogPath()));
-    connect(actUpdate, SIGNAL(triggered()), updater, SLOT(check()));
+    connect(actUpdate, SIGNAL(triggered()), this, SLOT(checkUpdates()));
     connect(actAbout, SIGNAL(triggered()), about, SLOT(exec()));
     connect(actAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(btnPack, SIGNAL(clicked()), this, SLOT(apk_save()));
-    connect(mapRecent, SIGNAL(mapped(QString)), this, SLOT(apk_open(QString)));
     connect(actAddIconLdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Ldpi); });
     connect(actAddIconMdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Mdpi); });
     connect(actAddIconHdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Hdpi); });
@@ -562,6 +557,7 @@ void MainWindow::init_slots()
     connect(uploadDialog, SIGNAL(rejected()), gdrive, SLOT(cancel()));
     connect(uploadDialog, SIGNAL(rejected()), onedrive, SLOT(cancel()));
     connect(updater, SIGNAL(version(QString)), this, SLOT(newVersion(QString)));
+    connect(updater, SIGNAL(checked(QString,bool,QString)), this, SLOT(updateChecked(QString,bool,QString)));
     connect(this, SIGNAL(reqsChecked(QString, QString, QString)), about, SLOT(setVersions(QString, QString, QString)));
 }
 
@@ -736,8 +732,7 @@ void MainWindow::recent_update()
             QAction *actRecent = new QAction(RECENT.filename, menuRecent);
             actRecent->setIcon(RECENT.icon);
             menuRecent->addAction(actRecent);
-            connect(actRecent, SIGNAL(triggered()), mapRecent, SLOT(map()));
-            mapRecent->setMapping(actRecent, RECENT.filename);
+            connect(actRecent, &QAction::triggered, [=]() { apk_open(RECENT.filename); });
         }
         menuRecent->addSeparator();
         menuRecent->addAction(actRecentClear);
@@ -1017,7 +1012,7 @@ bool MainWindow::icon_revert()
 
 bool MainWindow::setPreviewColor()
 {
-    const QColor DEFAULT = drawArea->palette().color(QPalette::Background);
+    const QColor DEFAULT = drawArea->palette().color(QPalette::Window);
     const QColor COLOR = QColorDialog::getColor(DEFAULT, this);
     if (COLOR.isValid()) {
         drawArea->setBackground(COLOR);
@@ -1207,9 +1202,30 @@ void MainWindow::browseBugs() const
     QDesktopServices::openUrl(Url::CONTACT);
 }
 
-void MainWindow::browseFaq() const
+void MainWindow::browseFaq()
 {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(Path::Data::shared() + "faq.txt"));
+    const QString path = Path::Data::shared() + "faq.txt";
+    if (!QFile::exists(path)) {
+        warning(tr("FAQ"), tr("Could not find FAQ file:\n%1").arg(path));
+        return;
+    }
+
+    QString program;
+    QStringList args;
+#if defined(Q_OS_WIN)
+    program = "notepad.exe";
+    args << QDir::toNativeSeparators(path);
+#elif defined(Q_OS_MAC) || defined(Q_OS_MACOS) || defined(Q_OS_OSX)
+    program = "open";
+    args << path;
+#else
+    program = "xdg-open";
+    args << path;
+#endif
+
+    if (!QProcess::startDetached(program, args)) {
+        warning(tr("FAQ"), tr("Could not open FAQ file:\n%1").arg(path));
+    }
 }
 
 void MainWindow::openLogFile() const
@@ -1232,6 +1248,12 @@ void MainWindow::browseTranslate() const
     QDesktopServices::openUrl(Url::TRANSLATE);
 }
 
+void MainWindow::checkUpdates()
+{
+    manualUpdateCheck = true;
+    updater->check();
+}
+
 bool MainWindow::newVersion(QString version)
 {
     QMessageBox msgBox(
@@ -1247,6 +1269,29 @@ bool MainWindow::newVersion(QString version)
     }
     else {
         return false;
+    }
+}
+
+void MainWindow::updateChecked(QString version, bool updateAvailable, QString error)
+{
+    if (!manualUpdateCheck) {
+        return;
+    }
+    manualUpdateCheck = false;
+
+    if (updateAvailable) {
+        return;
+    }
+
+    if (!error.isEmpty()) {
+        warning(tr("Update"), tr("Could not check for updates."), error);
+        return;
+    }
+
+    if (version.isEmpty()) {
+        success(tr("Update"), tr("No release version was found."));
+    } else {
+        success(tr("Update"), tr("%1 is up to date.").arg(APP), tr("Latest version: %1").arg(version));
     }
 }
 

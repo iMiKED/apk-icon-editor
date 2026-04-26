@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QDebug>
+#include <QRegularExpression>
 #include <QtXml/QDomDocument>
 
 using Apk::Packer;
@@ -49,7 +50,7 @@ void Packer::pack(Apk::File *apk, QString temp)
 
     emit loading(40, tr("Packing APK..."));
 
-    connect(apktool, static_cast<void(QProcess::*)(int)>(&QProcess::finished), [=](int code) {
+    connect(apktool, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [=](int code, QProcess::ExitStatus) {
         const int QPROCESS_KILL_CODE = 62097;
         switch (code) {
             case 0: {
@@ -71,7 +72,7 @@ void Packer::pack(Apk::File *apk, QString temp)
         }
     });
 
-    connect(apktool, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), [=](QProcess::ProcessError processError) {
+    connect(apktool, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::errorOccurred), [=](QProcess::ProcessError processError) {
         if (processError == QProcess::FailedToStart) {
             if (isJavaInstalled()) {
                 const QString errorText = apktool->errorString();
@@ -84,7 +85,7 @@ void Packer::pack(Apk::File *apk, QString temp)
         }
     });
 
-    apktool->start(QString("java -jar \"%1\" b \"%2\" -f -o \"%3\" -p \"%4\"").arg(APKTOOL, CONTENTS, TEMPAPK, temp + "/framework/"));
+    apktool->start("java", QStringList() << "-jar" << APKTOOL << "b" << CONTENTS << "-f" << "-o" << TEMPAPK << "-p" << temp + "/framework/");
 }
 
 void Packer::cancel()
@@ -119,7 +120,7 @@ void Packer::saveAppVersion(QString contents, QString code, QString name) const
     QFile f(contents + "/apktool.yml");
     if (f.open(QFile::ReadWrite | QFile::Text)) {
         QString yml = f.readAll();
-        QRegExp rxCode, rxName;
+        QRegularExpression rxCode, rxName;
         rxCode.setPattern("versionCode: [^\n]+");
         rxName.setPattern("versionName: [^\n]+");
         yml.replace(rxCode, QString("versionCode: '%1'").arg(code));
@@ -153,8 +154,7 @@ bool Packer::saveStrings(QList<Apk::String> strings) const
             const QString LINE = QString("<string name=\"%1\">%2</string>").arg(KEY);
             QTextStream in(&f);
             QString xml = in.readAll();
-            QRegExp rx;
-            rx.setMinimal(true);
+            QRegularExpression rx;
             rx.setPattern(LINE.arg(".*"));
             xml.replace(rx, QString(LINE).arg(VALUE));
             f.resize(0);
@@ -192,7 +192,7 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
     const bool isApksigner = apk->getApksigner();
     const QString apkDest = apkPath + ".signed"; // Separate output file for signapk.jar
 
-    connect(signer, static_cast<void(QProcess::*)(int)>(&QProcess::finished), [=](int code) {
+    connect(signer, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [=](int code, QProcess::ExitStatus) {
         const int QPROCESS_KILL_CODE = 62097;
         switch (code) {
             case 0: {
@@ -219,7 +219,7 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
         isApksigner ? finalize(apk, apkPath) : zipalign(apk, apkPath);
     });
 
-    connect(signer, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), [=](QProcess::ProcessError processError) {
+    connect(signer, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::errorOccurred), [=](QProcess::ProcessError processError) {
         if (processError == QProcess::FailedToStart) {
             signError = signer->errorString();
             qDebug() << "Error starting signer";
@@ -229,10 +229,15 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
         }
     });
 
-    const QString procString = isApksigner
-        ? "java -jar \"%1/signer/apksigner.jar\" sign --key \"%3\" --cert \"%2\" \"%4\""
-        : "java -jar \"%1/signer/signapk.jar\" \"%2\" \"%3\" \"%4\" \"%5\"";
-    signer->start(procString.arg(Path::Data::shared(), pem, pk8, apkPath, apkDest));
+    QStringList args;
+    if (isApksigner) {
+        args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
+             << "sign" << "--key" << pk8 << "--cert" << pem << apkPath;
+    } else {
+        args << "-jar" << Path::Data::shared() + "signer/signapk.jar"
+             << pem << pk8 << apkPath << apkDest;
+    }
+    signer->start("java", args);
 }
 
 void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
@@ -243,7 +248,7 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
     const QString passAlias = apk->getPassAlias();
     const bool isApksigner = apk->getApksigner();
 
-    connect(signer, static_cast<void(QProcess::*)(int)>(&QProcess::finished), [=](int code) {
+    connect(signer, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [=](int code, QProcess::ExitStatus) {
         const int QPROCESS_KILL_CODE = 62097;
         switch (code) {
             case 0: {
@@ -266,7 +271,7 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
         isApksigner ? finalize(apk, apkPath) : zipalign(apk, apkPath);
     });
 
-    connect(signer, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), [=](QProcess::ProcessError processError) {
+    connect(signer, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::errorOccurred), [=](QProcess::ProcessError processError) {
         if (processError == QProcess::FailedToStart) {
             signError = signer->errorString();
             qDebug() << "Error starting signer";
@@ -276,10 +281,20 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
     });
 
     qDebug() << "Packing...";
-    QString procString = isApksigner
-        ? "java -jar \"%6/signer/apksigner.jar\" sign --ks \"%1\" --ks-key-alias \"%2\" --ks-pass pass:\"%3\" --key-pass pass:\"%4\" \"%5\""
-        : "jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore \"%1\" \"%5\" -storepass \"%3\" -keypass \"%4\" \"%2\"";
-    signer->start(procString.arg(keystore, alias, passKeystore, passAlias, apkPath, Path::Data::shared()));
+    QStringList args;
+    if (isApksigner) {
+        args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
+             << "sign" << "--ks" << keystore << "--ks-key-alias" << alias
+             << "--ks-pass" << QString("pass:%1").arg(passKeystore)
+             << "--key-pass" << QString("pass:%1").arg(passAlias)
+             << apkPath;
+        signer->start("java", args);
+    } else {
+        args << "-verbose" << "-sigalg" << "SHA1withRSA" << "-digestalg" << "SHA1"
+             << "-keystore" << keystore << apkPath << "-storepass" << passKeystore
+             << "-keypass" << passAlias << alias;
+        signer->start("jarsigner", args);
+    }
 }
 
 void Packer::zipalign(Apk::File *apk, QString apkPath)
@@ -294,7 +309,7 @@ void Packer::zipalign(Apk::File *apk, QString apkPath)
 
     const QString apkDest(apkPath + ".aligned");
 
-    connect(zipaligner, static_cast<void(QProcess::*)(int)>(&QProcess::finished), [=](int code) {
+    connect(zipaligner, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), [=](int code, QProcess::ExitStatus) {
         const int QPROCESS_KILL_CODE = 62097;
         switch (code) {
             case 0: {
@@ -320,7 +335,7 @@ void Packer::zipalign(Apk::File *apk, QString apkPath)
         apk->getApksigner() ? sign(apk, apkPath) : finalize(apk, apkPath);
     });
 
-    connect(zipaligner, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), [=](QProcess::ProcessError processError) {
+    connect(zipaligner, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::errorOccurred), [=](QProcess::ProcessError processError) {
         if (processError == QProcess::FailedToStart) {
             alignError = zipaligner->errorString();
             qDebug() << "Error starting Zipalign";
@@ -329,7 +344,7 @@ void Packer::zipalign(Apk::File *apk, QString apkPath)
         }
     });
 
-    zipaligner->start(QString("zipalign -f 4 \"%1\" \"%2\"").arg(apkPath, apkDest));
+    zipaligner->start("zipalign", QStringList() << "-f" << "4" << apkPath << apkDest);
 }
 
 void Packer::finalize(Apk::File *apk, QString apkPath) const

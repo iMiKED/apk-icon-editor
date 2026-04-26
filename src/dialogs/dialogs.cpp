@@ -90,7 +90,7 @@ void InputDialog::checkInput(QString text)
 
 ProgressDialog::ProgressDialog(QWidget *parent) : QDialog(parent)
 {
-    resize(Gui::Screen::scaled(220, 100));
+    resize(Gui::Screen::scaled(360, 220));
     setModal(true);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     allowCancel = true;
@@ -100,10 +100,13 @@ ProgressDialog::ProgressDialog(QWidget *parent) : QDialog(parent)
     label = new QLabel(this);
     icon = new QLabel(this);
     progress = new QProgressBar(this);
+    log = new QPlainTextEdit(this);
     buttons = new QDialogButtonBox(QDialogButtonBox::Cancel, this);
 
     icon->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
     progress->setRange(0, 100);
+    log->setReadOnly(true);
+    log->setMaximumBlockCount(200);
 
     QHBoxLayout *row1 = new QHBoxLayout();
     row1->addWidget(icon);
@@ -111,9 +114,10 @@ ProgressDialog::ProgressDialog(QWidget *parent) : QDialog(parent)
 
     layout->addLayout(row1);
     layout->addWidget(progress);
+    layout->addWidget(log);
     layout->addWidget(buttons);
 
-    setFixedHeight((sizeHint().height() < 100) ? 100 : sizeHint().height());
+    setMinimumHeight(qMax(Gui::Screen::scaled(180), sizeHint().height()));
 
 #ifdef WINEXTRAS
     isWinExtras = QSysInfo::windowsVersion() >= QSysInfo::WV_VISTA;
@@ -129,6 +133,12 @@ void ProgressDialog::setProgress(short percentage, QString text)
 {
     label->setText(text);
     progress->setValue(percentage);
+    if (percentage <= 0) {
+        log->clear();
+    }
+    if (!text.isEmpty()) {
+        log->appendPlainText(QString("[%1%] %2").arg(percentage).arg(text));
+    }
 #ifdef WINEXTRAS
     if (isWinExtras) {
         taskbar->setWindow(static_cast<QWidget*>(parent())->windowHandle());
@@ -144,6 +154,9 @@ void ProgressDialog::setProgress(short percentage, QString text)
 void ProgressDialog::setText(QString text)
 {
     label->setText(text);
+    if (!text.isEmpty()) {
+        log->appendPlainText(text);
+    }
 }
 
 void ProgressDialog::setIcon(QPixmap pixmap)

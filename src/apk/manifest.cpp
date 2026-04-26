@@ -1,15 +1,30 @@
 #include "manifest.h"
 #include <QTextStream>
 #include <QDebug>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
+
+static void setUtf8Encoding(QTextStream &stream)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    stream.setEncoding(QStringConverter::Utf8);
+#else
+    stream.setCodec("UTF-8");
+#endif
+}
 
 Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 {
+    this->xmlPath = xmlPath;
+    this->ymlPath = ymlPath;
+
     // XML:
 
-    xmlFile = new QFile(xmlPath);
-    if (xmlFile->open(QFile::ReadWrite | QFile::Text)) {
-        QTextStream stream(xmlFile);
-        stream.setCodec("UTF-8");
+    QFile xmlFile(xmlPath);
+    if (xmlFile.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream stream(&xmlFile);
+        setUtf8Encoding(stream);
         xml.setContent(stream.readAll());
 
         // Parse <application> node:
@@ -48,19 +63,19 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
     regexTargetSdk.setPatternOptions(QRegularExpression::MultilineOption);
     regexVersionCode.setPatternOptions(QRegularExpression::MultilineOption);
     regexVersionName.setPatternOptions(QRegularExpression::MultilineOption);
-    regexMinSdk.setPattern("(?<=^  minSdkVersion: ')\\d+(?='$)");
-    regexTargetSdk.setPattern("(?<=^  targetSdkVersion: ')\\d+(?='$)");
-    regexVersionCode.setPattern("(?<=^  versionCode: ')\\d+(?='$)");
+    regexMinSdk.setPattern("(^\\s*minSdkVersion:\\s*'?)\\d+('?$)");
+    regexTargetSdk.setPattern("(^\\s*targetSdkVersion:\\s*'?)\\d+('?$)");
+    regexVersionCode.setPattern("(^\\s*versionCode:\\s*'?)\\d+('?$)");
     regexVersionName.setPattern("(?<=^  versionName: ).+(?=$)");
 
-    ymlFile = new QFile(ymlPath);
-    if (ymlFile->open(QFile::ReadWrite | QFile::Text)) {
-        QTextStream stream(ymlFile);
-        stream.setCodec("UTF-8");
+    QFile ymlFile(ymlPath);
+    if (ymlFile.open(QFile::ReadOnly | QFile::Text)) {
+        QTextStream stream(&ymlFile);
+        setUtf8Encoding(stream);
         yml = stream.readAll();
-        minSdk = regexMinSdk.match(yml).captured().toInt();
-        targetSdk = regexTargetSdk.match(yml).captured().toInt();
-        versionCode = regexVersionCode.match(yml).captured().toInt();
+        minSdk = regexMinSdk.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
+        targetSdk = regexTargetSdk.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
+        versionCode = regexVersionCode.match(yml).captured(0).split(':').last().remove('\'').trimmed().toInt();
         versionName = regexVersionName.match(yml).captured();
 #ifdef QT_DEBUG
         qDebug() << "Parsed minumum SDK: " << minSdk;
@@ -73,8 +88,6 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 
 Manifest::~Manifest()
 {
-    delete xmlFile;
-    delete ymlFile;
 }
 
 QDomAttr Manifest::getXmlAttribute(QStringList &tree) const
@@ -167,7 +180,7 @@ void Manifest::setMinSdk(int value)
 {
     value = qMax(0, value);
     minSdk = value;
-    yml.replace(regexMinSdk, QString::number(value));
+    yml.replace(regexMinSdk, QString("\\1%1\\2").arg(value));
     saveYml();
 }
 
@@ -175,7 +188,7 @@ void Manifest::setTargetSdk(int value)
 {
     value = qMax(1, value);
     targetSdk = value;
-    yml.replace(regexTargetSdk, QString::number(value));
+    yml.replace(regexTargetSdk, QString("\\1%1\\2").arg(value));
     saveYml();
 }
 
@@ -183,7 +196,7 @@ void Manifest::setVersionCode(int value)
 {
     value = qMax(0, value);
     versionCode = value;
-    yml.replace(regexVersionCode, QString::number(value));
+    yml.replace(regexVersionCode, QString("\\1%1\\2").arg(value));
     saveYml();
 }
 
@@ -250,10 +263,10 @@ bool Manifest::addApplicationBanner()
 
 bool Manifest::saveXml()
 {
-    if (xmlFile->isWritable()) {
-        xmlFile->resize(0);
-        QTextStream stream(xmlFile);
-        stream.setCodec("UTF-8");
+    QFile xmlFile(xmlPath);
+    if (xmlFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        QTextStream stream(&xmlFile);
+        setUtf8Encoding(stream);
         xml.save(stream, 4);
         return true;
     } else {
@@ -264,10 +277,10 @@ bool Manifest::saveXml()
 
 bool Manifest::saveYml()
 {
-    if (ymlFile->isWritable()) {
-        ymlFile->resize(0);
-        QTextStream stream(ymlFile);
-        stream.setCodec("UTF-8");
+    QFile ymlFile(ymlPath);
+    if (ymlFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        QTextStream stream(&ymlFile);
+        setUtf8Encoding(stream);
         stream << yml;
         return true;
     } else {

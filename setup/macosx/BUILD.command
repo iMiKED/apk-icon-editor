@@ -7,8 +7,8 @@ rm -rf "bin/macosx/apk-icon-editor.app"
 rm -rf "build"
 find . -name "Makefile*" -type f -delete
 
-~/Qt/5.15.2/clang_64/bin/qmake && make || { echo "Could not build the project."; exit 2; }
-~/Qt/5.15.2/clang_64/bin/macdeployqt bin/macosx/apk-icon-editor.app || { echo "Could not deploy the project."; exit 3; }
+~/Qt/6.8.3/macos/bin/qmake && make || { echo "Could not build the project."; exit 2; }
+~/Qt/6.8.3/macos/bin/macdeployqt bin/macosx/apk-icon-editor.app || { echo "Could not deploy the project."; exit 3; }
 find "bin/macosx/apk-icon-editor.app" -name ".DS_Store" -type f -delete
 
 mkdir "setup/macosx/build"

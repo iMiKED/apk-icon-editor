@@ -3,7 +3,12 @@
 #include <QBoxLayout>
 #include <QFile>
 #include <QTextStream>
+#include <QRegularExpression>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#else
 #include <QTextCodec>
+#endif
 
 Authors::Authors(QWidget *parent) : QDialog(parent)
 {
@@ -46,7 +51,11 @@ void Authors::parse()
     QFile inputFile(Path::Data::shared() + "authors.txt");
     if (inputFile.open(QIODevice::ReadOnly)) {
         QTextStream in(&inputFile);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        in.setEncoding(QStringConverter::Utf8);
+#else
         in.setCodec(QTextCodec::codecForName("UTF-8"));
+#endif
         while (!in.atEnd()) {
             QString line = in.readLine();
             if (line.endsWith(':')) {
@@ -56,12 +65,10 @@ void Authors::parse()
             }
             else {
                 if (!line.isEmpty()) {
-                    QRegExp rxMarkdown("\\[([^\\]]+)\\]\\((https?://[^\\)]+)\\)");
-                    rxMarkdown.setMinimal(true);
+                    QRegularExpression rxMarkdown("\\[([^\\]]+)\\]\\((https?://[^\\)]+)\\)");
                     line = line.replace(rxMarkdown, "<a href=\"\\2\">\\1</a>");
 
-                    QRegExp rx("\\(www.(.+)\\)");
-                    rx.setMinimal(true);
+                    QRegularExpression rx("\\(www\\.([^\\)]+)\\)");
                     line = line.replace(rx, "(<a href=\"http://www.\\1\">www.\\1</a>)");
                     authors[category].append(line + "<br>");
                 }

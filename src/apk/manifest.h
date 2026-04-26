@@ -39,8 +39,8 @@ private:
 
     QDomElement findIntentByCategory(QDomElement activity, QString category);
 
-    QFile *xmlFile;
-    QFile *ymlFile;
+    QString xmlPath;
+    QString ymlPath;
 
     QDomDocument xml;
     QString yml;

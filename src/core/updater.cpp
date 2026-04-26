@@ -17,6 +17,7 @@ void Updater::check() const
 
     connect(thread, SIGNAL(started()), worker, SLOT(check()));
     connect(worker, SIGNAL(version(QString)), this, SIGNAL(version(QString)));
+    connect(worker, SIGNAL(checked(QString,bool,QString)), this, SIGNAL(checked(QString,bool,QString)));
     connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
@@ -71,6 +72,10 @@ void UpdateWorker::check() const
 
 void UpdateWorker::catchReply(QNetworkReply *reply)
 {
+    QString latest;
+    QString error;
+    bool updateAvailable = false;
+
     if (reply->error() == QNetworkReply::NoError) {
 
         const int CODE = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -80,14 +85,23 @@ void UpdateWorker::catchReply(QNetworkReply *reply)
             if (URL.indexOf(Url::VERSION) != -1) {
 
                 const QString JSON = reply->readAll().trimmed();
-                const QString VERSION = parse(JSON);
-                if (Updater::compare(VERSION, VER)) {
-                    emit version(VERSION);
+                latest = parse(JSON);
+                updateAvailable = Updater::compare(latest, VER);
+                if (updateAvailable) {
+                    emit version(latest);
+                }
+                if (latest.isEmpty()) {
+                    error = tr("Could not find release version in the update response.");
                 }
             }
+        } else {
+            error = tr("Update server returned HTTP %1.").arg(CODE);
         }
+    } else {
+        error = reply->errorString();
     }
 
+    emit checked(latest, updateAvailable, error);
     reply->deleteLater();
     emit finished();
 }
@@ -103,11 +117,18 @@ QString UpdateWorker::parse(QString json) const
 #else
     const QString OS = "windows";
 #endif
-    const QString LATEST = QJsonDocument::fromJson(json.toUtf8())
-                           .object()["1.3.0"]
-                           .toObject()[OS]
-                           .toObject()["version"].toString();
+    Q_UNUSED(OS);
+    const QJsonObject object = QJsonDocument::fromJson(json.toUtf8()).object();
+    QString LATEST = object["tag_name"].toString();
+    if (LATEST.isEmpty()) {
+        LATEST = object["name"].toString();
+    }
+    LATEST.remove(QRegularExpression("^v", QRegularExpression::CaseInsensitiveOption));
 
-    qDebug() << qPrintable(QString("Updater: v%1\n").arg(LATEST));
+    if (!LATEST.isEmpty()) {
+        qDebug() << qPrintable(QString("Updater: v%1\n").arg(LATEST));
+    } else {
+        qDebug() << "Updater: no release version found\n";
+    }
     return LATEST;
 }
