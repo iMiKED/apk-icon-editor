@@ -1,4 +1,5 @@
 %global app_version 3.0.0-beta1
+%global _missing_build_ids_terminate_build 0
 
 Name:           apk-icon-editor
 Version:        3.0.0
