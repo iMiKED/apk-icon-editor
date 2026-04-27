@@ -26,6 +26,7 @@ public:
 
     explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication);
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const QString &adaptiveXmlPath, const QString &adaptiveForegroundRef, Type type = Unknown, Scope scope = ScopeApplication);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -68,11 +69,15 @@ signals:
 
 private:
     void applyEffects();
+    bool patchAdaptiveForeground() const;
 
     QPixmap pixmap;   ///< Stores the pixmap itself.
+    QPixmap originalPixmap;
     QPixmap pixmapFx; ///< Stores the pixmap with effects applied.
     QString filePath; ///< Stores the pixmap original filename. Used to revert the original pixmap.
     QStringList saveTargets;
+    QString adaptiveXmlPath;
+    QString adaptiveForegroundRef;
     QStringList qualifiers;
     Type type;
     Scope scope;

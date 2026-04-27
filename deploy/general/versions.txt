@@ -12,6 +12,7 @@
 * Added Android VectorDrawable foreground rendering for adaptive XML launcher icons.
 * Prevented rendered adaptive/vector previews from overwriting XML resources when saving unchanged icons.
 * Fixed exporting adaptive/vector icon previews with Save Icon.
+* Added initial adaptive icon write-back by creating custom bitmap foreground layers for vector/XML foregrounds during APK packing.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

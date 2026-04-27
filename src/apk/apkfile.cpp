@@ -1,6 +1,7 @@
 #include "apkfile.h"
 #include "adaptiveicon.h"
 #include <QDirIterator>
+#include <QFileInfo>
 #include <QTextStream>
 #include <QDebug>
 
@@ -217,10 +218,21 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         }
 
         QStringList saveTargets;
+        QString adaptiveForegroundRef;
         if (!result.foregroundPath.isEmpty()) {
             saveTargets.append(result.foregroundPath);
+        } else {
+            const QString qualifier = ResourceResolver::qualifierForType(type);
+            const int resIndex = result.xmlPath.indexOf("/res/");
+            if (!qualifier.isEmpty() && resIndex >= 0) {
+                const QString contentsRoot = result.xmlPath.left(resIndex);
+                const QString customName = iconRef.name() + "_foreground_custom";
+                const QString resourceType = iconRef.type().isEmpty() ? "mipmap" : iconRef.type();
+                saveTargets.append(QString("%1/res/%2-%3/%4.png").arg(contentsRoot, resourceType, qualifier, customName));
+                adaptiveForegroundRef = QString("@%1/%2").arg(resourceType, customName);
+            }
         }
-        iconsModel.add(result.xmlPath, result.pixmap, saveTargets, type, scope);
+        iconsModel.add(result.xmlPath, result.pixmap, saveTargets, result.xmlPath, adaptiveForegroundRef, type, scope);
         added = true;
     }
 

@@ -14,6 +14,7 @@ public:
 
     void add(const QString &filename, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication);
     void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication);
+    void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const QString &adaptiveXmlPath, const QString &adaptiveForegroundRef, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication);
     bool remove(Icon *icon);
     void clone(Icon *source);
     void save();

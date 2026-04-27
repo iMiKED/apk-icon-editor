@@ -13,6 +13,7 @@ public:
         QPixmap pixmap;
         QString xmlPath;
         QString foregroundPath;
+        QString foregroundRef;
         QString backgroundPath;
         QColor backgroundColor;
         Icon::Type type = Icon::Unknown;

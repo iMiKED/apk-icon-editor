@@ -1,8 +1,24 @@
 #include "icon.h"
 #include <QDir>
+#include <QDomDocument>
+#include <QFile>
 #include <QFileInfo>
 #include <QPainter>
 #include <QLabel>
+#include <QTextStream>
+#include <QDebug>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
+
+static void setUtf8Encoding(QTextStream &stream)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    stream.setEncoding(QStringConverter::Utf8);
+#else
+    stream.setCodec("UTF-8");
+#endif
+}
 
 Icon::Icon(QString filename, Type type, Scope scope)
 {
@@ -62,7 +78,15 @@ Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTarge
     }
     this->saveTargets = saveTargets;
     virtualIcon = true;
+    originalPixmap = pixmap;
     setPixmap(pixmap);
+}
+
+Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const QString &adaptiveXmlPath, const QString &adaptiveForegroundRef, Type type, Scope scope)
+    : Icon(filename, pixmap, saveTargets, type, scope)
+{
+    this->adaptiveXmlPath = adaptiveXmlPath;
+    this->adaptiveForegroundRef = adaptiveForegroundRef;
 }
 
 bool Icon::load(QString filename)
@@ -98,6 +122,9 @@ bool Icon::save(QString filename)
     foreach (const QString &target, targets) {
         QDir().mkpath(QFileInfo(target).absolutePath());
         result = getPixmap().save(target, NULL, 100) && result;
+    }
+    if (result && !adaptiveXmlPath.isEmpty() && !adaptiveForegroundRef.isEmpty()) {
+        result = patchAdaptiveForeground();
     }
     return result;
 }
@@ -136,7 +163,7 @@ bool Icon::revert()
     depth      = 1.0;
     blur       = 1.0;
     corners    = 0;
-    setPixmap(QPixmap(filePath));
+    setPixmap(virtualIcon ? originalPixmap : QPixmap(filePath));
     modified = false;
     emit updated();
     return !pixmap.isNull();
@@ -286,4 +313,44 @@ void Icon::applyEffects()
     if (isFlipX) { pixmapFx = pixmapFx.transformed(QTransform().scale(-1, 1)); }
     if (isFlipY) { pixmapFx = pixmapFx.transformed(QTransform().scale(1, -1)); }
     if (angle) { pixmapFx = pixmapFx.transformed(QTransform().rotate(angle)); }
+}
+
+bool Icon::patchAdaptiveForeground() const
+{
+    QFile file(adaptiveXmlPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning() << "Error: Could not open adaptive icon XML:" << adaptiveXmlPath;
+        return false;
+    }
+
+    QTextStream in(&file);
+    setUtf8Encoding(in);
+    QDomDocument doc;
+    if (!doc.setContent(in.readAll())) {
+        qWarning() << "Error: Could not parse adaptive icon XML:" << adaptiveXmlPath;
+        return false;
+    }
+    file.close();
+
+    QDomElement root = doc.documentElement();
+    if (root.tagName() != "adaptive-icon") {
+        return false;
+    }
+
+    QDomElement foreground = root.firstChildElement("foreground");
+    if (foreground.isNull()) {
+        foreground = doc.createElement("foreground");
+        root.appendChild(foreground);
+    }
+    foreground.setAttribute("android:drawable", adaptiveForegroundRef);
+
+    if (!file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        qWarning() << "Error: Could not save adaptive icon XML:" << adaptiveXmlPath;
+        return false;
+    }
+
+    QTextStream out(&file);
+    setUtf8Encoding(out);
+    doc.save(out, 4);
+    return true;
 }

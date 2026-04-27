@@ -58,6 +58,7 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     result.pixmap = pixmap;
     result.xmlPath = xml.filePath;
     result.foregroundPath = foreground.isBitmap ? foreground.filePath : QString();
+    result.foregroundRef = foregroundRef.original();
     result.backgroundPath = background.filePath;
     result.backgroundColor = background.color;
     result.type = type;
