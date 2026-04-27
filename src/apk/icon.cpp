@@ -174,6 +174,11 @@ QString Icon::getFilename() const
     return filePath;
 }
 
+QString Icon::getAdaptiveXmlPath() const
+{
+    return adaptiveXmlPath;
+}
+
 Icon::Type Icon::getType() const
 {
     return type;
@@ -182,6 +187,11 @@ Icon::Type Icon::getType() const
 Icon::Scope Icon::getScope() const
 {
     return scope;
+}
+
+bool Icon::isAdaptiveIcon() const
+{
+    return !adaptiveXmlPath.isEmpty();
 }
 
 QString Icon::getTitle() const

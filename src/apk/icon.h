@@ -36,8 +36,10 @@ public:
     QString getTitle() const;                       ///< Returns the user-friendly icon title.
     QPixmap getPixmap();                            ///< Returns the icon with the applied visual effects.
     QString getFilename() const;                    ///< Returns the icon filename.
+    QString getAdaptiveXmlPath() const;
     Type getType() const;
     Scope getScope() const;
+    bool isAdaptiveIcon() const;
 
     bool revert();                                  ///< Reverts the original icon (loaded from the original filename).
     int width() const { return pixmap.width(); }    ///< Returns the icon width.

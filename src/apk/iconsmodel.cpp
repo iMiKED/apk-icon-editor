@@ -110,6 +110,22 @@ void IconsModel::clone(Icon *source)
     }
 }
 
+void IconsModel::updateAdaptiveFamily(Icon *source)
+{
+    if (!source || !source->isAdaptiveIcon()) {
+        return;
+    }
+
+    const QString xmlPath = source->getAdaptiveXmlPath();
+    const QPixmap sourcePixmap = source->getPixmap();
+    foreach (Icon *icon, icons) {
+        if (icon == source || icon->getAdaptiveXmlPath() != xmlPath || icon->getType() == Icon::Unknown) {
+            continue;
+        }
+        icon->replace(sourcePixmap.scaled(icon->width(), icon->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    }
+}
+
 void IconsModel::save()
 {
     foreach (Icon *icon, icons) {

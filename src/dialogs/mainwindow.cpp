@@ -936,6 +936,7 @@ bool MainWindow::icon_open(QString filename)
                 return false;
             }
         }
+        apk->iconsModel.updateAdaptiveFamily(icon);
         setWindowModified(true);
         return true;
     }
