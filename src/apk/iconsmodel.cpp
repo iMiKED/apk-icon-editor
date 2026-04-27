@@ -33,6 +33,29 @@ void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope
     emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
 }
 
+void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type, Icon::Scope scope)
+{
+    const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
+    qDebug() << qPrintable(QString("Added adaptive %1 icon: %2").arg(scopeStr, filename));
+    beginInsertRows(QModelIndex(), icons.count(), icons.count());
+        Icon *icon = new Icon(filename, pixmap, saveTargets, type, scope);
+        icons.append(icon);
+        connect(icon, &Icon::updated, [=]() {
+            QModelIndex index = this->index(icons.indexOf(icon), 0);
+            emit dataChanged(index, index);
+        });
+    endInsertRows();
+
+    std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
+        if (a->getScope() != b->getScope()) {
+            return a->getScope() < b->getScope();
+        } else {
+            return a->getType() < b->getType();
+        }
+    });
+    emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
+}
+
 bool IconsModel::remove(Icon *icon)
 {
     QMutableListIterator<Icon *> it(icons);

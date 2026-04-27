@@ -14,6 +14,7 @@ public:
     QDomAttr getXmlAttribute(QStringList &tree) const;
 
     QString getApplicationIcon() const;
+    QString getApplicationRoundIcon() const;
     QString getApplicationBanner() const;
     QString getApplicationLabel() const;
     QStringList getActivityIcons() const;
@@ -46,6 +47,7 @@ private:
     QString yml;
 
     QDomAttr applicationIcon;
+    QDomAttr applicationRoundIcon;
     QDomAttr applicationBanner;
     QDomAttr applicationLabel;
     QList<QDomAttr> activityIcons;

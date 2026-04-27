@@ -25,6 +25,7 @@ public:
     };
 
     explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -71,9 +72,12 @@ private:
     QPixmap pixmap;   ///< Stores the pixmap itself.
     QPixmap pixmapFx; ///< Stores the pixmap with effects applied.
     QString filePath; ///< Stores the pixmap original filename. Used to revert the original pixmap.
+    QStringList saveTargets;
     QStringList qualifiers;
     Type type;
     Scope scope;
+    bool modified;
+    bool virtualIcon;
 
     bool isColorize;  ///< Stores the "Colorize" effect state.
     bool isFlipX;     ///< Stores the horizontal flipping state.

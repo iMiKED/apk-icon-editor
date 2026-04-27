@@ -31,6 +31,7 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 
         applicationLabel = getXmlAttribute(QStringList() << "application" << "android:label");
         applicationIcon = getXmlAttribute(QStringList() << "application" << "android:icon");
+        applicationRoundIcon = getXmlAttribute(QStringList() << "application" << "android:roundIcon");
         applicationBanner = getXmlAttribute(QStringList() << "application" << "android:banner");
 
         // Parse <activity> nodes:
@@ -44,9 +45,32 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
                 if (!icon.isNull()) {
                     activityIcons.append(icon);
                 }
+                QDomAttr roundIcon = activity.attributeNode("android:roundIcon");
+                if (!roundIcon.isNull()) {
+                    activityIcons.append(roundIcon);
+                }
                 QDomAttr banner = activity.attributeNode("android:banner");
                 if (!banner.isNull()) {
                     activityBanners.append(banner);
+                }
+            }
+            if (node.isElement() && node.nodeName() == "activity-alias") {
+                QDomElement activity = node.toElement();
+                const bool enabled = activity.attribute("android:enabled", "true") != "false";
+                const bool launcher = !findIntentByCategory(activity, "LAUNCHER").isNull();
+                if (enabled && launcher) {
+                    QDomAttr icon = activity.attributeNode("android:icon");
+                    if (!icon.isNull()) {
+                        activityIcons.append(icon);
+                    }
+                    QDomAttr roundIcon = activity.attributeNode("android:roundIcon");
+                    if (!roundIcon.isNull()) {
+                        activityIcons.append(roundIcon);
+                    }
+                    QDomAttr banner = activity.attributeNode("android:banner");
+                    if (!banner.isNull()) {
+                        activityBanners.append(banner);
+                    }
                 }
             }
         }
@@ -106,6 +130,11 @@ QDomAttr Manifest::getXmlAttribute(QStringList &tree) const
 QString Manifest::getApplicationIcon() const
 {
     return applicationIcon.value();
+}
+
+QString Manifest::getApplicationRoundIcon() const
+{
+    return applicationRoundIcon.value();
 }
 
 QString Manifest::getApplicationBanner() const

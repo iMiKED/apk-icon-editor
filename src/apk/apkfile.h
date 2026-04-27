@@ -6,6 +6,8 @@
 #include "manifestmodel.h"
 #include "titlesmodel.h"
 #include "device.h"
+#include "resourceref.h"
+#include "resourceresolver.h"
 #include <QDomDocument>
 
 namespace Apk {
@@ -58,6 +60,7 @@ namespace Apk {
 
     private:
         QString getIconPath(Icon::Type type);
+        bool addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope);
 
         QString filePath;     ///< APK filename.
         QString contentsPath; ///< Path to APK contents directory.

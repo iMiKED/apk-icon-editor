@@ -4,7 +4,7 @@ CONFIG += c++11
 
 TARGET = apk-icon-editor
 VERSION = 3.0.0
-APP_VERSION = 3.0.0-beta1
+APP_VERSION = 3.0.0-beta2
 
 QMAKE_TARGET_PRODUCT = APK Icon Editor
 QMAKE_TARGET_COMPANY = Alexander Gorishnyak / iMiKED

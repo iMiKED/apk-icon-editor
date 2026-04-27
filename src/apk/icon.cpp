@@ -8,6 +8,8 @@ Icon::Icon(QString filename, Type type, Scope scope)
 {
     this->type = type;
     this->scope = scope;
+    modified = false;
+    virtualIcon = false;
 
     qualifiers = QFileInfo(filename).path().split('/').last().split('-').mid(1);
 
@@ -41,6 +43,28 @@ Icon::Icon(QString filename, Type type, Scope scope)
     load(filename);
 }
 
+Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type, Scope scope)
+    : Icon(filename, type, scope)
+{
+    qualifiers.clear();
+    QString dpi;
+    switch (type) {
+        case Ldpi: dpi = "ldpi"; break;
+        case Mdpi: dpi = "mdpi"; break;
+        case Hdpi: dpi = "hdpi"; break;
+        case Xhdpi: dpi = "xhdpi"; break;
+        case Xxhdpi: dpi = "xxhdpi"; break;
+        case Xxxhdpi: dpi = "xxxhdpi"; break;
+        default: break;
+    }
+    if (!dpi.isEmpty()) {
+        qualifiers.append(dpi);
+    }
+    this->saveTargets = saveTargets;
+    virtualIcon = true;
+    setPixmap(pixmap);
+}
+
 bool Icon::load(QString filename)
 {
     filePath = filename;
@@ -53,11 +77,25 @@ bool Icon::save(QString filename)
         // Don't save an empty icon (but don't throw error).
         return true;
     }
+    if (virtualIcon && saveTargets.isEmpty()) {
+        return true;
+    }
+    if (!saveTargets.isEmpty() && !modified) {
+        return true;
+    }
     if (filename.isEmpty()) {
         filename = filePath;
     }
-    QDir().mkpath(QFileInfo(filename).absolutePath());
-    return getPixmap().save(filename, NULL, 100);
+    QStringList targets = saveTargets;
+    if (targets.isEmpty()) {
+        targets.append(filename);
+    }
+    bool result = true;
+    foreach (const QString &target, targets) {
+        QDir().mkpath(QFileInfo(target).absolutePath());
+        result = getPixmap().save(target, NULL, 100) && result;
+    }
+    return result;
 }
 
 bool Icon::replace(QPixmap pixmap)
@@ -66,6 +104,7 @@ bool Icon::replace(QPixmap pixmap)
         return false;
     }
     setPixmap(pixmap);
+    modified = true;
     emit updated();
     return true;
 }
@@ -73,6 +112,7 @@ bool Icon::replace(QPixmap pixmap)
 bool Icon::resize(QSize size)
 {
     setPixmap(pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    modified = true;
     emit updated();
     return !pixmap.isNull();
 }
@@ -93,6 +133,7 @@ bool Icon::revert()
     blur       = 1.0;
     corners    = 0;
     setPixmap(QPixmap(filePath));
+    modified = false;
     emit updated();
     return !pixmap.isNull();
 }
@@ -140,48 +181,56 @@ void Icon::setPixmap(const QPixmap &pixmap)
 void Icon::setAngle(int value)
 {
     angle = value;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setColorize(bool enable)
 {
     isColorize = enable;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setFlipX(bool value)
 {
     isFlipX = value;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setFlipY(bool value)
 {
     isFlipY = value;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setColor(QColor value)
 {
     color = value;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setDepth(qreal value)
 {
     depth = value;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setBlur(qreal radius)
 {
     blur = radius;
+    modified = true;
     applyEffects();
 }
 
 void Icon::setCorners(qreal radius)
 {
     corners = radius;
+    modified = true;
     applyEffects();
 }
 

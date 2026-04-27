@@ -1,6 +1,8 @@
 #include "apkfile.h"
+#include "adaptiveicon.h"
 #include <QDirIterator>
 #include <QTextStream>
+#include <QDebug>
 
 Apk::File::File(const QString &contentsPath)
 {
@@ -13,6 +15,7 @@ Apk::File::File(const QString &contentsPath)
     manifest = new Manifest(contentsPath + "/AndroidManifest.xml", contentsPath + "/apktool.yml");
     manifestModel.initialize(manifest);
     const QString appIconAttribute = manifest->getApplicationIcon();
+    const QString appRoundIconAttribute = manifest->getApplicationRoundIcon();
     const QString appIconCategory = appIconAttribute.split('/').value(0).mid(1);
     const QString appIconFilename = appIconAttribute.split('/').value(1);
     const QString appBannerAttribute = manifest->getApplicationBanner();
@@ -25,7 +28,16 @@ Apk::File::File(const QString &contentsPath)
 
     // Parse resource directories:
 
-    const QStringList drawableExtensions = QStringList() << "png" << "jpg" << "gif";
+    ResourceResolver resolver(contentsPath);
+    const bool appAdaptiveIcon = addAdaptiveIcons(resolver, ResourceRef(appIconAttribute), Icon::ScopeApplication);
+    if (!appAdaptiveIcon && !appRoundIconAttribute.isEmpty()) {
+        addAdaptiveIcons(resolver, ResourceRef(appRoundIconAttribute), Icon::ScopeApplication);
+    }
+    foreach (const QString &activityIconAttribute, activityIcons) {
+        addAdaptiveIcons(resolver, ResourceRef(activityIconAttribute), Icon::ScopeActivity);
+    }
+
+    const QStringList drawableExtensions = QStringList() << "png" << "jpg" << "jpeg" << "gif" << "webp";
     QDirIterator categories(contentsPath + "/res/", QDir::Dirs | QDir::NoDotAndDotDot);
     while (categories.hasNext()) {
 
@@ -41,7 +53,7 @@ Apk::File::File(const QString &contentsPath)
 
                 // Parse application icons:
 
-                if (categoryTitle == appIconCategory) {
+                if (!appAdaptiveIcon && categoryTitle == appIconCategory) {
                     if (resource.baseName() == appIconFilename) {
                         const QString icon = resource.filePath();
                         thumbnail.addFile(icon);
@@ -166,11 +178,74 @@ void Apk::File::removeIcon(Icon *icon)
     QFileInfo fi(icon->getFilename());
     QString filePath = fi.path() + "/" + fi.baseName();
     QStringList icons;
-    icons << filePath + ".png" << filePath + ".jpg" << filePath + ".gif";
+    icons << filePath + ".png" << filePath + ".jpg" << filePath + ".jpeg" << filePath + ".gif" << filePath + ".webp";
     foreach (const QString &icon, icons) {
         QFile::remove(icon);
     }
     iconsModel.remove(icon);
+}
+
+bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope)
+{
+    if (!iconRef.isValid()) {
+        return false;
+    }
+
+    if (!resolver.resolveXml(iconRef).found) {
+        return false;
+    }
+
+    bool added = false;
+    const QList<Icon::Type> types = QList<Icon::Type>()
+            << Icon::Ldpi
+            << Icon::Mdpi
+            << Icon::Hdpi
+            << Icon::Xhdpi
+            << Icon::Xxhdpi
+            << Icon::Xxxhdpi;
+
+    Device device;
+    foreach (Icon::Type type, types) {
+        const QSize size = device.getIconSize(type).size;
+        const AdaptiveIcon::Result result = AdaptiveIcon::resolve(resolver, iconRef, type, size);
+        if (!result.valid) {
+            continue;
+        }
+
+        if (scope == Icon::ScopeApplication) {
+            thumbnail.addPixmap(result.pixmap);
+        }
+
+        QStringList saveTargets;
+        if (!result.foregroundPath.isEmpty()) {
+            saveTargets.append(result.foregroundPath);
+        }
+        iconsModel.add(result.xmlPath, result.pixmap, saveTargets, type, scope);
+        added = true;
+    }
+
+    if (!added) {
+        QStringList addedFiles;
+        const QList<ResourceResolver::Candidate> bitmapFallbacks = resolver.bitmapCandidatesByName(iconRef.name());
+        foreach (const ResourceResolver::Candidate &fallback, bitmapFallbacks) {
+            if (addedFiles.contains(fallback.filePath)) {
+                continue;
+            }
+
+            if (scope == Icon::ScopeApplication) {
+                thumbnail.addFile(fallback.filePath);
+            }
+
+            iconsModel.add(fallback.filePath, fallback.type, scope);
+            addedFiles.append(fallback.filePath);
+            added = true;
+        }
+    }
+
+    if (!added) {
+        qDebug() << "Adaptive icon was found but could not be rendered:" << iconRef.original();
+    }
+    return added;
 }
 
 // Getters:

@@ -1,7 +1,22 @@
 # Version History
 
+## 3.0.0-beta2
+
+* Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.
+* Added adaptive icon preview composition from foreground and background resources.
+* Added WebP launcher image detection for decoded APK resources.
+* Added roundIcon and activity-alias icon parsing for launcher icon fallbacks.
+* Fixed adaptive XML icon list titles and ignored disabled activity-alias icons.
+* Fixed adaptive XML background color resolution from Apktool-decoded values resources.
+* Added Qt WebP image format plugin for WebP launcher icon resources.
+* Fixed adaptive XML fallback detection when Apktool decodes vector foregrounds and bitmap launcher fallbacks into different resource directories.
+* Added Android VectorDrawable foreground rendering for adaptive XML launcher icons.
+* Prevented rendered adaptive/vector previews from overwriting XML resources when saving unchanged icons.
+
 ## 3.0.0-beta1
+
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
+
 * Migrated Windows builds to *MSVC 2022 x64*.
 * Added fork author information.
 * Fixed FAQ opening on Windows, macOS, and Linux.
@@ -9,17 +24,29 @@
 * Fixed parsing of Apktool 3.x SDK and version metadata in APK properties.
 * Fixed APK packing on Windows by closing manifest files before running Apktool.
 * Added visible packing/unpacking progress log.
+
 * Synchronized displayed application version with the *v3.0.0-beta1* prerelease tag.
+
 * Fixed update checks to include GitHub prereleases.
+
 * Prepared Linux Debian and macOS packaging metadata for Qt 6.8 builds.
+
 * Updated fork metadata links used by FAQ, installers, and platform bundles.
+
 * Added RPM packaging files for Fedora and Red Hat compatible distributions.
+
 * Added GitHub Actions builds for Windows, Linux, RPM, and macOS artifacts.
+
 * Fixed continuous integration build settings for SimpleCrypt and CI credentials.
+
 * Fixed macOS Java detection and replaced the bundled macOS zipalign during CI packaging.
+
 * Simplified Linux release asset names and stopped uploading source RPM artifacts.
+
 * Improved macOS Java lookup for Finder-launched application bundles and APK signing.
+
 * Added separate macOS Apple Silicon arm64 release artifacts.
+
 
 ## 2.2.0
 * Added *Android 9 Pie* support.

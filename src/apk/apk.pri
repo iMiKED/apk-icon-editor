@@ -5,11 +5,15 @@ SOURCES += $$PWD/apk.cpp \
            $$PWD/apkpacker.cpp \
            $$PWD/apkunpacker.cpp \
            $$PWD/apkmanager.cpp \
+           $$PWD/androidvectorrenderer.cpp \
+           $$PWD/adaptiveicon.cpp \
            $$PWD/manifest.cpp \
            $$PWD/manifestmodel.cpp \
            $$PWD/icon.cpp \
            $$PWD/iconsmodel.cpp \
            $$PWD/iconsproxy.cpp \
+           $$PWD/resourceref.cpp \
+           $$PWD/resourceresolver.cpp \
            $$PWD/device.cpp \
            $$PWD/devicemodel.cpp \
            $$PWD/titlenode.cpp \
@@ -20,11 +24,15 @@ HEADERS += $$PWD/apk.h \
            $$PWD/apkpacker.h \
            $$PWD/apkunpacker.h \
            $$PWD/apkmanager.h \
+           $$PWD/androidvectorrenderer.h \
+           $$PWD/adaptiveicon.h \
            $$PWD/manifest.h \
            $$PWD/manifestmodel.h \
            $$PWD/icon.h \
            $$PWD/iconsmodel.h \
            $$PWD/iconsproxy.h \
+           $$PWD/resourceref.h \
+           $$PWD/resourceresolver.h \
            $$PWD/device.h \
            $$PWD/devicemodel.h \
            $$PWD/titlenode.h \
