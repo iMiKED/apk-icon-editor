@@ -14,6 +14,7 @@
 * Fixed exporting adaptive/vector icon previews with Save Icon.
 * Added initial adaptive icon write-back by creating custom bitmap foreground layers for vector/XML foregrounds during APK packing.
 * Synchronized adaptive XML icon replacement across all density previews that share the same adaptive icon resource.
+* Updated bundled apksigner and enabled v1/v2/v3 signature schemes explicitly for APK signing.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

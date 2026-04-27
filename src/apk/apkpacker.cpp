@@ -233,7 +233,11 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
     QStringList args;
     if (isApksigner) {
         args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
-             << "sign" << "--key" << pk8 << "--cert" << pem << apkPath;
+             << "sign"
+             << "--v1-signing-enabled" << "true"
+             << "--v2-signing-enabled" << "true"
+             << "--v3-signing-enabled" << "true"
+             << "--key" << pk8 << "--cert" << pem << apkPath;
     } else {
         args << "-jar" << Path::Data::shared() + "signer/signapk.jar"
              << pem << pk8 << apkPath << apkDest;
@@ -285,7 +289,11 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
     QStringList args;
     if (isApksigner) {
         args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
-             << "sign" << "--ks" << keystore << "--ks-key-alias" << alias
+             << "sign"
+             << "--v1-signing-enabled" << "true"
+             << "--v2-signing-enabled" << "true"
+             << "--v3-signing-enabled" << "true"
+             << "--ks" << keystore << "--ks-key-alias" << alias
              << "--ks-pass" << QString("pass:%1").arg(passKeystore)
              << "--key-pass" << QString("pass:%1").arg(passAlias)
              << apkPath;
