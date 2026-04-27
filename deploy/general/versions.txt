@@ -19,6 +19,7 @@
 * Fixed macOS Java detection and replaced the bundled macOS zipalign during CI packaging.
 * Simplified Linux release asset names and stopped uploading source RPM artifacts.
 * Improved macOS Java lookup for Finder-launched application bundles and APK signing.
+* Added separate macOS Apple Silicon arm64 release artifacts.
 
 ## 2.2.0
 * Added *Android 9 Pie* support.

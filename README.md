@@ -26,7 +26,7 @@ This repository is a fork of the original [APK Icon Editor](https://github.com/k
 - Install a full JDK instead of a JRE so `java` and `javac` are available in `PATH`.
 
 ## Build
-GitHub Actions can build release artifacts for Windows, Linux, Fedora/RHEL RPM, and macOS from `.github/workflows/build.yml`. Pushes and pull requests publish workflow artifacts; tag pushes matching `v*` also upload those artifacts to the matching GitHub Release.
+GitHub Actions can build release artifacts for Windows, Linux, Fedora/RHEL RPM, macOS Intel, and macOS Apple Silicon from `.github/workflows/build.yml`. Pushes and pull requests publish workflow artifacts; tag pushes matching `v*` also upload those artifacts to the matching GitHub Release.
 
 #### Windows
 - Install Qt 6.8.3 with the `msvc2022_64` component.

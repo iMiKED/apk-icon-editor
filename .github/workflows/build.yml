@@ -28,9 +28,14 @@ jobs:
           - name: Linux portable tar.gz and deb
             os: ubuntu-24.04
             target: linux
-          - name: macOS app zip and dmg
+          - name: macOS x86_64 app zip and dmg
             os: macos-15-intel
             target: macos
+            macos_suffix: _macos-x86_64
+          - name: macOS arm64 app zip and dmg
+            os: macos-15
+            target: macos
+            macos_suffix: _macos-arm64
 
     steps:
       - name: Checkout
@@ -111,6 +116,8 @@ jobs:
 
       - name: Build macOS
         if: matrix.target == 'macos'
+        env:
+          MACOS_ARTIFACT_SUFFIX: ${{ matrix.macos_suffix }}
         run: |
           chmod +x setup/macosx/BUILD.command
           setup/macosx/BUILD.command
@@ -119,10 +126,10 @@ jobs:
         if: matrix.target == 'macos'
         uses: actions/upload-artifact@v4
         with:
-          name: apk-icon-editor-${{ env.APP_VERSION }}-macos
+          name: apk-icon-editor-${{ env.APP_VERSION }}${{ matrix.macos_suffix }}
           path: |
-            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}.app.zip
-            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}.dmg
+            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}${{ matrix.macos_suffix }}.app.zip
+            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}${{ matrix.macos_suffix }}.dmg
 
   rpm:
     name: Linux RPM on Fedora
@@ -166,5 +173,7 @@ jobs:
             gh release create "$GITHUB_REF_NAME" --prerelease --title "$GITHUB_REF_NAME" --notes "Automated prerelease build."
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor-3.0.0-0.beta1.fc40.src.rpm" -y || true
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0.beta1-1_amd64.deb" -y || true
+          gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0-beta1.app.zip" -y || true
+          gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0-beta1.dmg" -y || true
           mapfile -d '' files < <(find dist -type f -print0)
           gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
