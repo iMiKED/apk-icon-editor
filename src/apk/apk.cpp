@@ -1,31 +1,63 @@
 #include "apk.h"
 #include "globals.h"
 #include "settings.h"
+#include <QDir>
+#include <QFileInfo>
 #include <QProcess>
+#include <QStandardPaths>
+
+namespace {
+
+QString javaExecutable(Java java)
+{
+    const QString name = java == JRE ? "java" : "javac";
+    const QString fromPath = QStandardPaths::findExecutable(name);
+    if (!fromPath.isEmpty()) {
+        return fromPath;
+    }
+
+    const QString javaHome = qgetenv("JAVA_HOME");
+    if (!javaHome.isEmpty()) {
+        const QString candidate = QDir(javaHome).filePath("bin/" + name);
+        if (QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+    }
+
+#ifdef Q_OS_OSX
+    QProcess javaHomeProcess;
+    javaHomeProcess.start("/usr/libexec/java_home", QStringList());
+    if (javaHomeProcess.waitForFinished(3000) && javaHomeProcess.exitCode() == 0) {
+        const QString detectedHome = QString::fromUtf8(javaHomeProcess.readAllStandardOutput()).trimmed();
+        const QString candidate = QDir(detectedHome).filePath("bin/" + name);
+        if (QFileInfo::exists(candidate)) {
+            return candidate;
+        }
+    }
+
+    if (java == JRE) {
+        const QString pluginJava = "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home/bin/java";
+        if (QFileInfo::exists(pluginJava)) {
+            return pluginJava;
+        }
+    }
+#endif
+
+    return QString();
+}
+
+}
 
 bool Apk::whichJava(Java java)
 {
-#ifdef Q_OS_OSX
-    QProcess p;
-    p.start(QString("which %1").arg(java == JRE ? "java" : "javac"));
-    if (p.waitForStarted()) {
-        p.waitForFinished();
-        return !p.readAllStandardOutput().trimmed().isEmpty();
-    }
-    else {
-        return false;
-    }
-#else
-    Q_UNUSED(java);
-    return true;
-#endif
+    return !javaExecutable(java).isEmpty();
 }
 
 QString Apk::getApktoolVersion()
 {
     if (whichJava(JRE)) {
         QProcess p;
-        p.start("java", QStringList() << "-jar" << Settings::get_apktool() << "-version");
+        p.start(javaExecutable(JRE), QStringList() << "-jar" << Settings::get_apktool() << "-version");
         if (p.waitForStarted(-1)) {
             p.waitForFinished(-1);
             return p.readAllStandardOutput().trimmed();
@@ -43,7 +75,7 @@ QString Apk::getJavaVersion(Java java)
 {
     if (whichJava(java)) {
         QProcess p;
-        p.start(java == JRE ? "java" : "javac", QStringList() << "-version");
+        p.start(javaExecutable(java), QStringList() << "-version");
         if (p.waitForStarted(-1)) {
             p.waitForFinished(-1);
             QString VERSION = p.readAllStandardError().replace("\r\n", "\n").trimmed();

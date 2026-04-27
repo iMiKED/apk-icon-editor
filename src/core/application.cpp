@@ -59,6 +59,20 @@ void Application::initEnv() const
     if (!JAVA_HOME.isEmpty()) {
         addToPath(JAVA_HOME + "/bin");
     }
+#ifdef Q_OS_OSX
+    const QStringList javaHomes = {
+        "/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/jdk-21.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home",
+        "/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home"
+    };
+    for (const QString &home : javaHomes) {
+        if (QFile::exists(home + "/bin/java")) {
+            addToPath(home + "/bin");
+        }
+    }
+#endif
 }
 
 bool Application::initLog() const

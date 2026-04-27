@@ -10,6 +10,8 @@ apk-icon-editor (3.0.0~beta1-1) unstable; urgency=low
   * Added RPM packaging files for Fedora and Red Hat compatible distributions.
   * Added GitHub Actions builds for Windows, Linux, RPM, and macOS artifacts.
   * Fixed continuous integration build settings for SimpleCrypt and CI credentials.
+  * Fixed macOS Java detection and replaced the bundled macOS zipalign during CI packaging.
+  * Simplified Linux release asset names and stopped uploading source RPM artifacts.
 
  -- iMiKED <imiked@users.noreply.github.com>  Sun, 26 Apr 2026 21:00:00 +0700
 

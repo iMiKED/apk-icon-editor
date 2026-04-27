@@ -42,7 +42,9 @@ GitHub Actions can build release artifacts for Windows, Linux, Fedora/RHEL RPM, 
 
 #### macOS
 - Install Qt 6.8.3 for macOS and Xcode 15 or newer.
+- Install Android SDK Build Tools so the package includes a current 64-bit `zipalign`.
 - The build script uses `~/Qt/6.8.3/macos/bin` by default; set `QT_BIN=/path/to/Qt/bin` to override it.
+- Set `MACOS_ZIPALIGN=/path/to/zipalign` if `zipalign` is not available in `PATH`.
 - Run `setup/macosx/BUILD.command` to build and package the app bundle.
 
 ## Notice

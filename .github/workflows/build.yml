@@ -80,7 +80,7 @@ jobs:
         run: |
           ./setup/linux/deb/build.sh
           mkdir -p artifacts/deb
-          cp ../apk-icon-editor_*.deb artifacts/deb/
+          cp ../apk-icon-editor_*.deb "artifacts/deb/apk-icon-editor_${APP_VERSION}_amd64.deb"
 
       - name: Build Linux portable package
         if: matrix.target == 'linux'
@@ -104,7 +104,10 @@ jobs:
 
       - name: Install macOS packaging tools
         if: matrix.target == 'macos'
-        run: npm install -g appdmg
+        run: |
+          npm install -g appdmg
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;35.0.0"
+          echo "MACOS_ZIPALIGN=$ANDROID_HOME/build-tools/35.0.0/zipalign" >> "$GITHUB_ENV"
 
       - name: Build macOS
         if: matrix.target == 'macos'
@@ -140,9 +143,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: apk-icon-editor-${{ env.APP_VERSION }}-rpm
-          path: |
-            setup/linux/rpm/build/RPMS/**/*.rpm
-            setup/linux/rpm/build/SRPMS/*.rpm
+          path: setup/linux/rpm/build/RPMS/**/*.rpm
 
   release:
     name: Upload release assets
@@ -163,5 +164,7 @@ jobs:
         run: |
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
             gh release create "$GITHUB_REF_NAME" --prerelease --title "$GITHUB_REF_NAME" --notes "Automated prerelease build."
+          gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor-3.0.0-0.beta1.fc40.src.rpm" -y || true
+          gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0.beta1-1_amd64.deb" -y || true
           mapfile -d '' files < <(find dist -type f -print0)
           gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber
