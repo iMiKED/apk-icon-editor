@@ -11,6 +11,7 @@
 * Fixed adaptive XML fallback detection when Apktool decodes vector foregrounds and bitmap launcher fallbacks into different resource directories.
 * Added Android VectorDrawable foreground rendering for adaptive XML launcher icons.
 * Prevented rendered adaptive/vector previews from overwriting XML resources when saving unchanged icons.
+* Fixed exporting adaptive/vector icon previews with Save Icon.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

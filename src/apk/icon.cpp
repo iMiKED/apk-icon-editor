@@ -77,18 +77,22 @@ bool Icon::save(QString filename)
         // Don't save an empty icon (but don't throw error).
         return true;
     }
+
+    const bool explicitExport = !filename.isEmpty();
+    if (explicitExport) {
+        QDir().mkpath(QFileInfo(filename).absolutePath());
+        return getPixmap().save(filename, NULL, 100);
+    }
+
     if (virtualIcon && saveTargets.isEmpty()) {
         return true;
     }
     if (!saveTargets.isEmpty() && !modified) {
         return true;
     }
-    if (filename.isEmpty()) {
-        filename = filePath;
-    }
     QStringList targets = saveTargets;
     if (targets.isEmpty()) {
-        targets.append(filename);
+        targets.append(filePath);
     }
     bool result = true;
     foreach (const QString &target, targets) {
