@@ -6,16 +6,34 @@ This repository is a fork of the original [APK Icon Editor](https://github.com/k
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/iMiKED/apk-icon-editor/blob/master/LICENSE)
 
 ## Description
-**APK Icon Editor** is a cross-platform APK editor designed to easily edit and replace APK resources such as icons, strings, images, application name and version, etc. Written in C++/Qt.
+**APK Icon Editor** is a cross-platform APK editor designed to edit and replace APK resources such as icons, strings, images, application name and version. This fork modernizes the original Qt application for current build toolchains and adds beta support for adaptive XML launcher icons decoded by Apktool.
 
 ## Features
-- Edit, replace and extract APK icons;
+- Edit, replace and extract APK icons, including classic bitmap launcher icons and adaptive XML launcher icons;
+- Preview adaptive icons composed from XML foreground and background resources;
+- Render common Android VectorDrawable foreground layers used by adaptive icons;
 - Edit application name, version and resources;
 - Sign and optimize APK;
-- Supported image formats: PNG, ICO, GIF, JPG, BMP;
+- Supported image formats: PNG, ICO, GIF, JPG, BMP, WebP;
+- Parse application `roundIcon`, launcher activity aliases, and activity icon fallbacks;
 - Size presets for devices: *Android*, *BlackBerry*, *Amazon Kindle Fire*;
 - Cloud storage upload: *Dropbox*, *Google Drive*, *Microsoft OneDrive*;
 - Multilingual interface.
+
+## 3.0.0 Beta Status
+The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta2` focuses on adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, color backgrounds are supported, WebP launcher layers are loaded through Qt image plugins, and vector foreground previews are rendered in-app.
+
+Adaptive/vector previews are currently intended for display and safe inspection. Unchanged rendered previews are not written back over XML resources.
+
+## Release Artifacts
+GitHub Actions are prepared to build the following packages:
+
+- Windows x64 portable ZIP built with MSVC 2022 and Qt 6.8.
+- Linux x86_64 portable `tar.gz`.
+- Debian/Ubuntu `amd64` DEB package.
+- Fedora/RHEL-compatible RPM package.
+- macOS Intel x86_64 app ZIP and DMG.
+- macOS Apple Silicon arm64 app ZIP and DMG.
 
 ## Requirements
 #### Recommended:
