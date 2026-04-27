@@ -10,6 +10,7 @@ enum Java { JRE, JDK };
 namespace Apk {
 
     bool isJavaInstalled();            ///< Returns \c true if Java (JRE or JDK) is installed.
+    QString getJavaPath(Java java);    ///< Returns the path to a Java executable.
     QString getJavaVersion(Java java); ///< Returns Java version.
     QString getJreVersion();           ///< Returns JRE version.
     QString getJdkVersion();           ///< Returns JDK version.

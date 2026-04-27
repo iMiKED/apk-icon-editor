@@ -6,9 +6,7 @@
 #include <QProcess>
 #include <QStandardPaths>
 
-namespace {
-
-QString javaExecutable(Java java)
+QString Apk::getJavaPath(Java java)
 {
     const QString name = java == JRE ? "java" : "javac";
     const QString fromPath = QStandardPaths::findExecutable(name);
@@ -46,18 +44,16 @@ QString javaExecutable(Java java)
     return QString();
 }
 
-}
-
 bool Apk::whichJava(Java java)
 {
-    return !javaExecutable(java).isEmpty();
+    return !getJavaPath(java).isEmpty();
 }
 
 QString Apk::getApktoolVersion()
 {
     if (whichJava(JRE)) {
         QProcess p;
-        p.start(javaExecutable(JRE), QStringList() << "-jar" << Settings::get_apktool() << "-version");
+        p.start(getJavaPath(JRE), QStringList() << "-jar" << Settings::get_apktool() << "-version");
         if (p.waitForStarted(-1)) {
             p.waitForFinished(-1);
             return p.readAllStandardOutput().trimmed();
@@ -75,7 +71,7 @@ QString Apk::getJavaVersion(Java java)
 {
     if (whichJava(java)) {
         QProcess p;
-        p.start(javaExecutable(java), QStringList() << "-version");
+        p.start(getJavaPath(java), QStringList() << "-version");
         if (p.waitForStarted(-1)) {
             p.waitForFinished(-1);
             QString VERSION = p.readAllStandardError().replace("\r\n", "\n").trimmed();

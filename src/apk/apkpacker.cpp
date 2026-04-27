@@ -229,6 +229,7 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
         }
     });
 
+    const QString java = getJavaPath(JRE);
     QStringList args;
     if (isApksigner) {
         args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
@@ -237,7 +238,7 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
         args << "-jar" << Path::Data::shared() + "signer/signapk.jar"
              << pem << pk8 << apkPath << apkDest;
     }
-    signer->start("java", args);
+    signer->start(java.isEmpty() ? "java" : java, args);
 }
 
 void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
@@ -288,7 +289,8 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
              << "--ks-pass" << QString("pass:%1").arg(passKeystore)
              << "--key-pass" << QString("pass:%1").arg(passAlias)
              << apkPath;
-        signer->start("java", args);
+        const QString java = getJavaPath(JRE);
+        signer->start(java.isEmpty() ? "java" : java, args);
     } else {
         args << "-verbose" << "-sigalg" << "SHA1withRSA" << "-digestalg" << "SHA1"
              << "-keystore" << keystore << apkPath << "-storepass" << passKeystore

@@ -55,6 +55,12 @@ void Application::addToPath(QString path, bool append) const
 void Application::initEnv() const
 {
     addToPath(Path::App::dir(), false);
+#ifdef Q_OS_OSX
+    addToPath("/usr/bin");
+    addToPath("/bin");
+    addToPath("/usr/sbin");
+    addToPath("/sbin");
+#endif
     const QString JAVA_HOME = qgetenv("JAVA_HOME");
     if (!JAVA_HOME.isEmpty()) {
         addToPath(JAVA_HOME + "/bin");

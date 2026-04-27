@@ -18,6 +18,7 @@
 * Fixed continuous integration build settings for SimpleCrypt and CI credentials.
 * Fixed macOS Java detection and replaced the bundled macOS zipalign during CI packaging.
 * Simplified Linux release asset names and stopped uploading source RPM artifacts.
+* Improved macOS Java lookup for Finder-launched application bundles and APK signing.
 
 ## 2.2.0
 * Added *Android 9 Pie* support.
