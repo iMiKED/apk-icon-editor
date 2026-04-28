@@ -51,6 +51,7 @@ public:
     bool resize(int w, int h);
 
     QString getTitle() const;                       ///< Returns the user-friendly icon title.
+    QString getToolTip() const;
     QPixmap getPixmap();                            ///< Returns the icon with the applied visual effects.
     QString getFilename() const;                    ///< Returns the icon filename.
     QString getAdaptiveXmlPath() const;

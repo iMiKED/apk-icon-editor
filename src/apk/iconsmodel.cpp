@@ -186,6 +186,8 @@ QVariant IconsModel::data(const QModelIndex &index, int role) const
             return icon->getTitle();
         } else if (role == Qt::DecorationRole) {
             return icon->getPixmap();
+        } else if (role == Qt::ToolTipRole) {
+            return icon->getToolTip();
         }
     }
     return QVariant();

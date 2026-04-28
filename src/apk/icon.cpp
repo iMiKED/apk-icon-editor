@@ -206,6 +206,45 @@ QString Icon::getTitle() const
     return getQualifiers().join(" - ").toUpper();
 }
 
+QString Icon::getToolTip() const
+{
+    if (!isAdaptiveIcon()) {
+        return tr("Bitmap icon") + "\n" + filePath;
+    }
+
+    QStringList lines;
+    lines << tr("Adaptive XML icon");
+    lines << "";
+    lines << tr("XML:") << adaptiveDescriptor.xmlPath;
+    lines << "";
+    lines << tr("Foreground:") << adaptiveDescriptor.foregroundRef;
+    if (!adaptiveDescriptor.foregroundPath.isEmpty()) {
+        lines << adaptiveDescriptor.foregroundPath;
+    } else {
+        lines << tr("Vector/XML foreground");
+    }
+    lines << "";
+    lines << tr("Background:") << adaptiveDescriptor.backgroundRef;
+    if (!adaptiveDescriptor.backgroundPath.isEmpty()) {
+        lines << adaptiveDescriptor.backgroundPath;
+    } else if (adaptiveDescriptor.backgroundColor.isValid()) {
+        lines << adaptiveDescriptor.backgroundColor.name(QColor::HexArgb).toUpper();
+    } else {
+        lines << tr("Not resolved");
+    }
+    lines << "";
+    lines << tr("Write-back:");
+    if (adaptiveDescriptor.customForegroundRef.isEmpty()) {
+        lines << tr("existing bitmap foreground");
+    } else {
+        lines << tr("custom bitmap foreground") << adaptiveDescriptor.customForegroundRef;
+    }
+    if (!saveTargets.isEmpty()) {
+        lines << saveTargets.join("\n");
+    }
+    return lines.join("\n");
+}
+
 QPixmap Icon::getPixmap()
 {
     return pixmapFx;
