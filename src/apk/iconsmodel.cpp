@@ -1,4 +1,5 @@
 #include "iconsmodel.h"
+#include "globals.h"
 #include <QDebug>
 
 IconsModel::~IconsModel()
@@ -11,7 +12,7 @@ void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope
     // Add:
 
     const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
-    qDebug() << qPrintable(QString("Added %1 icon: %2").arg(scopeStr, filename));
+    qDebug().noquote() << QString("Added %1 icon: %2").arg(scopeStr, Path::display(filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
         Icon *icon = new Icon(filename, type, scope);
         icons.append(icon);
@@ -36,7 +37,7 @@ void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope
 void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type, Icon::Scope scope)
 {
     const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
-    qDebug() << qPrintable(QString("Added adaptive %1 icon: %2").arg(scopeStr, filename));
+    qDebug().noquote() << QString("Added adaptive %1 icon: %2").arg(scopeStr, Path::display(filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
         Icon *icon = new Icon(filename, pixmap, saveTargets, type, scope);
         icons.append(icon);
@@ -59,7 +60,7 @@ void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStri
 void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type, Icon::Scope scope)
 {
     const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
-    qDebug() << qPrintable(QString("Added adaptive %1 icon: %2").arg(scopeStr, filename));
+    qDebug().noquote() << QString("Added adaptive %1 icon: %2").arg(scopeStr, Path::display(filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
         Icon *icon = new Icon(filename, pixmap, saveTargets, adaptiveDescriptor, type, scope);
         icons.append(icon);

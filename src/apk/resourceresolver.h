@@ -6,6 +6,7 @@
 #include <QColor>
 #include <QFileInfo>
 #include <QMap>
+#include <QSet>
 #include <QStringList>
 
 class ResourceResolver
@@ -49,11 +50,15 @@ private:
     void parseValuesFile(const QString &filePath);
     QList<Candidate> fileCandidates(const ResourceRef &ref) const;
     int score(const Candidate &candidate, Icon::Type preferredType) const;
+    int xmlScore(const Candidate &candidate) const;
+    int qualifierPenalty(const QStringList &qualifiers) const;
     int rankForType(Icon::Type type) const;
+    void logUnsupportedRef(const ResourceRef &ref, const QString &context) const;
 
     QString contentsPath;
     QMap<QString, QColor> colors;
     QMap<QString, QString> aliases;
+    mutable QSet<QString> loggedUnsupportedRefs;
 };
 
 #endif // RESOURCERESOLVER_H

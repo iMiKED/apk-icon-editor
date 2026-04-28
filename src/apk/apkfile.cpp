@@ -1,5 +1,6 @@
 #include "apkfile.h"
 #include "adaptiveicon.h"
+#include "globals.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
@@ -70,7 +71,7 @@ Apk::File::File(const QString &contentsPath)
                 if (!appAdaptiveIcon && categoryTitle == appIconCategory) {
                     if (resource.baseName() == appIconFilename) {
                         if (isAdaptiveLayer) {
-                            qDebug() << "Skipping adaptive layer fallback resource:" << resource.filePath();
+                            qDebug().noquote() << "Skipping adaptive layer fallback resource:" << Path::display(resource.filePath());
                             continue;
                         }
                         const QString icon = resource.filePath();
@@ -97,7 +98,7 @@ Apk::File::File(const QString &contentsPath)
                         const QString activityIconFilename = activityIconAttribute.split('/').value(1);
                         if (resource.baseName() == activityIconFilename) {
                             if (isAdaptiveLayer) {
-                                qDebug() << "Skipping adaptive layer activity fallback resource:" << resource.filePath();
+                                qDebug().noquote() << "Skipping adaptive layer activity fallback resource:" << Path::display(resource.filePath());
                                 continue;
                             }
                             iconsModel.add(resource.filePath(), Icon::Unknown, Icon::ScopeActivity);
@@ -274,7 +275,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
                 continue;
             }
             if (isAdaptiveLayerResource(fallback.dirName.split('-').first(), QFileInfo(fallback.filePath).completeBaseName())) {
-                qDebug() << "Skipping adaptive layer bitmap fallback:" << fallback.filePath;
+                qDebug().noquote() << "Skipping adaptive layer bitmap fallback:" << Path::display(fallback.filePath);
                 continue;
             }
 

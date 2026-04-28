@@ -32,6 +32,7 @@ ResourceResolver::ResourceResolver(const QString &contentsPath)
 
 QList<ResourceResolver::Candidate> ResourceResolver::candidates(const ResourceRef &ref) const
 {
+    logUnsupportedRef(ref, "resolve resource");
     ResourceRef resolved = resolveAlias(ref);
     if (!resolved.isValid()) {
         resolved = ref;
@@ -105,10 +106,10 @@ ResourceResolver::Value ResourceResolver::resolveXml(const ResourceRef &ref) con
 {
     QList<Candidate> matches = candidates(ref);
     std::sort(matches.begin(), matches.end(), [=](const Candidate &a, const Candidate &b) {
-        const bool aModern = a.qualifiers.contains("anydpi") || a.qualifiers.contains("v26");
-        const bool bModern = b.qualifiers.contains("anydpi") || b.qualifiers.contains("v26");
-        if (aModern != bModern) {
-            return aModern > bModern;
+        const int scoreA = xmlScore(a);
+        const int scoreB = xmlScore(b);
+        if (scoreA != scoreB) {
+            return scoreA < scoreB;
         }
         return a.filePath < b.filePath;
     });
@@ -175,6 +176,7 @@ ResourceResolver::Value ResourceResolver::resolveColor(const ResourceRef &ref) c
 
 ResourceRef ResourceResolver::resolveAlias(const ResourceRef &ref, int depth) const
 {
+    logUnsupportedRef(ref, "resolve alias");
     if (!ref.isValid() || depth > 8) {
         return ResourceRef();
     }
@@ -320,10 +322,57 @@ QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const Resour
 
 int ResourceResolver::score(const Candidate &candidate, Icon::Type preferredType) const
 {
-    if (preferredType == Icon::Unknown || candidate.type == Icon::Unknown) {
-        return candidate.type == preferredType ? 0 : 100;
+    int result = qualifierPenalty(candidate.qualifiers);
+    const bool nodpi = candidate.qualifiers.contains("nodpi");
+    const bool anydpi = candidate.qualifiers.contains("anydpi");
+
+    if (preferredType == Icon::Unknown) {
+        if (candidate.type == Icon::Unknown) {
+            return result;
+        }
+        return result + 100 + rankForType(candidate.type);
     }
-    return qAbs(rankForType(candidate.type) - rankForType(preferredType));
+
+    if (candidate.type == preferredType) {
+        return result;
+    }
+    if (candidate.type == Icon::Unknown) {
+        return result + (nodpi ? 35 : anydpi ? 45 : 100);
+    }
+    return result + qAbs(rankForType(candidate.type) - rankForType(preferredType)) * 10;
+}
+
+int ResourceResolver::xmlScore(const Candidate &candidate) const
+{
+    int result = qualifierPenalty(candidate.qualifiers);
+    if (!candidate.qualifiers.contains("anydpi")) {
+        result += 30;
+    }
+    if (!candidate.qualifiers.contains("v26")) {
+        result += 10;
+    }
+    return result;
+}
+
+int ResourceResolver::qualifierPenalty(const QStringList &qualifiers) const
+{
+    int penalty = 0;
+    foreach (const QString &qualifier, qualifiers) {
+        if (qualifier == "night") {
+            penalty += 1000;
+        } else if (qualifier.startsWith("mcc") || qualifier.startsWith("mnc")) {
+            penalty += 600;
+        } else if (qualifier.length() == 2 || qualifier.startsWith("b+")) {
+            penalty += 500;
+        } else if (qualifier.startsWith('v')) {
+            bool ok = false;
+            const int api = qualifier.mid(1).toInt(&ok);
+            if (ok && api > 0) {
+                penalty += qMax(0, api - 26);
+            }
+        }
+    }
+    return penalty;
 }
 
 int ResourceResolver::rankForType(Icon::Type type) const
@@ -336,5 +385,26 @@ int ResourceResolver::rankForType(Icon::Type type) const
         case Icon::Xxhdpi: return 4;
         case Icon::Xxxhdpi: return 5;
         default: return -1;
+    }
+}
+
+void ResourceResolver::logUnsupportedRef(const ResourceRef &ref, const QString &context) const
+{
+    if (ref.original().isEmpty() || ref.isValid()) {
+        return;
+    }
+    const QString key = context + "|" + ref.original();
+    if (loggedUnsupportedRefs.contains(key)) {
+        return;
+    }
+    loggedUnsupportedRefs.insert(key);
+    if (ref.isRawId()) {
+        qDebug().noquote() << "Unsupported raw resource id while trying to" << context + ":" << ref.original();
+    } else if (ref.isFramework()) {
+        qDebug().noquote() << "Unsupported Android framework resource while trying to" << context + ":" << ref.original();
+    } else if (ref.isAttribute()) {
+        qDebug().noquote() << "Unsupported theme attribute resource while trying to" << context + ":" << ref.original();
+    } else {
+        qDebug().noquote() << "Unsupported resource reference while trying to" << context + ":" << ref.original();
     }
 }

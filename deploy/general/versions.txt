@@ -23,6 +23,8 @@
 * Added adaptive icon metadata logging when selecting, replacing, exporting, and packing icons.
 * Normalized decoded APK resource paths shown in logs and icon metadata.
 * Hardened icon fallback filtering to skip adaptive XML layer resources and non-launcher activity icons.
+* Displayed user-visible paths with native platform separators in logs and icon tooltips.
+* Improved adaptive resource qualifier scoring and diagnostics for unsupported resource references.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

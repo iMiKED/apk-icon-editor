@@ -1,4 +1,5 @@
 #include "icon.h"
+#include "globals.h"
 #include <QDir>
 #include <QDomDocument>
 #include <QFile>
@@ -105,7 +106,7 @@ bool Icon::save(QString filename)
     if (explicitExport) {
         if (isAdaptiveIcon()) {
             qDebug().noquote() << "Exporting adaptive icon preview:\n" + getToolTip();
-            qDebug() << "Export file:" << filename;
+            qDebug().noquote() << "Export file:" << Path::display(filename);
         }
         QDir().mkpath(QFileInfo(filename).absolutePath());
         return getPixmap().save(filename, NULL, 100);
@@ -128,7 +129,7 @@ bool Icon::save(QString filename)
     foreach (const QString &target, targets) {
         QDir().mkpath(QFileInfo(target).absolutePath());
         if (isAdaptiveIcon()) {
-            qDebug() << "Adaptive icon save target:" << target;
+            qDebug().noquote() << "Adaptive icon save target:" << Path::display(target);
         }
         result = getPixmap().save(target, NULL, 100) && result;
     }
@@ -222,24 +223,24 @@ QString Icon::getTitle() const
 QString Icon::getToolTip() const
 {
     if (!isAdaptiveIcon()) {
-        return tr("Bitmap icon") + "\n" + filePath;
+        return tr("Bitmap icon") + "\n" + Path::display(filePath);
     }
 
     QStringList lines;
     lines << tr("Adaptive XML icon");
     lines << "";
-    lines << tr("XML:") << adaptiveDescriptor.xmlPath;
+    lines << tr("XML:") << Path::display(adaptiveDescriptor.xmlPath);
     lines << "";
     lines << tr("Foreground:") << adaptiveDescriptor.foregroundRef;
     if (!adaptiveDescriptor.foregroundPath.isEmpty()) {
-        lines << adaptiveDescriptor.foregroundPath;
+        lines << Path::display(adaptiveDescriptor.foregroundPath);
     } else {
         lines << tr("Vector/XML foreground");
     }
     lines << "";
     lines << tr("Background:") << adaptiveDescriptor.backgroundRef;
     if (!adaptiveDescriptor.backgroundPath.isEmpty()) {
-        lines << adaptiveDescriptor.backgroundPath;
+        lines << Path::display(adaptiveDescriptor.backgroundPath);
     } else if (adaptiveDescriptor.backgroundColor.isValid()) {
         lines << adaptiveDescriptor.backgroundColor.name(QColor::HexArgb).toUpper();
     } else {
@@ -253,7 +254,11 @@ QString Icon::getToolTip() const
         lines << tr("custom bitmap foreground") << adaptiveDescriptor.customForegroundRef;
     }
     if (!saveTargets.isEmpty()) {
-        lines << saveTargets.join("\n");
+        QStringList displayTargets;
+        foreach (const QString &target, saveTargets) {
+            displayTargets << Path::display(target);
+        }
+        lines << displayTargets.join("\n");
     }
     return lines.join("\n");
 }
@@ -385,7 +390,7 @@ bool Icon::patchAdaptiveForeground() const
 {
     QFile file(adaptiveDescriptor.xmlPath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        qWarning() << "Error: Could not open adaptive icon XML:" << adaptiveDescriptor.xmlPath;
+        qWarning().noquote() << "Error: Could not open adaptive icon XML:" << Path::display(adaptiveDescriptor.xmlPath);
         return false;
     }
 
@@ -393,7 +398,7 @@ bool Icon::patchAdaptiveForeground() const
     setUtf8Encoding(in);
     QDomDocument doc;
     if (!doc.setContent(in.readAll())) {
-        qWarning() << "Error: Could not parse adaptive icon XML:" << adaptiveDescriptor.xmlPath;
+        qWarning().noquote() << "Error: Could not parse adaptive icon XML:" << Path::display(adaptiveDescriptor.xmlPath);
         return false;
     }
     file.close();
@@ -409,10 +414,10 @@ bool Icon::patchAdaptiveForeground() const
         root.appendChild(foreground);
     }
     foreground.setAttribute("android:drawable", adaptiveDescriptor.customForegroundRef);
-    qDebug() << "Adaptive icon XML foreground patched:" << adaptiveDescriptor.xmlPath << "->" << adaptiveDescriptor.customForegroundRef;
+    qDebug().noquote() << "Adaptive icon XML foreground patched:" << Path::display(adaptiveDescriptor.xmlPath) << "->" << adaptiveDescriptor.customForegroundRef;
 
     if (!file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
-        qWarning() << "Error: Could not save adaptive icon XML:" << adaptiveDescriptor.xmlPath;
+        qWarning().noquote() << "Error: Could not save adaptive icon XML:" << Path::display(adaptiveDescriptor.xmlPath);
         return false;
     }
 
