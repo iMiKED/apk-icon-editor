@@ -13,6 +13,12 @@ QMAKE_TARGET_COPYRIGHT = Copyright (C) 2014-2026
 
 DEFINES += APP='"\\\"$$QMAKE_TARGET_PRODUCT\\\""'
 DEFINES += VER=\\\"$$APP_VERSION\\\"
+GIT_COMMIT = $$system(git -C $$PWD/.. rev-parse --short HEAD)
+GIT_COMMIT_URL = https://github.com/iMiKED/apk-icon-editor/commit/$$GIT_COMMIT
+!isEmpty(GIT_COMMIT) {
+    DEFINES += GIT_COMMIT=\\\"$$GIT_COMMIT\\\"
+    DEFINES += GIT_COMMIT_URL=\\\"$$GIT_COMMIT_URL\\\"
+}
 #DEFINES += PORTABLE
 
 TRANSLATIONS += $$PWD/../lang/apk-icon-editor.en.ts

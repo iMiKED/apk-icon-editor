@@ -18,6 +18,7 @@
 * Added JKS files to the KeyStore selection dialog filter.
 * Added an adaptive icon descriptor for XML, foreground, background, and write-back metadata.
 * Changed About dialog build timestamp to use the executable file build time.
+* Changed About dialog build timestamp format and added a GitHub commit link.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
