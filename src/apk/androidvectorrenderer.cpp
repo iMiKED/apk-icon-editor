@@ -185,6 +185,11 @@ QPixmap AndroidVectorRenderer::render(const ResourceResolver &resolver, const QS
     }
 
     const QDomElement root = doc.documentElement();
+    return render(resolver, root, size);
+}
+
+QPixmap AndroidVectorRenderer::render(const ResourceResolver &resolver, const QDomElement &root, const QSize &size)
+{
     if (root.tagName() != "vector") {
         return QPixmap();
     }

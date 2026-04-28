@@ -3,6 +3,7 @@
 #include <QDirIterator>
 #include <QDomDocument>
 #include <QFile>
+#include <QImageReader>
 #include <QRegularExpression>
 #include <QTextStream>
 #include <QDebug>
@@ -61,7 +62,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::bitmapCandidatesByName(cons
         QDir dir(dirInfo.filePath());
         const QFileInfoList files = dir.entryInfoList(QDir::Files);
         foreach (const QFileInfo &file, files) {
-            if (file.completeBaseName() != name || !isBitmapExtension(file.suffix())) {
+            if (file.completeBaseName() != name || (!isBitmapExtension(file.suffix()) && !QImageReader(file.filePath()).canRead())) {
                 continue;
             }
 
@@ -71,7 +72,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::bitmapCandidatesByName(cons
             candidate.qualifiers = parts.mid(1);
             candidate.extension = file.suffix().toLower();
             candidate.type = typeFromQualifiers(candidate.qualifiers);
-            candidate.isBitmap = true;
+            candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(file.filePath()).canRead();
             result.append(candidate);
         }
     }
@@ -312,7 +313,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const Resour
             candidate.qualifiers = parts.mid(1);
             candidate.extension = file.suffix().toLower();
             candidate.type = typeFromQualifiers(candidate.qualifiers);
-            candidate.isBitmap = isBitmapExtension(candidate.extension);
+            candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(file.filePath()).canRead();
             candidate.isXml = candidate.extension == "xml";
             result.append(candidate);
         }

@@ -2,6 +2,7 @@
 #include "androidvectorrenderer.h"
 #include <QDomDocument>
 #include <QFile>
+#include <QLinearGradient>
 #include <QPainter>
 #include <QTextStream>
 #include <QDebug>
@@ -26,30 +27,50 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
         return result;
     }
 
-    ResourceRef backgroundRef;
-    ResourceRef foregroundRef;
-    if (!parseXml(xml.filePath, &backgroundRef, &foregroundRef) || !foregroundRef.isValid()) {
+    QFile file(xml.filePath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return result;
+    }
+    QTextStream stream(&file);
+    setUtf8Encoding(stream);
+    QDomDocument doc;
+    if (!doc.setContent(stream.readAll())) {
+        return result;
+    }
+    const QDomElement root = doc.documentElement();
+    if (root.tagName() != "adaptive-icon") {
         return result;
     }
 
-    ResourceResolver::Value background = resolver.resolveBest(backgroundRef, type);
-    ResourceResolver::Value foreground = resolver.resolveBitmap(foregroundRef, type);
+    const QDomElement backgroundNode = root.firstChildElement("background");
+    const QDomElement foregroundNode = root.firstChildElement("foreground");
+    ResourceRef backgroundRef(drawableAttr(backgroundNode));
+    ResourceRef foregroundRef(drawableAttr(foregroundNode));
+
+    QPixmap backgroundPixmap;
     QPixmap foregroundVector;
-    if (!foreground.found) {
-        const ResourceResolver::Value foregroundXml = resolver.resolveXml(foregroundRef);
-        if (foregroundXml.found) {
-            foregroundVector = AndroidVectorRenderer::render(resolver, foregroundXml.filePath, size);
-            if (!foregroundVector.isNull()) {
-                foreground = foregroundXml;
-            }
-        }
+    ResourceResolver::Value background = backgroundRef.isValid()
+            ? resolveLayer(resolver, backgroundRef, type, size, &backgroundPixmap)
+            : ResourceResolver::Value();
+    ResourceResolver::Value foreground = foregroundRef.isValid()
+            ? resolveLayer(resolver, foregroundRef, type, size, &foregroundVector)
+            : ResourceResolver::Value();
+    if (!backgroundNode.isNull() && !backgroundRef.isValid()) {
+        backgroundPixmap = renderDrawableElement(resolver, backgroundNode, type, size);
+        background.found = !backgroundPixmap.isNull();
+        background.isXml = background.found;
+    }
+    if (!foregroundNode.isNull() && !foregroundRef.isValid()) {
+        foregroundVector = renderDrawableElement(resolver, foregroundNode, type, size);
+        foreground.found = !foregroundVector.isNull();
+        foreground.isXml = foreground.found;
     }
     if (!foreground.found) {
-        qDebug() << "Adaptive icon foreground is not renderable:" << foregroundRef.original();
+        qDebug() << "Adaptive icon foreground is not renderable:" << (foregroundRef.original().isEmpty() ? QString("inline foreground") : foregroundRef.original());
         return result;
     }
 
-    QPixmap pixmap = render(background, foreground, size, foregroundVector);
+    QPixmap pixmap = render(background, foreground, size, foregroundVector, backgroundPixmap);
     if (pixmap.isNull()) {
         return result;
     }
@@ -89,15 +110,15 @@ bool AdaptiveIcon::parseXml(const QString &xmlPath, ResourceRef *background, Res
     const QDomElement backgroundNode = root.firstChildElement("background");
     const QDomElement foregroundNode = root.firstChildElement("foreground");
     if (!backgroundNode.isNull() && background) {
-        *background = ResourceRef(backgroundNode.attribute("android:drawable"));
+        *background = ResourceRef(drawableAttr(backgroundNode));
     }
     if (!foregroundNode.isNull() && foreground) {
-        *foreground = ResourceRef(foregroundNode.attribute("android:drawable"));
+        *foreground = ResourceRef(drawableAttr(foregroundNode));
     }
     return true;
 }
 
-QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const ResourceResolver::Value &foreground, const QSize &size, const QPixmap &foregroundOverride)
+QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const ResourceResolver::Value &foreground, const QSize &size, const QPixmap &foregroundOverride, const QPixmap &backgroundOverride)
 {
     if (!size.isValid() || !foreground.found) {
         return QPixmap();
@@ -109,11 +130,13 @@ QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const Re
     QPainter painter(&canvas);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
-    if (background.color.isValid()) {
+    if (!backgroundOverride.isNull()) {
+        painter.drawPixmap(canvas.rect(), backgroundOverride);
+    } else if (background.color.isValid()) {
         painter.fillRect(canvas.rect(), background.color);
     }
 
-    if (background.isBitmap && !background.filePath.isEmpty()) {
+    if (backgroundOverride.isNull() && background.isBitmap && !background.filePath.isEmpty()) {
         QPixmap bg(background.filePath);
         if (!bg.isNull()) {
             painter.drawPixmap(canvas.rect(), bg);
@@ -127,4 +150,194 @@ QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const Re
 
     painter.end();
     return QPixmap::fromImage(canvas);
+}
+
+ResourceResolver::Value AdaptiveIcon::resolveLayer(const ResourceResolver &resolver, const ResourceRef &ref, Icon::Type type, const QSize &size, QPixmap *pixmap)
+{
+    ResourceResolver::Value bitmap = resolver.resolveBitmap(ref, type);
+    if (bitmap.found) {
+        return bitmap;
+    }
+
+    ResourceResolver::Value xml = resolver.resolveXml(ref);
+    if (xml.found) {
+        const QPixmap rendered = renderDrawableXml(resolver, xml.filePath, type, size);
+        if (!rendered.isNull()) {
+            if (pixmap) {
+                *pixmap = rendered;
+            }
+            xml.isBitmap = false;
+            return xml;
+        }
+    }
+
+    return resolver.resolveColor(ref);
+}
+
+QPixmap AdaptiveIcon::renderDrawableXml(const ResourceResolver &resolver, const QString &filePath, Icon::Type type, const QSize &size)
+{
+    QFile file(filePath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return QPixmap();
+    }
+
+    QTextStream stream(&file);
+    setUtf8Encoding(stream);
+    QDomDocument doc;
+    if (!doc.setContent(stream.readAll())) {
+        return QPixmap();
+    }
+    return renderDrawableElement(resolver, doc.documentElement(), type, size);
+}
+
+QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, const QDomElement &node, Icon::Type type, const QSize &size)
+{
+    if (!size.isValid() || node.isNull()) {
+        return QPixmap();
+    }
+
+    const QString tag = node.tagName();
+    if (tag == "vector") {
+        return AndroidVectorRenderer::render(resolver, node, size);
+    }
+
+    if (tag == "shape") {
+        QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+        canvas.fill(Qt::transparent);
+        QPainter painter(&canvas);
+        const QDomElement solid = node.firstChildElement("solid");
+        const QDomElement gradient = node.firstChildElement("gradient");
+        if (!gradient.isNull()) {
+            const QColor start = resolveColorValue(resolver, drawableAttr(gradient).isEmpty() ? gradient.attribute("android:startColor") : drawableAttr(gradient));
+            const QColor end = resolveColorValue(resolver, gradient.attribute("android:endColor"));
+            QLinearGradient brush(0, size.height(), 0, 0);
+            if (gradient.attribute("android:angle").toDouble() == 0.0) {
+                brush = QLinearGradient(0, 0, size.width(), 0);
+            }
+            brush.setColorAt(0, start.isValid() ? start : Qt::transparent);
+            brush.setColorAt(1, end.isValid() ? end : start);
+            painter.fillRect(canvas.rect(), brush);
+        } else if (!solid.isNull()) {
+            const QColor color = resolveColorValue(resolver, solid.attribute("android:color"));
+            painter.fillRect(canvas.rect(), color.isValid() ? color : Qt::transparent);
+        }
+        painter.end();
+        return QPixmap::fromImage(canvas);
+    }
+
+    if (tag == "layer-list") {
+        QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+        canvas.fill(Qt::transparent);
+        QPainter painter(&canvas);
+        QDomElement item = node.firstChildElement("item");
+        while (!item.isNull()) {
+            QPixmap layer;
+            const ResourceRef ref(drawableAttr(item));
+            if (ref.isValid()) {
+                layer = renderDrawableElement(resolver, item, type, size);
+            } else {
+                QDomElement child = item.firstChildElement();
+                if (!child.isNull()) {
+                    layer = renderDrawableElement(resolver, child, type, size);
+                }
+            }
+            if (!layer.isNull()) {
+                painter.drawPixmap(canvas.rect(), layer);
+            }
+            item = item.nextSiblingElement("item");
+        }
+        painter.end();
+        return QPixmap::fromImage(canvas);
+    }
+
+    if (tag == "item" || tag == "rotate" || tag == "inset" || tag == "background" || tag == "foreground") {
+        const QString attr = drawableAttr(node);
+        const ResourceRef ref(attr);
+        QPixmap pixmap;
+        if (ref.isValid()) {
+            ResourceResolver::Value value = resolveLayer(resolver, ref, type, size, &pixmap);
+            if (pixmap.isNull() && value.isBitmap) {
+                pixmap = QPixmap(value.filePath);
+            } else if (pixmap.isNull() && value.color.isValid()) {
+                QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+                canvas.fill(value.color);
+                pixmap = QPixmap::fromImage(canvas);
+            }
+        } else if (attr.startsWith("@android:color/")) {
+            QColor color = Qt::transparent;
+            const QString name = attr.mid(QString("@android:color/").length());
+            if (name == "white") {
+                color = Qt::white;
+            } else if (name == "black") {
+                color = Qt::black;
+            } else if (name == "transparent") {
+                color = Qt::transparent;
+            }
+            QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+            canvas.fill(color);
+            pixmap = QPixmap::fromImage(canvas);
+        } else {
+            const QDomElement child = node.firstChildElement();
+            if (!child.isNull()) {
+                pixmap = renderDrawableElement(resolver, child, type, size);
+            }
+        }
+        if (pixmap.isNull()) {
+            return pixmap;
+        }
+        if (tag == "rotate") {
+            const qreal degrees = node.attribute("android:fromDegrees").toDouble();
+            if (!qFuzzyIsNull(degrees)) {
+                const qreal pivotX = percentAttr(node.attribute("android:pivotX"), 0.5) * size.width();
+                const qreal pivotY = percentAttr(node.attribute("android:pivotY"), 0.5) * size.height();
+                QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+                canvas.fill(Qt::transparent);
+                QPainter painter(&canvas);
+                painter.setRenderHint(QPainter::SmoothPixmapTransform);
+                painter.translate(pivotX, pivotY);
+                painter.rotate(degrees);
+                painter.translate(-pivotX, -pivotY);
+                painter.drawPixmap(canvas.rect(), pixmap);
+                painter.end();
+                pixmap = QPixmap::fromImage(canvas);
+            }
+        }
+        return pixmap;
+    }
+
+    qDebug() << "Adaptive drawable XML tag is not renderable:" << tag;
+    return QPixmap();
+}
+
+QString AdaptiveIcon::drawableAttr(const QDomElement &node)
+{
+    QString value = node.attribute("android:drawable");
+    if (value.isEmpty()) {
+        value = node.attribute("drawable");
+    }
+    return value.trimmed();
+}
+
+QColor AdaptiveIcon::resolveColorValue(const ResourceResolver &resolver, const QString &value)
+{
+    if (value.startsWith('@')) {
+        const ResourceResolver::Value color = resolver.resolveColor(ResourceRef(value));
+        if (color.found) {
+            return color.color;
+        }
+    }
+    return QColor(value);
+}
+
+qreal AdaptiveIcon::percentAttr(const QString &value, qreal fallback)
+{
+    QString text = value.trimmed();
+    if (text.endsWith('%')) {
+        bool ok = false;
+        const qreal percent = text.left(text.length() - 1).toDouble(&ok);
+        return ok ? percent / 100.0 : fallback;
+    }
+    bool ok = false;
+    const qreal number = text.toDouble(&ok);
+    return ok ? number : fallback;
 }

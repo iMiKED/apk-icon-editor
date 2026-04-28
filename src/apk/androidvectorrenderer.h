@@ -11,6 +11,7 @@ class AndroidVectorRenderer
 {
 public:
     static QPixmap render(const ResourceResolver &resolver, const QString &filePath, const QSize &size);
+    static QPixmap render(const ResourceResolver &resolver, const QDomElement &root, const QSize &size);
 
 private:
     struct Parser {
