@@ -12,10 +12,7 @@ public:
         bool valid = false;
         QPixmap pixmap;
         QString xmlPath;
-        QString foregroundPath;
-        QString foregroundRef;
-        QString backgroundPath;
-        QColor backgroundColor;
+        AdaptiveIconDescriptor descriptor;
         Icon::Type type = Icon::Unknown;
     };
 

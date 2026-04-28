@@ -1,7 +1,24 @@
 #ifndef ICON_H
 #define ICON_H
 
+#include <QColor>
 #include <QGraphicsEffect>
+#include <QPixmap>
+#include <QString>
+#include <QStringList>
+
+struct AdaptiveIconDescriptor {
+    QString xmlPath;
+    QString foregroundRef;
+    QString foregroundPath;
+    QString backgroundRef;
+    QString backgroundPath;
+    QColor backgroundColor;
+    QString customForegroundRef;
+
+    bool isValid() const { return !xmlPath.isEmpty(); }
+    bool needsXmlPatch() const { return !xmlPath.isEmpty() && !customForegroundRef.isEmpty(); }
+};
 
 class Icon : public QObject
 {
@@ -26,7 +43,7 @@ public:
 
     explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication);
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication);
-    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const QString &adaptiveXmlPath, const QString &adaptiveForegroundRef, Type type = Unknown, Scope scope = ScopeApplication);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type = Unknown, Scope scope = ScopeApplication);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -37,6 +54,7 @@ public:
     QPixmap getPixmap();                            ///< Returns the icon with the applied visual effects.
     QString getFilename() const;                    ///< Returns the icon filename.
     QString getAdaptiveXmlPath() const;
+    const AdaptiveIconDescriptor &getAdaptiveDescriptor() const;
     Type getType() const;
     Scope getScope() const;
     bool isAdaptiveIcon() const;
@@ -78,8 +96,7 @@ private:
     QPixmap pixmapFx; ///< Stores the pixmap with effects applied.
     QString filePath; ///< Stores the pixmap original filename. Used to revert the original pixmap.
     QStringList saveTargets;
-    QString adaptiveXmlPath;
-    QString adaptiveForegroundRef;
+    AdaptiveIconDescriptor adaptiveDescriptor;
     QStringList qualifiers;
     Type type;
     Scope scope;

@@ -82,11 +82,10 @@ Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTarge
     setPixmap(pixmap);
 }
 
-Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const QString &adaptiveXmlPath, const QString &adaptiveForegroundRef, Type type, Scope scope)
+Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type, Scope scope)
     : Icon(filename, pixmap, saveTargets, type, scope)
 {
-    this->adaptiveXmlPath = adaptiveXmlPath;
-    this->adaptiveForegroundRef = adaptiveForegroundRef;
+    this->adaptiveDescriptor = adaptiveDescriptor;
 }
 
 bool Icon::load(QString filename)
@@ -123,7 +122,7 @@ bool Icon::save(QString filename)
         QDir().mkpath(QFileInfo(target).absolutePath());
         result = getPixmap().save(target, NULL, 100) && result;
     }
-    if (result && !adaptiveXmlPath.isEmpty() && !adaptiveForegroundRef.isEmpty()) {
+    if (result && adaptiveDescriptor.needsXmlPatch()) {
         result = patchAdaptiveForeground();
     }
     return result;
@@ -176,7 +175,12 @@ QString Icon::getFilename() const
 
 QString Icon::getAdaptiveXmlPath() const
 {
-    return adaptiveXmlPath;
+    return adaptiveDescriptor.xmlPath;
+}
+
+const AdaptiveIconDescriptor &Icon::getAdaptiveDescriptor() const
+{
+    return adaptiveDescriptor;
 }
 
 Icon::Type Icon::getType() const
@@ -191,7 +195,7 @@ Icon::Scope Icon::getScope() const
 
 bool Icon::isAdaptiveIcon() const
 {
-    return !adaptiveXmlPath.isEmpty();
+    return adaptiveDescriptor.isValid();
 }
 
 QString Icon::getTitle() const
@@ -327,9 +331,9 @@ void Icon::applyEffects()
 
 bool Icon::patchAdaptiveForeground() const
 {
-    QFile file(adaptiveXmlPath);
+    QFile file(adaptiveDescriptor.xmlPath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        qWarning() << "Error: Could not open adaptive icon XML:" << adaptiveXmlPath;
+        qWarning() << "Error: Could not open adaptive icon XML:" << adaptiveDescriptor.xmlPath;
         return false;
     }
 
@@ -337,7 +341,7 @@ bool Icon::patchAdaptiveForeground() const
     setUtf8Encoding(in);
     QDomDocument doc;
     if (!doc.setContent(in.readAll())) {
-        qWarning() << "Error: Could not parse adaptive icon XML:" << adaptiveXmlPath;
+        qWarning() << "Error: Could not parse adaptive icon XML:" << adaptiveDescriptor.xmlPath;
         return false;
     }
     file.close();
@@ -352,10 +356,10 @@ bool Icon::patchAdaptiveForeground() const
         foreground = doc.createElement("foreground");
         root.appendChild(foreground);
     }
-    foreground.setAttribute("android:drawable", adaptiveForegroundRef);
+    foreground.setAttribute("android:drawable", adaptiveDescriptor.customForegroundRef);
 
     if (!file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
-        qWarning() << "Error: Could not save adaptive icon XML:" << adaptiveXmlPath;
+        qWarning() << "Error: Could not save adaptive icon XML:" << adaptiveDescriptor.xmlPath;
         return false;
     }
 

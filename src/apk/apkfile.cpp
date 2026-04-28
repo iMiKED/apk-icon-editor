@@ -218,9 +218,9 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         }
 
         QStringList saveTargets;
-        QString adaptiveForegroundRef;
-        if (!result.foregroundPath.isEmpty()) {
-            saveTargets.append(result.foregroundPath);
+        AdaptiveIconDescriptor descriptor = result.descriptor;
+        if (!descriptor.foregroundPath.isEmpty()) {
+            saveTargets.append(descriptor.foregroundPath);
         } else {
             const QString qualifier = ResourceResolver::qualifierForType(type);
             const int resIndex = result.xmlPath.indexOf("/res/");
@@ -229,10 +229,10 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
                 const QString customName = iconRef.name() + "_foreground_custom";
                 const QString resourceType = iconRef.type().isEmpty() ? "mipmap" : iconRef.type();
                 saveTargets.append(QString("%1/res/%2-%3/%4.png").arg(contentsRoot, resourceType, qualifier, customName));
-                adaptiveForegroundRef = QString("@%1/%2").arg(resourceType, customName);
+                descriptor.customForegroundRef = QString("@%1/%2").arg(resourceType, customName);
             }
         }
-        iconsModel.add(result.xmlPath, result.pixmap, saveTargets, result.xmlPath, adaptiveForegroundRef, type, scope);
+        iconsModel.add(result.xmlPath, result.pixmap, saveTargets, descriptor, type, scope);
         added = true;
     }
 

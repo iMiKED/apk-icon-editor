@@ -56,12 +56,12 @@ void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStri
     emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
 }
 
-void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const QString &adaptiveXmlPath, const QString &adaptiveForegroundRef, Icon::Type type, Icon::Scope scope)
+void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type, Icon::Scope scope)
 {
     const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
     qDebug() << qPrintable(QString("Added adaptive %1 icon: %2").arg(scopeStr, filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
-        Icon *icon = new Icon(filename, pixmap, saveTargets, adaptiveXmlPath, adaptiveForegroundRef, type, scope);
+        Icon *icon = new Icon(filename, pixmap, saveTargets, adaptiveDescriptor, type, scope);
         icons.append(icon);
         connect(icon, &Icon::updated, [=]() {
             QModelIndex index = this->index(icons.indexOf(icon), 0);
