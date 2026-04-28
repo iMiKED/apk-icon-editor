@@ -25,7 +25,7 @@ static QString keyForRef(const ResourceRef &ref)
 }
 
 ResourceResolver::ResourceResolver(const QString &contentsPath)
-    : contentsPath(QDir::fromNativeSeparators(contentsPath))
+    : contentsPath(QDir::cleanPath(QDir::fromNativeSeparators(contentsPath)))
 {
     loadValues();
 }
@@ -46,7 +46,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::bitmapCandidatesByName(cons
         return result;
     }
 
-    const QString resRoot = contentsPath + "/res";
+    const QString resRoot = QDir::cleanPath(contentsPath + "/res");
     QDirIterator dirs(resRoot, QDir::Dirs | QDir::NoDotAndDotDot);
     while (dirs.hasNext()) {
         const QFileInfo dirInfo(dirs.next());
@@ -65,7 +65,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::bitmapCandidatesByName(cons
             }
 
             Candidate candidate;
-            candidate.filePath = file.filePath();
+            candidate.filePath = QDir::cleanPath(file.filePath());
             candidate.dirName = dirName;
             candidate.qualifiers = parts.mid(1);
             candidate.extension = file.suffix().toLower();
@@ -221,7 +221,7 @@ QString ResourceResolver::qualifierForType(Icon::Type type)
 
 void ResourceResolver::loadValues()
 {
-    QDirIterator it(contentsPath + "/res", QStringList() << "*.xml", QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(QDir::cleanPath(contentsPath + "/res"), QStringList() << "*.xml", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         const QFileInfo info(it.next());
         if (info.dir().dirName().split('-').first() == "values") {
@@ -287,7 +287,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const Resour
         return result;
     }
 
-    const QString resRoot = contentsPath + "/res";
+    const QString resRoot = QDir::cleanPath(contentsPath + "/res");
     QDirIterator dirs(resRoot, QDir::Dirs | QDir::NoDotAndDotDot);
     while (dirs.hasNext()) {
         const QFileInfo dirInfo(dirs.next());
@@ -305,7 +305,7 @@ QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const Resour
             }
 
             Candidate candidate;
-            candidate.filePath = file.filePath();
+            candidate.filePath = QDir::cleanPath(file.filePath());
             candidate.dirName = dirName;
             candidate.qualifiers = parts.mid(1);
             candidate.extension = file.suffix().toLower();

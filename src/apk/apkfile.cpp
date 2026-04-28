@@ -1,19 +1,31 @@
 #include "apkfile.h"
 #include "adaptiveicon.h"
+#include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QTextStream>
 #include <QDebug>
 
+static QString resourceKey(const QString &type, const QString &name)
+{
+    return type + "/" + name;
+}
+
+static QString resourceKey(const ResourceRef &ref)
+{
+    return ref.isValid() ? resourceKey(ref.type(), ref.name()) : QString();
+}
+
 Apk::File::File(const QString &contentsPath)
 {
     // Be careful with the "contentsPath" variable: this directory is recursively removed in the destructor.
 
-    this->contentsPath = contentsPath;
+    this->contentsPath = QDir::cleanPath(QDir::fromNativeSeparators(contentsPath));
 
     // Parse application manifest:
 
-    manifest = new Manifest(contentsPath + "/AndroidManifest.xml", contentsPath + "/apktool.yml");
+    manifest = new Manifest(QDir::cleanPath(this->contentsPath + "/AndroidManifest.xml"),
+                            QDir::cleanPath(this->contentsPath + "/apktool.yml"));
     manifestModel.initialize(manifest);
     const QString appIconAttribute = manifest->getApplicationIcon();
     const QString appRoundIconAttribute = manifest->getApplicationRoundIcon();
@@ -29,7 +41,7 @@ Apk::File::File(const QString &contentsPath)
 
     // Parse resource directories:
 
-    ResourceResolver resolver(contentsPath);
+    ResourceResolver resolver(this->contentsPath);
     const bool appAdaptiveIcon = addAdaptiveIcons(resolver, ResourceRef(appIconAttribute), Icon::ScopeApplication);
     if (!appAdaptiveIcon && !appRoundIconAttribute.isEmpty()) {
         addAdaptiveIcons(resolver, ResourceRef(appRoundIconAttribute), Icon::ScopeApplication);
@@ -39,7 +51,7 @@ Apk::File::File(const QString &contentsPath)
     }
 
     const QStringList drawableExtensions = QStringList() << "png" << "jpg" << "jpeg" << "gif" << "webp";
-    QDirIterator categories(contentsPath + "/res/", QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator categories(QDir::cleanPath(this->contentsPath + "/res"), QDir::Dirs | QDir::NoDotAndDotDot);
     while (categories.hasNext()) {
 
         const QFileInfo category(categories.next());
@@ -51,11 +63,16 @@ Apk::File::File(const QString &contentsPath)
             const QFileInfo resource(resources.next());
 
             if (drawableExtensions.contains(resource.suffix())) {
+                const bool isAdaptiveLayer = isAdaptiveLayerResource(categoryTitle, resource.baseName());
 
                 // Parse application icons:
 
                 if (!appAdaptiveIcon && categoryTitle == appIconCategory) {
                     if (resource.baseName() == appIconFilename) {
+                        if (isAdaptiveLayer) {
+                            qDebug() << "Skipping adaptive layer fallback resource:" << resource.filePath();
+                            continue;
+                        }
                         const QString icon = resource.filePath();
                         thumbnail.addFile(icon);
                         iconsModel.add(icon, Icon::Unknown, Icon::ScopeApplication);
@@ -79,6 +96,10 @@ Apk::File::File(const QString &contentsPath)
                     if (activityIconCategory == categoryTitle) {
                         const QString activityIconFilename = activityIconAttribute.split('/').value(1);
                         if (resource.baseName() == activityIconFilename) {
+                            if (isAdaptiveLayer) {
+                                qDebug() << "Skipping adaptive layer activity fallback resource:" << resource.filePath();
+                                continue;
+                            }
                             iconsModel.add(resource.filePath(), Icon::Unknown, Icon::ScopeActivity);
                         }
                     }
@@ -216,6 +237,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         if (scope == Icon::ScopeApplication) {
             thumbnail.addPixmap(result.pixmap);
         }
+        adaptiveLayerRefs.insert(resourceKey(iconRef));
 
         QStringList saveTargets;
         AdaptiveIconDescriptor descriptor = result.descriptor;
@@ -228,9 +250,17 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
                 const QString contentsRoot = result.xmlPath.left(resIndex);
                 const QString customName = iconRef.name() + "_foreground_custom";
                 const QString resourceType = iconRef.type().isEmpty() ? "mipmap" : iconRef.type();
-                saveTargets.append(QString("%1/res/%2-%3/%4.png").arg(contentsRoot, resourceType, qualifier, customName));
+                saveTargets.append(QDir::cleanPath(QString("%1/res/%2-%3/%4.png").arg(contentsRoot, resourceType, qualifier, customName)));
                 descriptor.customForegroundRef = QString("@%1/%2").arg(resourceType, customName);
             }
+        }
+        const QString foregroundKey = resourceKey(ResourceRef(descriptor.foregroundRef));
+        const QString backgroundKey = resourceKey(ResourceRef(descriptor.backgroundRef));
+        if (!foregroundKey.isEmpty()) {
+            adaptiveLayerRefs.insert(foregroundKey);
+        }
+        if (!backgroundKey.isEmpty()) {
+            adaptiveLayerRefs.insert(backgroundKey);
         }
         iconsModel.add(result.xmlPath, result.pixmap, saveTargets, descriptor, type, scope);
         added = true;
@@ -241,6 +271,10 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         const QList<ResourceResolver::Candidate> bitmapFallbacks = resolver.bitmapCandidatesByName(iconRef.name());
         foreach (const ResourceResolver::Candidate &fallback, bitmapFallbacks) {
             if (addedFiles.contains(fallback.filePath)) {
+                continue;
+            }
+            if (isAdaptiveLayerResource(fallback.dirName.split('-').first(), QFileInfo(fallback.filePath).completeBaseName())) {
+                qDebug() << "Skipping adaptive layer bitmap fallback:" << fallback.filePath;
                 continue;
             }
 
@@ -258,6 +292,11 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         qDebug() << "Adaptive icon was found but could not be rendered:" << iconRef.original();
     }
     return added;
+}
+
+bool Apk::File::isAdaptiveLayerResource(const QString &resourceType, const QString &resourceName) const
+{
+    return adaptiveLayerRefs.contains(resourceKey(resourceType, resourceName));
 }
 
 // Getters:

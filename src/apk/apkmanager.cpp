@@ -1,4 +1,5 @@
 #include "apkmanager.h"
+#include <QDir>
 #include <QFile>
 #include <QDebug>
 
@@ -20,12 +21,14 @@ ApkManager::ApkManager(QObject *parent) : QObject(parent)
 
 void ApkManager::unpack(QString filename, QString temp, QString apktool, bool smali)
 {
+    const QString tempPath = QDir::cleanPath(QDir::fromNativeSeparators(temp));
+
     qDebug() << "Unpacking" << filename;
-    qDebug() << "Output directory:" << temp;
+    qDebug() << "Output directory:" << tempPath;
     unpacker->unpack(filename,
-                     temp + "/apk/",
+                     QDir::cleanPath(tempPath + "/apk"),
                      apktool,
-                     temp + "/framework",
+                     QDir::cleanPath(tempPath + "/framework"),
                      smali);
 }
 
