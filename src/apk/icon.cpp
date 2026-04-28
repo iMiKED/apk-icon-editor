@@ -103,6 +103,10 @@ bool Icon::save(QString filename)
 
     const bool explicitExport = !filename.isEmpty();
     if (explicitExport) {
+        if (isAdaptiveIcon()) {
+            qDebug().noquote() << "Exporting adaptive icon preview:\n" + getToolTip();
+            qDebug() << "Export file:" << filename;
+        }
         QDir().mkpath(QFileInfo(filename).absolutePath());
         return getPixmap().save(filename, NULL, 100);
     }
@@ -117,9 +121,15 @@ bool Icon::save(QString filename)
     if (targets.isEmpty()) {
         targets.append(filePath);
     }
+    if (isAdaptiveIcon()) {
+        qDebug().noquote() << "Saving adaptive icon write-back:\n" + getToolTip();
+    }
     bool result = true;
     foreach (const QString &target, targets) {
         QDir().mkpath(QFileInfo(target).absolutePath());
+        if (isAdaptiveIcon()) {
+            qDebug() << "Adaptive icon save target:" << target;
+        }
         result = getPixmap().save(target, NULL, 100) && result;
     }
     if (result && adaptiveDescriptor.needsXmlPatch()) {
@@ -132,6 +142,9 @@ bool Icon::replace(QPixmap pixmap)
 {
     if (pixmap.isNull()) {
         return false;
+    }
+    if (isAdaptiveIcon()) {
+        qDebug().noquote() << "Replacing adaptive icon:\n" + getToolTip();
     }
     setPixmap(pixmap);
     modified = true;
@@ -396,6 +409,7 @@ bool Icon::patchAdaptiveForeground() const
         root.appendChild(foreground);
     }
     foreground.setAttribute("android:drawable", adaptiveDescriptor.customForegroundRef);
+    qDebug() << "Adaptive icon XML foreground patched:" << adaptiveDescriptor.xmlPath << "->" << adaptiveDescriptor.customForegroundRef;
 
     if (!file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
         qWarning() << "Error: Could not save adaptive icon XML:" << adaptiveDescriptor.xmlPath;

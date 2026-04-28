@@ -20,6 +20,7 @@
 * Changed About dialog build timestamp to use the executable file build time.
 * Changed About dialog build timestamp format and added a GitHub commit link.
 * Added icon list tooltips with adaptive XML foreground, background, and write-back metadata.
+* Added adaptive icon metadata logging when selecting, replacing, exporting, and packing icons.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

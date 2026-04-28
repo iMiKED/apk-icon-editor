@@ -10,6 +10,7 @@
 #include <QRegularExpression>
 #include <QDesktopServices>
 #include <QProcess>
+#include <QDebug>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
 
@@ -778,6 +779,9 @@ void MainWindow::setCurrentIcon(const QModelIndex &index)
 
         icon = static_cast<Icon *>(iconsProxy->mapToSource(index).internalPointer());
         drawArea->setIcon(icon);
+        if (icon && icon->isAdaptiveIcon()) {
+            qDebug().noquote() << "Selected adaptive icon:\n" + icon->getToolTip();
+        }
 
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
         const QSize size = device->getIconSize(icon->getType()).size;
