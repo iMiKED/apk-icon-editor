@@ -32,6 +32,7 @@ void Unpacker::unpack(QString filepath, QString destination, QString apktoolPath
     args << apktoolPath;
     args << "d" << filepath;
     args << "-f";
+    args << "--res-resolve-mode" << "greedy";
     if (!smali) { args << "-s"; }
     args << "-o" << destination;
     args << "-p" << frameworks;

@@ -8,7 +8,7 @@
 !define VERSIONMINOR 0
 !define VERSIONPATCH 0
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
-!define VERSIONDISPLAY "${VERSION}-beta1"
+!define VERSIONDISPLAY "${VERSION}-beta2"
 !define ABOUTURL "https://github.com/iMiKED/apk-icon-editor"
 !define UPDATEURL "https://github.com/iMiKED/apk-icon-editor/releases"
 !define EXE "$INSTDIR\apk-icon-editor.exe"
@@ -82,7 +82,7 @@ FunctionEnd
 
 Section
 	SetOutPath "$INSTDIR"
-	File /r /x "*.manifest" "..\..\bin\win64\"
+	File /r /x "*.manifest" /x "*.bak" "..\..\bin\win64\"
 	SetOutPath "$INSTDIR\gfx"
 	File "..\..\res\icons\win32\icon.ico"
 	WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -150,6 +150,7 @@ Section "-un.Uninstall"
 	Delete "$INSTDIR\imageformats\qgif.dll"
 	Delete "$INSTDIR\imageformats\qico.dll"
 	Delete "$INSTDIR\imageformats\qjpeg.dll"
+	Delete "$INSTDIR\imageformats\qwebp.dll"
 	Delete "$INSTDIR\lang\apk-icon-editor.de.qm"
 	Delete "$INSTDIR\lang\apk-icon-editor.el.qm"
 	Delete "$INSTDIR\lang\apk-icon-editor.es.qm"

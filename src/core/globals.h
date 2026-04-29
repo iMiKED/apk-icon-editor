@@ -65,6 +65,8 @@ namespace Path {
         QString dir();  ///< Returns the full path to the log directory.
         QString file(); ///< Returns the full path to the log file.
     }
+
+    QString display(QString path); ///< Returns a cleaned path with native separators for user-visible text.
 }
 
 ///

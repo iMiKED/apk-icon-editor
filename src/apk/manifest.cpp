@@ -14,6 +14,31 @@ static void setUtf8Encoding(QTextStream &stream)
 #endif
 }
 
+static QDomAttr attributeByName(const QDomElement &node, const QString &name)
+{
+    QDomElement element = node;
+    QDomAttr attr = element.attributeNode(name);
+    if (!attr.isNull()) {
+        return attr;
+    }
+
+    const QString localName = name.section(':', -1);
+    const QDomNamedNodeMap attrs = node.attributes();
+    for (int i = 0; i < attrs.count(); ++i) {
+        const QDomAttr candidate = attrs.item(i).toAttr();
+        if (candidate.name().section(':', -1) == localName) {
+            return candidate;
+        }
+    }
+    return QDomAttr();
+}
+
+static QString attributeValue(const QDomElement &node, const QString &name, const QString &fallback = QString())
+{
+    const QDomAttr attr = attributeByName(node, name);
+    return attr.isNull() ? fallback : attr.value();
+}
+
 Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 {
     this->xmlPath = xmlPath;
@@ -31,6 +56,7 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 
         applicationLabel = getXmlAttribute(QStringList() << "application" << "android:label");
         applicationIcon = getXmlAttribute(QStringList() << "application" << "android:icon");
+        applicationRoundIcon = getXmlAttribute(QStringList() << "application" << "android:roundIcon");
         applicationBanner = getXmlAttribute(QStringList() << "application" << "android:banner");
 
         // Parse <activity> nodes:
@@ -40,13 +66,40 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
             QDomElement node = nodes.at(i).toElement();
             if (node.isElement() && node.nodeName() == "activity") {
                 QDomElement activity = node.toElement();
-                QDomAttr icon = activity.attributeNode("android:icon");
-                if (!icon.isNull()) {
-                    activityIcons.append(icon);
+                const bool enabled = attributeValue(activity, "android:enabled", "true") != "false";
+                const bool launcher = !findIntentByCategory(activity, "LAUNCHER").isNull();
+                if (enabled && launcher) {
+                    QDomAttr icon = attributeByName(activity, "android:icon");
+                    if (!icon.isNull()) {
+                        activityIcons.append(icon);
+                    }
+                    QDomAttr roundIcon = attributeByName(activity, "android:roundIcon");
+                    if (!roundIcon.isNull()) {
+                        activityIcons.append(roundIcon);
+                    }
+                    QDomAttr banner = attributeByName(activity, "android:banner");
+                    if (!banner.isNull()) {
+                        activityBanners.append(banner);
+                    }
                 }
-                QDomAttr banner = activity.attributeNode("android:banner");
-                if (!banner.isNull()) {
-                    activityBanners.append(banner);
+            }
+            if (node.isElement() && node.nodeName() == "activity-alias") {
+                QDomElement activity = node.toElement();
+                const bool enabled = attributeValue(activity, "android:enabled", "true") != "false";
+                const bool launcher = !findIntentByCategory(activity, "LAUNCHER").isNull();
+                if (enabled && launcher) {
+                    QDomAttr icon = attributeByName(activity, "android:icon");
+                    if (!icon.isNull()) {
+                        activityIcons.append(icon);
+                    }
+                    QDomAttr roundIcon = attributeByName(activity, "android:roundIcon");
+                    if (!roundIcon.isNull()) {
+                        activityIcons.append(roundIcon);
+                    }
+                    QDomAttr banner = attributeByName(activity, "android:banner");
+                    if (!banner.isNull()) {
+                        activityBanners.append(banner);
+                    }
                 }
             }
         }
@@ -98,7 +151,7 @@ QDomAttr Manifest::getXmlAttribute(QStringList &tree) const
         foreach (const QString &element, tree) {
             node = node.firstChildElement(element);
         }
-        return node.attributeNode(attribute);
+        return attributeByName(node, attribute);
     }
     return QDomAttr();
 }
@@ -106,6 +159,11 @@ QDomAttr Manifest::getXmlAttribute(QStringList &tree) const
 QString Manifest::getApplicationIcon() const
 {
     return applicationIcon.value();
+}
+
+QString Manifest::getApplicationRoundIcon() const
+{
+    return applicationRoundIcon.value();
 }
 
 QString Manifest::getApplicationBanner() const
@@ -116,6 +174,27 @@ QString Manifest::getApplicationBanner() const
 QString Manifest::getApplicationLabel() const
 {
     return applicationLabel.value();
+}
+
+QList<Manifest::IconEntry> Manifest::getLauncherIconEntries() const
+{
+    QList<IconEntry> entries;
+    QStringList seen;
+    for (int i = 0; i < activityIcons.count(); ++i) {
+        const QDomAttr attr = activityIcons.at(i);
+        const QString value = attr.value();
+        if (value.isEmpty() || value == getApplicationIcon() || seen.contains(value)) {
+            continue;
+        }
+        const QDomNode parent = attr.ownerElement();
+        IconEntry entry;
+        entry.value = value;
+        entry.round = attr.name().section(':', -1) == "roundIcon";
+        entry.alias = parent.isElement() && parent.toElement().tagName() == "activity-alias";
+        entries.append(entry);
+        seen.append(value);
+    }
+    return entries;
 }
 
 QStringList Manifest::getActivityIcons() const
@@ -295,7 +374,7 @@ QDomElement Manifest::findIntentByCategory(QDomElement activity, QString categor
     while (!intent.isNull()) {
         QDomElement cat = intent.firstChildElement("category");
         while (!cat.isNull()) {
-            if (cat.attribute("android:name") == "android.intent.category." + category) {
+            if (attributeValue(cat, "android:name") == "android.intent.category." + category) {
                 return intent;
             }
             cat = cat.nextSiblingElement();

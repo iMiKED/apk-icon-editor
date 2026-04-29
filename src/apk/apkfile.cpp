@@ -1,32 +1,72 @@
 #include "apkfile.h"
+#include "adaptiveicon.h"
+#include "globals.h"
+#include <QDir>
 #include <QDirIterator>
+#include <QFileInfo>
 #include <QTextStream>
+#include <QDebug>
+
+static QString resourceKey(const QString &type, const QString &name)
+{
+    return type + "/" + name;
+}
+
+static QString resourceKey(const ResourceRef &ref)
+{
+    return ref.isValid() ? resourceKey(ref.type(), ref.name()) : QString();
+}
+
+static Icon::EntryRole entryRoleFor(const Manifest::IconEntry &entry)
+{
+    if (entry.alias && entry.round) {
+        return Icon::EntryActivityAliasRoundIcon;
+    }
+    if (entry.alias) {
+        return Icon::EntryActivityAliasIcon;
+    }
+    if (entry.round) {
+        return Icon::EntryActivityRoundIcon;
+    }
+    return Icon::EntryActivityIcon;
+}
 
 Apk::File::File(const QString &contentsPath)
 {
     // Be careful with the "contentsPath" variable: this directory is recursively removed in the destructor.
 
-    this->contentsPath = contentsPath;
+    this->contentsPath = QDir::cleanPath(QDir::fromNativeSeparators(contentsPath));
 
     // Parse application manifest:
 
-    manifest = new Manifest(contentsPath + "/AndroidManifest.xml", contentsPath + "/apktool.yml");
+    manifest = new Manifest(QDir::cleanPath(this->contentsPath + "/AndroidManifest.xml"),
+                            QDir::cleanPath(this->contentsPath + "/apktool.yml"));
     manifestModel.initialize(manifest);
     const QString appIconAttribute = manifest->getApplicationIcon();
+    const QString appRoundIconAttribute = manifest->getApplicationRoundIcon();
     const QString appIconCategory = appIconAttribute.split('/').value(0).mid(1);
     const QString appIconFilename = appIconAttribute.split('/').value(1);
     const QString appBannerAttribute = manifest->getApplicationBanner();
     const QString appBannerCategory = appBannerAttribute.split('/').value(0).mid(1);
     const QString appBannerFilename = appBannerAttribute.split('/').value(1);
-    QStringList activityIcons = manifest->getActivityIcons();
+    const QList<Manifest::IconEntry> launcherIconEntries = manifest->getLauncherIconEntries();
     QStringList activityBanners = manifest->getActivityBanners();
     const QString appLabelAttribute = manifest->getApplicationLabel();
     const QString appLabelKey = appLabelAttribute.startsWith("@string/") ? appLabelAttribute.mid(QString("@string/").length()) : QString();
 
     // Parse resource directories:
 
-    const QStringList drawableExtensions = QStringList() << "png" << "jpg" << "gif";
-    QDirIterator categories(contentsPath + "/res/", QDir::Dirs | QDir::NoDotAndDotDot);
+    ResourceResolver resolver(this->contentsPath);
+    foreach (const Manifest::IconEntry &entry, launcherIconEntries) {
+        addAdaptiveIcons(resolver, ResourceRef(entry.value), Icon::ScopeActivity, entryRoleFor(entry));
+    }
+    const bool appAdaptiveIcon = addAdaptiveIcons(resolver, ResourceRef(appIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationIcon);
+    if (!appAdaptiveIcon && !appRoundIconAttribute.isEmpty()) {
+        addAdaptiveIcons(resolver, ResourceRef(appRoundIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationRoundIcon);
+    }
+
+    const QStringList drawableExtensions = QStringList() << "png" << "jpg" << "jpeg" << "gif" << "webp";
+    QDirIterator categories(QDir::cleanPath(this->contentsPath + "/res"), QDir::Dirs | QDir::NoDotAndDotDot);
     while (categories.hasNext()) {
 
         const QFileInfo category(categories.next());
@@ -38,14 +78,19 @@ Apk::File::File(const QString &contentsPath)
             const QFileInfo resource(resources.next());
 
             if (drawableExtensions.contains(resource.suffix())) {
+                const bool isAdaptiveLayer = isAdaptiveLayerResource(categoryTitle, resource.baseName());
 
                 // Parse application icons:
 
-                if (categoryTitle == appIconCategory) {
+                if (!appAdaptiveIcon && categoryTitle == appIconCategory) {
                     if (resource.baseName() == appIconFilename) {
+                        if (isAdaptiveLayer) {
+                            qDebug().noquote() << "Skipping adaptive layer fallback resource:" << Path::display(resource.filePath());
+                            continue;
+                        }
                         const QString icon = resource.filePath();
                         thumbnail.addFile(icon);
-                        iconsModel.add(icon, Icon::Unknown, Icon::ScopeApplication);
+                        iconsModel.add(icon, Icon::Unknown, Icon::ScopeApplication, Icon::EntryApplicationIcon);
                     }
                 }
 
@@ -54,19 +99,24 @@ Apk::File::File(const QString &contentsPath)
                 if (!appBannerFilename.isEmpty()) {
                     if (categoryTitle == appBannerCategory) {
                         if (resource.baseName() == appBannerFilename) {
-                            iconsModel.add(resource.filePath(), Icon::TvBanner, Icon::ScopeApplication);
+                            iconsModel.add(resource.filePath(), Icon::TvBanner, Icon::ScopeApplication, Icon::EntryApplicationIcon);
                         }
                     }
                 }
 
                 // Parse activity icons:
 
-                foreach (const QString &activityIconAttribute, activityIcons) {
+                foreach (const Manifest::IconEntry &activityIconEntry, launcherIconEntries) {
+                    const QString activityIconAttribute = activityIconEntry.value;
                     const QString activityIconCategory = activityIconAttribute.split('/').value(0).mid(1);
                     if (activityIconCategory == categoryTitle) {
                         const QString activityIconFilename = activityIconAttribute.split('/').value(1);
                         if (resource.baseName() == activityIconFilename) {
-                            iconsModel.add(resource.filePath(), Icon::Unknown, Icon::ScopeActivity);
+                            if (isAdaptiveLayer) {
+                                qDebug().noquote() << "Skipping adaptive layer activity fallback resource:" << Path::display(resource.filePath());
+                                continue;
+                            }
+                            iconsModel.add(resource.filePath(), Icon::Unknown, Icon::ScopeActivity, entryRoleFor(activityIconEntry));
                         }
                     }
                 }
@@ -166,11 +216,125 @@ void Apk::File::removeIcon(Icon *icon)
     QFileInfo fi(icon->getFilename());
     QString filePath = fi.path() + "/" + fi.baseName();
     QStringList icons;
-    icons << filePath + ".png" << filePath + ".jpg" << filePath + ".gif";
+    icons << filePath + ".png" << filePath + ".jpg" << filePath + ".jpeg" << filePath + ".gif" << filePath + ".webp";
     foreach (const QString &icon, icons) {
         QFile::remove(icon);
     }
     iconsModel.remove(icon);
+}
+
+bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope, Icon::EntryRole entryRole)
+{
+    if (!iconRef.isValid()) {
+        return false;
+    }
+
+    if (!resolver.resolveXml(iconRef).found) {
+        return false;
+    }
+
+    bool added = false;
+    const QList<Icon::Type> types = QList<Icon::Type>()
+            << Icon::Ldpi
+            << Icon::Mdpi
+            << Icon::Hdpi
+            << Icon::Xhdpi
+            << Icon::Xxhdpi
+            << Icon::Xxxhdpi;
+
+    Device device;
+    foreach (Icon::Type type, types) {
+        const QSize size = device.getIconSize(type).size;
+        const AdaptiveIcon::Result result = AdaptiveIcon::resolve(resolver, iconRef, type, size);
+        if (!result.valid) {
+            continue;
+        }
+
+        adaptiveLayerRefs.insert(resourceKey(iconRef));
+
+        QStringList saveTargets;
+        AdaptiveIconDescriptor descriptor = result.descriptor;
+        QPixmap previewPixmap = result.pixmap;
+        bool usesReadyBitmapPreview = false;
+        const ResourceResolver::Value directBitmap = resolver.resolveBitmap(iconRef, type);
+        if (directBitmap.found) {
+            const QPixmap directPixmap(directBitmap.filePath);
+            if (!directPixmap.isNull()) {
+                previewPixmap = directPixmap;
+                usesReadyBitmapPreview = true;
+                descriptor.previewSource = "ready bitmap with the same resource id";
+                descriptor.previewPath = directBitmap.filePath;
+                saveTargets.append(directBitmap.filePath);
+                qDebug().noquote() << "Adaptive icon preview uses ready bitmap resource:" << Path::display(directBitmap.filePath);
+            }
+        }
+        if (!usesReadyBitmapPreview) {
+            descriptor.previewSource = "composed XML layers with AOSP-style layer inset";
+        }
+        if (!descriptor.foregroundPath.isEmpty()) {
+            saveTargets.append(descriptor.foregroundPath);
+        } else {
+            const QString qualifier = ResourceResolver::qualifierForType(type);
+            const int resIndex = result.xmlPath.indexOf("/res/");
+            if (!qualifier.isEmpty() && resIndex >= 0) {
+                const QString contentsRoot = result.xmlPath.left(resIndex);
+                const QString customName = iconRef.name() + "_foreground_custom";
+                const QString resourceType = iconRef.type().isEmpty() ? "mipmap" : iconRef.type();
+                saveTargets.append(QDir::cleanPath(QString("%1/res/%2-%3/%4.png").arg(contentsRoot, resourceType, qualifier, customName)));
+                descriptor.customForegroundRef = QString("@%1/%2").arg(resourceType, customName);
+            }
+        }
+        const QString foregroundKey = resourceKey(ResourceRef(descriptor.foregroundRef));
+        const QString backgroundKey = resourceKey(ResourceRef(descriptor.backgroundRef));
+        const QString monochromeKey = resourceKey(ResourceRef(descriptor.monochromeRef));
+        if (!foregroundKey.isEmpty()) {
+            adaptiveLayerRefs.insert(foregroundKey);
+        }
+        if (!backgroundKey.isEmpty()) {
+            adaptiveLayerRefs.insert(backgroundKey);
+        }
+        if (!monochromeKey.isEmpty()) {
+            adaptiveLayerRefs.insert(monochromeKey);
+        }
+        saveTargets.removeDuplicates();
+        if (scope == Icon::ScopeApplication) {
+            thumbnail.addPixmap(previewPixmap);
+        }
+        iconsModel.add(result.xmlPath, previewPixmap, saveTargets, descriptor, type, scope, entryRole);
+        added = true;
+    }
+
+    if (!added) {
+        QStringList addedFiles;
+        const QList<ResourceResolver::Candidate> bitmapFallbacks = resolver.bitmapCandidatesByName(iconRef.name());
+        foreach (const ResourceResolver::Candidate &fallback, bitmapFallbacks) {
+            if (addedFiles.contains(fallback.filePath)) {
+                continue;
+            }
+            if (isAdaptiveLayerResource(fallback.dirName.split('-').first(), QFileInfo(fallback.filePath).completeBaseName())) {
+                qDebug().noquote() << "Skipping adaptive layer bitmap fallback:" << Path::display(fallback.filePath);
+                continue;
+            }
+
+            if (scope == Icon::ScopeApplication) {
+                thumbnail.addFile(fallback.filePath);
+            }
+
+            iconsModel.add(fallback.filePath, fallback.type, scope, entryRole);
+            addedFiles.append(fallback.filePath);
+            added = true;
+        }
+    }
+
+    if (!added) {
+        qDebug() << "Adaptive icon was found but could not be rendered:" << iconRef.original();
+    }
+    return added;
+}
+
+bool Apk::File::isAdaptiveLayerResource(const QString &resourceType, const QString &resourceName) const
+{
+    return adaptiveLayerRefs.contains(resourceKey(resourceType, resourceName));
 }
 
 // Getters:

@@ -2,9 +2,19 @@
 #include "authors.h"
 #include "globals.h"
 #include <QBoxLayout>
+#include <QCoreApplication>
+#include <QDateTime>
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QFileInfo>
+
+#ifndef GIT_COMMIT
+#define GIT_COMMIT ""
+#endif
+
+#ifndef GIT_COMMIT_URL
+#define GIT_COMMIT_URL ""
+#endif
 
 About::About(QWidget *parent) : QDialog(parent)
 {
@@ -84,6 +94,12 @@ void About::showAuthors()
 void About::retranslate()
 {
     setWindowTitle(tr("About"));
+    const QString buildDateTime = QFileInfo(QCoreApplication::applicationFilePath()).lastModified().toString("dd.MM.yyyy HH:mm:ss");
+    const QString commit = QString::fromLatin1(GIT_COMMIT);
+    const QString commitUrl = QString::fromLatin1(GIT_COMMIT_URL);
+    const QString commitLine = commit.isEmpty()
+            ? QString()
+            : tr("Commit: %1").arg(QString("<a href='%1'>%2</a>").arg(commitUrl, commit)) + "<br>";
 
     textApp->setText(
 #ifndef PORTABLE
@@ -91,7 +107,8 @@ void About::retranslate()
 #else
         QString("<h3>%1 v%2 %3</h3>").arg(APP, VER, "Portable") +
 #endif
-        tr("Built on: %1 - %2").arg(__DATE__, __TIME__) + "<br>" +
+        tr("Built on: %1").arg(buildDateTime) + "<br>" +
+        commitLine +
         tr("Author: %1").arg("Alexander Gorishnyak") + "<br>" +
         tr("Fork author: %1").arg("<a href='https://4pda.to/forum/index.php?showuser=1017942'>iMiKED from 4PDA</a>") + "<br>" +
         tr("License") + ": <a href='http://www.gnu.org/licenses/gpl-3.0.html'>GNU GPL v3.0</a>"

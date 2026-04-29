@@ -6,7 +6,10 @@
 #include "manifestmodel.h"
 #include "titlesmodel.h"
 #include "device.h"
+#include "resourceref.h"
+#include "resourceresolver.h"
 #include <QDomDocument>
+#include <QSet>
 
 namespace Apk {
 
@@ -58,9 +61,12 @@ namespace Apk {
 
     private:
         QString getIconPath(Icon::Type type);
+        bool addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
+        bool isAdaptiveLayerResource(const QString &resourceType, const QString &resourceName) const;
 
         QString filePath;     ///< APK filename.
         QString contentsPath; ///< Path to APK contents directory.
+        QSet<QString> adaptiveLayerRefs;
 
         QIcon thumbnail;
         Manifest *manifest;

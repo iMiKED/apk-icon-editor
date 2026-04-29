@@ -8,14 +8,22 @@
 class Manifest {
 
 public:
+    struct IconEntry {
+        QString value;
+        bool round = false;
+        bool alias = false;
+    };
+
     Manifest(const QString &xmlPath, const QString &ymlPath);
     ~Manifest();
 
     QDomAttr getXmlAttribute(QStringList &tree) const;
 
     QString getApplicationIcon() const;
+    QString getApplicationRoundIcon() const;
     QString getApplicationBanner() const;
     QString getApplicationLabel() const;
+    QList<IconEntry> getLauncherIconEntries() const;
     QStringList getActivityIcons() const;
     QStringList getActivityBanners() const;
     int getMinSdk() const;
@@ -46,6 +54,7 @@ private:
     QString yml;
 
     QDomAttr applicationIcon;
+    QDomAttr applicationRoundIcon;
     QDomAttr applicationBanner;
     QDomAttr applicationLabel;
     QList<QDomAttr> activityIcons;

@@ -1,5 +1,47 @@
 # Version History
 
+## 3.0.0-beta2
+* Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.
+* Added adaptive icon preview composition from foreground and background resources.
+* Added WebP launcher image detection for decoded APK resources.
+* Added roundIcon and activity-alias icon parsing for launcher icon fallbacks.
+* Fixed adaptive XML icon list titles and ignored disabled activity-alias icons.
+* Fixed adaptive XML background color resolution from Apktool-decoded values resources.
+* Added Qt WebP image format plugin for WebP launcher icon resources.
+* Fixed adaptive XML fallback detection when Apktool decodes vector foregrounds and bitmap launcher fallbacks into different resource directories.
+* Added Android VectorDrawable foreground rendering for adaptive XML launcher icons.
+* Prevented rendered adaptive/vector previews from overwriting XML resources when saving unchanged icons.
+* Fixed exporting adaptive/vector icon previews with Save Icon.
+* Added initial adaptive icon write-back by creating custom bitmap foreground layers for vector/XML foregrounds during APK packing.
+* Synchronized adaptive XML icon replacement across all density previews that share the same adaptive icon resource.
+* Updated bundled apksigner and enabled v1/v2/v3 signature schemes explicitly for APK signing.
+* Added JKS files to the KeyStore selection dialog filter.
+* Added an adaptive icon descriptor for XML, foreground, background, and write-back metadata.
+* Changed About dialog build timestamp to use the executable file build time.
+* Changed About dialog build timestamp format and added a GitHub commit link.
+* Added icon list tooltips with adaptive XML foreground, background, and write-back metadata.
+* Added adaptive icon metadata logging when selecting, replacing, exporting, and packing icons.
+* Normalized decoded APK resource paths shown in logs and icon metadata.
+* Hardened icon fallback filtering to skip adaptive XML layer resources and non-launcher activity icons.
+* Displayed user-visible paths with native platform separators in logs and icon tooltips.
+* Improved adaptive resource qualifier scoring and diagnostics for unsupported resource references.
+* Added rendering for adaptive icon XML layers that use shape gradients, layer-list, inline vector, inset, and rotate wrappers.
+* Enabled Apktool greedy resource resolving to recover obfuscated launcher resource file names.
+* Added support for Apktool-renamed Android XML namespace attributes such as `n0:icon` and `n0:drawable`.
+* Added an Apktool build compatibility cleanup/retry for unsupported Android manifest attributes reported by aapt2.
+* Fixed adaptive icon write-back for extensionless bitmap resources used by obfuscated APKs.
+* Added an explicit foreground-only adaptive icon replacement policy in tooltips, logs, and the Replace Icon confirmation dialog.
+* Added adaptive XML monochrome layer metadata and filtering for Android themed icons.
+* Added drawable XML shape rendering for adaptive icon backgrounds, including oval, rounded corners, stroke, and layer item insets.
+* Preferred ready bitmap resources with the same adaptive XML resource id for preview, matching APK Info behavior and preserving app-provided icon shape/scale.
+* Removed forced fallback launcher masking from composed adaptive XML previews; the next rendering step will follow AOSP layer sizing/inset rules instead.
+* Applied AOSP-style adaptive layer inset when composing adaptive XML previews from foreground and background layers.
+* Rendered XML/vector adaptive icon layers directly at inset layer size to avoid blurry upscaled previews.
+* Added oversampled adaptive XML preview composition for smoother antialiasing.
+* Added launcher entry roles and ordered application icons before activity and activity-alias launcher icons.
+* Hardened resource qualifier handling for values aliases/colors and added diagnostics for ambiguous resource choices.
+* Documented resource candidate selection diagnostics: APK resources are selected by the lowest `score`, and logs show candidate scores and the selected resource.
+
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
 * Migrated Windows builds to *MSVC 2022 x64*.

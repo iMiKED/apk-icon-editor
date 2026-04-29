@@ -6,16 +6,52 @@ This repository is a fork of the original [APK Icon Editor](https://github.com/k
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/iMiKED/apk-icon-editor/blob/master/LICENSE)
 
 ## Description
-**APK Icon Editor** is a cross-platform APK editor designed to easily edit and replace APK resources such as icons, strings, images, application name and version, etc. Written in C++/Qt.
+**APK Icon Editor** is a cross-platform APK editor designed to edit and replace APK resources such as icons, strings, images, application name and version. This fork modernizes the original Qt application for current build toolchains and adds beta support for adaptive XML launcher icons decoded by Apktool.
 
 ## Features
-- Edit, replace and extract APK icons;
+- Edit, replace and extract APK icons, including classic bitmap launcher icons and adaptive XML launcher icons;
+- Preview adaptive icons composed from XML foreground and background resources;
+- Render common Android VectorDrawable foreground layers used by adaptive icons;
 - Edit application name, version and resources;
 - Sign and optimize APK;
-- Supported image formats: PNG, ICO, GIF, JPG, BMP;
+- Supported image formats: PNG, ICO, GIF, JPG, BMP, WebP;
+- Parse application `roundIcon`, launcher activity aliases, and activity icon fallbacks;
 - Size presets for devices: *Android*, *BlackBerry*, *Amazon Kindle Fire*;
 - Cloud storage upload: *Dropbox*, *Google Drive*, *Microsoft OneDrive*;
 - Multilingual interface.
+
+## 3.0.0 Beta Status
+The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta2` focuses on adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, color backgrounds are supported, WebP launcher layers are loaded through Qt image plugins, and vector foreground previews are rendered in-app.
+
+Adaptive/vector previews are intended for display, replacement, export, and safe APK repacking. The editor shows adaptive icon metadata in tooltips and logs, including the launcher entry, XML descriptor, foreground, background, monochrome layer when present, preview source, and write-back target.
+
+`Write-back` means the real resource that will be changed before Apktool rebuilds the APK. Classic bitmap icons are written back to the selected PNG/WebP file. Adaptive XML icons are saved through an explicit foreground-only strategy: existing bitmap foreground layers are replaced in place, while vector/XML foregrounds get a generated custom bitmap foreground resource and the adaptive XML is updated to reference it. Background layers are preserved to avoid breaking the original adaptive icon structure.
+
+Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
+
+## 3.0.0-beta2 Release Notes
+Highlights:
+
+- Added adaptive XML launcher icon support based on Apktool-decoded resources, without bundling `aapt2`.
+- Added preview composition for adaptive foreground/background layers, including WebP, color, drawable XML shapes, layer-lists, insets, rotate wrappers, and common Android VectorDrawable foregrounds.
+- Preferred ready bitmap resources with the same adaptive XML resource id when present, preserving app-provided launcher shape and scale.
+- Added AOSP-style adaptive layer inset and oversampled preview composition for better scale and antialiasing.
+- Added Save Icon, Replace Icon, Pack APK, and reopen support for complex adaptive/vector launcher icons.
+- Added foreground-only adaptive icon write-back with clear tooltip/log metadata and confirmation text.
+- Added `roundIcon`, launcher activity, and activity-alias launcher entry parsing with a stable display order.
+- Added monochrome layer metadata for Android themed icons.
+- Improved APK signing with bundled apksigner and explicit v1/v2/v3 schemes.
+- Added build and packaging updates for Windows, Linux, Fedora/RHEL RPM, macOS Intel, and macOS Apple Silicon.
+
+## Release Artifacts
+GitHub Actions are prepared to build the following packages:
+
+- Windows x64 portable ZIP built with MSVC 2022 and Qt 6.8.
+- Linux x86_64 portable `tar.gz`.
+- Debian/Ubuntu `amd64` DEB package.
+- Fedora/RHEL-compatible RPM package.
+- macOS Intel x86_64 app ZIP and DMG.
+- macOS Apple Silicon arm64 app ZIP and DMG.
 
 ## Requirements
 #### Recommended:

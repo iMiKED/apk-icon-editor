@@ -1,7 +1,31 @@
 #ifndef ICON_H
 #define ICON_H
 
+#include <QColor>
 #include <QGraphicsEffect>
+#include <QPixmap>
+#include <QString>
+#include <QStringList>
+
+struct AdaptiveIconDescriptor {
+    QString xmlPath;
+    QString foregroundRef;
+    QString foregroundPath;
+    QString backgroundRef;
+    QString backgroundPath;
+    QColor backgroundColor;
+    QString monochromeRef;
+    QString monochromePath;
+    QColor monochromeColor;
+    bool monochromeRenderable = false;
+    QString previewSource;
+    QString previewPath;
+    QString customForegroundRef;
+
+    bool isValid() const { return !xmlPath.isEmpty(); }
+    bool needsXmlPatch() const { return !xmlPath.isEmpty() && !customForegroundRef.isEmpty(); }
+    bool usesCustomForeground() const { return !customForegroundRef.isEmpty(); }
+};
 
 class Icon : public QObject
 {
@@ -24,7 +48,18 @@ public:
         ScopeActivity
     };
 
-    explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication);
+    enum EntryRole {
+        EntryApplicationIcon,
+        EntryApplicationRoundIcon,
+        EntryActivityIcon,
+        EntryActivityRoundIcon,
+        EntryActivityAliasIcon,
+        EntryActivityAliasRoundIcon
+    };
+
+    explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -32,10 +67,17 @@ public:
     bool resize(int w, int h);
 
     QString getTitle() const;                       ///< Returns the user-friendly icon title.
+    QString getToolTip() const;
     QPixmap getPixmap();                            ///< Returns the icon with the applied visual effects.
     QString getFilename() const;                    ///< Returns the icon filename.
+    QString getAdaptiveXmlPath() const;
+    const AdaptiveIconDescriptor &getAdaptiveDescriptor() const;
     Type getType() const;
     Scope getScope() const;
+    EntryRole getEntryRole() const;
+    QString getEntryRoleTitle() const;
+    int getEntryPriority() const;
+    bool isAdaptiveIcon() const;
 
     bool revert();                                  ///< Reverts the original icon (loaded from the original filename).
     int width() const { return pixmap.width(); }    ///< Returns the icon width.
@@ -67,13 +109,20 @@ signals:
 
 private:
     void applyEffects();
+    bool patchAdaptiveForeground() const;
 
     QPixmap pixmap;   ///< Stores the pixmap itself.
+    QPixmap originalPixmap;
     QPixmap pixmapFx; ///< Stores the pixmap with effects applied.
     QString filePath; ///< Stores the pixmap original filename. Used to revert the original pixmap.
+    QStringList saveTargets;
+    AdaptiveIconDescriptor adaptiveDescriptor;
     QStringList qualifiers;
     Type type;
     Scope scope;
+    EntryRole entryRole;
+    bool modified;
+    bool virtualIcon;
 
     bool isColorize;  ///< Stores the "Colorize" effect state.
     bool isFlipX;     ///< Stores the horizontal flipping state.

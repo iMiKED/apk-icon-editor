@@ -27,6 +27,9 @@ namespace Apk {
         void signWithPem(Apk::File *apk, QString apkPath);
         void signWithKeystore(Apk::File *apk, QString apkPath);
         void finalize(Apk::File *apk, QString apkPath) const;
+        void startApktoolBuild(const QString &apktoolPath, const QString &contents, const QString &output, const QString &frameworks);
+        bool removeMissingAndroidManifestAttributes(const QString &manifestPath, const QString &errorText) const;
+        bool removeAndroidManifestAttributes(const QString &manifestPath, const QStringList &names, const QString &reason) const;
 
         QProcess *apktool;
         QProcess *zipaligner;
@@ -34,6 +37,7 @@ namespace Apk {
 
         QString signError;
         QString alignError;
+        bool retriedMissingManifestAttributes = false;
 
     signals:
         void packed(Apk::File *apk, bool success, QString message, QString details = QString()) const;

@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QTextStream>
 #include <QtXml/QDomDocument>
 
 using Apk::Packer;
@@ -24,6 +25,7 @@ void Packer::pack(Apk::File *apk, QString temp)
 
     signError.clear();
     alignError.clear();
+    retriedMissingManifestAttributes = false;
 
     const QString APKTOOL = QDir::fromNativeSeparators(apk->getApktool());
     const QString TEMPAPK = temp + "/packed/temp.zip";
@@ -45,6 +47,10 @@ void Packer::pack(Apk::File *apk, QString temp)
 
     emit loading(30, tr("Saving string resources..."));
     apk->saveTitles();
+    removeAndroidManifestAttributes(
+                CONTENTS + "/AndroidManifest.xml",
+                QStringList() << "zygotePreloadNativeLib" << "nativeService",
+                "pre-build compatibility cleanup");
 
     // Pack APK (Apktool):
 
@@ -65,6 +71,12 @@ void Packer::pack(Apk::File *apk, QString temp)
                 return;
             default: {
                 const QString errorText = apktool->readAllStandardError().replace("\r\n", "\n");
+                if (!retriedMissingManifestAttributes && removeMissingAndroidManifestAttributes(CONTENTS + "/AndroidManifest.xml", errorText)) {
+                    retriedMissingManifestAttributes = true;
+                    qDebug() << "Retrying Apktool build after removing unsupported Android manifest attributes.";
+                    startApktoolBuild(APKTOOL, CONTENTS, TEMPAPK, temp + "/framework/");
+                    return;
+                }
                 qDebug() << errorText;
                 emit error(Apk::ERROR.arg("Apktool"), errorText);
                 break;
@@ -85,7 +97,7 @@ void Packer::pack(Apk::File *apk, QString temp)
         }
     });
 
-    apktool->start("java", QStringList() << "-jar" << APKTOOL << "b" << CONTENTS << "-f" << "-o" << TEMPAPK << "-p" << temp + "/framework/");
+    startApktoolBuild(APKTOOL, CONTENTS, TEMPAPK, temp + "/framework/");
 }
 
 void Packer::cancel()
@@ -233,12 +245,103 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
     QStringList args;
     if (isApksigner) {
         args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
-             << "sign" << "--key" << pk8 << "--cert" << pem << apkPath;
+             << "sign"
+             << "--v1-signing-enabled" << "true"
+             << "--v2-signing-enabled" << "true"
+             << "--v3-signing-enabled" << "true"
+             << "--key" << pk8 << "--cert" << pem << apkPath;
     } else {
         args << "-jar" << Path::Data::shared() + "signer/signapk.jar"
              << pem << pk8 << apkPath << apkDest;
     }
     signer->start(java.isEmpty() ? "java" : java, args);
+}
+
+void Packer::startApktoolBuild(const QString &apktoolPath, const QString &contents, const QString &output, const QString &frameworks)
+{
+    apktool->start("java", QStringList() << "-jar" << apktoolPath << "b" << contents << "-f" << "-o" << output << "-p" << frameworks);
+}
+
+bool Packer::removeMissingAndroidManifestAttributes(const QString &manifestPath, const QString &errorText) const
+{
+    QRegularExpression rx("attribute android:([A-Za-z0-9_]+) not found");
+    QRegularExpressionMatchIterator matches = rx.globalMatch(errorText);
+    QStringList names;
+    while (matches.hasNext()) {
+        const QString name = matches.next().captured(1);
+        if (!name.isEmpty() && !names.contains(name)) {
+            names.append(name);
+        }
+    }
+    return removeAndroidManifestAttributes(manifestPath, names, "aapt2 missing-attribute retry");
+}
+
+bool Packer::removeAndroidManifestAttributes(const QString &manifestPath, const QStringList &names, const QString &reason) const
+{
+    if (names.isEmpty()) {
+        return false;
+    }
+
+    QFile textFile(manifestPath);
+    if (textFile.open(QFile::ReadOnly | QFile::Text)) {
+        QString xmlText = QString::fromUtf8(textFile.readAll());
+        textFile.close();
+
+        int removed = 0;
+        foreach (const QString &name, names) {
+            QRegularExpression attrRx(QString("\\s+(?:[A-Za-z_][A-Za-z0-9_.-]*:)?%1=\"[^\"]*\"").arg(QRegularExpression::escape(name)));
+            QRegularExpressionMatchIterator it = attrRx.globalMatch(xmlText);
+            while (it.hasNext()) {
+                it.next();
+                ++removed;
+            }
+            xmlText.replace(attrRx, QString());
+        }
+
+        if (removed > 0 && textFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+            QTextStream out(&textFile);
+            out << xmlText;
+            qDebug().noquote() << QString("Removed unsupported Android manifest attributes (%1): %2").arg(reason, names.join(", "));
+            return true;
+        }
+    }
+
+    QFile file(manifestPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return false;
+    }
+    QDomDocument doc;
+    if (!doc.setContent(file.readAll())) {
+        return false;
+    }
+    file.close();
+
+    int removed = 0;
+    QDomNodeList nodes = doc.elementsByTagName("*");
+    for (int i = 0; i < nodes.count(); ++i) {
+        QDomElement element = nodes.at(i).toElement();
+        QDomNamedNodeMap attrs = element.attributes();
+        for (int j = attrs.count() - 1; j >= 0; --j) {
+            const QDomAttr attr = attrs.item(j).toAttr();
+            const QString localName = attr.name().section(':', -1);
+            if (names.contains(localName)) {
+                element.removeAttribute(attr.name());
+                ++removed;
+            }
+        }
+    }
+    if (!removed) {
+        return false;
+    }
+
+    if (!file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        return false;
+    }
+    QTextStream out(&file);
+    doc.save(out, 4);
+
+    qDebug().noquote() << QString("Removed unsupported Android manifest attributes (%1): %2").arg(reason, names.join(", "));
+    return true;
 }
 
 void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
@@ -285,7 +388,11 @@ void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
     QStringList args;
     if (isApksigner) {
         args << "-jar" << Path::Data::shared() + "signer/apksigner.jar"
-             << "sign" << "--ks" << keystore << "--ks-key-alias" << alias
+             << "sign"
+             << "--v1-signing-enabled" << "true"
+             << "--v2-signing-enabled" << "true"
+             << "--v3-signing-enabled" << "true"
+             << "--ks" << keystore << "--ks-key-alias" << alias
              << "--ks-pass" << QString("pass:%1").arg(passKeystore)
              << "--key-pass" << QString("pass:%1").arg(passAlias)
              << apkPath;

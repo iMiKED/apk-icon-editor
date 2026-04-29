@@ -112,3 +112,11 @@ QString Path::Log::file()
 {
     return Path::Log::dir() + "apk-icon-editor.log";
 }
+
+QString Path::display(QString path)
+{
+    if (path.isEmpty()) {
+        return path;
+    }
+    return QDir::toNativeSeparators(QDir::cleanPath(QDir::fromNativeSeparators(path)));
+}

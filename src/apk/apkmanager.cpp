@@ -1,4 +1,6 @@
 #include "apkmanager.h"
+#include "globals.h"
+#include <QDir>
 #include <QFile>
 #include <QDebug>
 
@@ -20,20 +22,22 @@ ApkManager::ApkManager(QObject *parent) : QObject(parent)
 
 void ApkManager::unpack(QString filename, QString temp, QString apktool, bool smali)
 {
-    qDebug() << "Unpacking" << filename;
-    qDebug() << "Output directory:" << temp;
+    const QString tempPath = QDir::cleanPath(QDir::fromNativeSeparators(temp));
+
+    qDebug().noquote() << "Unpacking" << Path::display(filename);
+    qDebug().noquote() << "Output directory:" << Path::display(tempPath);
     unpacker->unpack(filename,
-                     temp + "/apk/",
+                     QDir::cleanPath(tempPath + "/apk"),
                      apktool,
-                     temp + "/framework",
+                     QDir::cleanPath(tempPath + "/framework"),
                      smali);
 }
 
 void ApkManager::pack(Apk::File *apk, QString temp)
 {
     qDebug() << "\n--- Packing APK ---";
-    qDebug() << "Output file:" << apk->getFilePath();
-    qDebug() << "Contents directory:" << apk->getContentsPath();
+    qDebug().noquote() << "Output file:" << Path::display(apk->getFilePath());
+    qDebug().noquote() << "Contents directory:" << Path::display(apk->getContentsPath());
 
     qDebug() << "Sign:" << apk->getSign();
     qDebug() << "Zipalign:" << apk->getZipalign();

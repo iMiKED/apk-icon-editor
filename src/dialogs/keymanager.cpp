@@ -32,7 +32,7 @@ KeyManager::KeyManager(QWidget *parent) : QDialog(parent)
 
     boxPem->setFormats("PEM (*.pem);;");
     boxPk8->setFormats("PK8 (*.pk8);;");
-    boxKey->setFormats("KeyStore (*.keystore);;");
+    boxKey->setFormats("KeyStore (*.keystore *.jks);;");
 
     btnNew = new QPushButton(this);
     QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
