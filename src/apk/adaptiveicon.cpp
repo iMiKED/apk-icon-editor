@@ -315,6 +315,16 @@ QString AdaptiveIcon::drawableAttr(const QDomElement &node)
     if (value.isEmpty()) {
         value = node.attribute("drawable");
     }
+    if (value.isEmpty()) {
+        const QDomNamedNodeMap attrs = node.attributes();
+        for (int i = 0; i < attrs.count(); ++i) {
+            const QDomAttr attr = attrs.item(i).toAttr();
+            if (attr.name().section(':', -1) == "drawable") {
+                value = attr.value();
+                break;
+            }
+        }
+    }
     return value.trimmed();
 }
 

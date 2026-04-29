@@ -14,6 +14,31 @@ static void setUtf8Encoding(QTextStream &stream)
 #endif
 }
 
+static QDomAttr attributeByName(const QDomElement &node, const QString &name)
+{
+    QDomElement element = node;
+    QDomAttr attr = element.attributeNode(name);
+    if (!attr.isNull()) {
+        return attr;
+    }
+
+    const QString localName = name.section(':', -1);
+    const QDomNamedNodeMap attrs = node.attributes();
+    for (int i = 0; i < attrs.count(); ++i) {
+        const QDomAttr candidate = attrs.item(i).toAttr();
+        if (candidate.name().section(':', -1) == localName) {
+            return candidate;
+        }
+    }
+    return QDomAttr();
+}
+
+static QString attributeValue(const QDomElement &node, const QString &name, const QString &fallback = QString())
+{
+    const QDomAttr attr = attributeByName(node, name);
+    return attr.isNull() ? fallback : attr.value();
+}
+
 Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
 {
     this->xmlPath = xmlPath;
@@ -41,18 +66,18 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
             QDomElement node = nodes.at(i).toElement();
             if (node.isElement() && node.nodeName() == "activity") {
                 QDomElement activity = node.toElement();
-                const bool enabled = activity.attribute("android:enabled", "true") != "false";
+                const bool enabled = attributeValue(activity, "android:enabled", "true") != "false";
                 const bool launcher = !findIntentByCategory(activity, "LAUNCHER").isNull();
                 if (enabled && launcher) {
-                    QDomAttr icon = activity.attributeNode("android:icon");
+                    QDomAttr icon = attributeByName(activity, "android:icon");
                     if (!icon.isNull()) {
                         activityIcons.append(icon);
                     }
-                    QDomAttr roundIcon = activity.attributeNode("android:roundIcon");
+                    QDomAttr roundIcon = attributeByName(activity, "android:roundIcon");
                     if (!roundIcon.isNull()) {
                         activityIcons.append(roundIcon);
                     }
-                    QDomAttr banner = activity.attributeNode("android:banner");
+                    QDomAttr banner = attributeByName(activity, "android:banner");
                     if (!banner.isNull()) {
                         activityBanners.append(banner);
                     }
@@ -60,18 +85,18 @@ Manifest::Manifest(const QString &xmlPath, const QString &ymlPath)
             }
             if (node.isElement() && node.nodeName() == "activity-alias") {
                 QDomElement activity = node.toElement();
-                const bool enabled = activity.attribute("android:enabled", "true") != "false";
+                const bool enabled = attributeValue(activity, "android:enabled", "true") != "false";
                 const bool launcher = !findIntentByCategory(activity, "LAUNCHER").isNull();
                 if (enabled && launcher) {
-                    QDomAttr icon = activity.attributeNode("android:icon");
+                    QDomAttr icon = attributeByName(activity, "android:icon");
                     if (!icon.isNull()) {
                         activityIcons.append(icon);
                     }
-                    QDomAttr roundIcon = activity.attributeNode("android:roundIcon");
+                    QDomAttr roundIcon = attributeByName(activity, "android:roundIcon");
                     if (!roundIcon.isNull()) {
                         activityIcons.append(roundIcon);
                     }
-                    QDomAttr banner = activity.attributeNode("android:banner");
+                    QDomAttr banner = attributeByName(activity, "android:banner");
                     if (!banner.isNull()) {
                         activityBanners.append(banner);
                     }
@@ -126,7 +151,7 @@ QDomAttr Manifest::getXmlAttribute(QStringList &tree) const
         foreach (const QString &element, tree) {
             node = node.firstChildElement(element);
         }
-        return node.attributeNode(attribute);
+        return attributeByName(node, attribute);
     }
     return QDomAttr();
 }
@@ -328,7 +353,7 @@ QDomElement Manifest::findIntentByCategory(QDomElement activity, QString categor
     while (!intent.isNull()) {
         QDomElement cat = intent.firstChildElement("category");
         while (!cat.isNull()) {
-            if (cat.attribute("android:name") == "android.intent.category." + category) {
+            if (attributeValue(cat, "android:name") == "android.intent.category." + category) {
                 return intent;
             }
             cat = cat.nextSiblingElement();
