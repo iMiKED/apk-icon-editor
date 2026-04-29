@@ -83,7 +83,7 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
         return result;
     }
 
-    QPixmap pixmap = render(background, foreground, size, foregroundVector, backgroundPixmap);
+    QPixmap pixmap = applyLauncherMask(render(background, foreground, size, foregroundVector, backgroundPixmap));
     if (pixmap.isNull()) {
         return result;
     }
@@ -101,6 +101,7 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     result.descriptor.monochromePath = monochrome.isBitmap ? monochrome.filePath : QString();
     result.descriptor.monochromeColor = monochrome.color;
     result.descriptor.monochromeRenderable = monochrome.found || !monochromePixmap.isNull();
+    result.descriptor.previewMask = "circle";
     result.type = type;
     return result;
 }
@@ -166,6 +167,27 @@ QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const Re
     }
 
     painter.end();
+    return QPixmap::fromImage(canvas);
+}
+
+QPixmap AdaptiveIcon::applyLauncherMask(const QPixmap &pixmap)
+{
+    if (pixmap.isNull()) {
+        return pixmap;
+    }
+
+    QImage canvas(pixmap.size(), QImage::Format_ARGB32_Premultiplied);
+    canvas.fill(Qt::transparent);
+
+    QPainter painter(&canvas);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    QPainterPath mask;
+    mask.addEllipse(QRectF(0, 0, pixmap.width(), pixmap.height()));
+    painter.setClipPath(mask);
+    painter.drawPixmap(canvas.rect(), pixmap);
+    painter.end();
+
     return QPixmap::fromImage(canvas);
 }
 

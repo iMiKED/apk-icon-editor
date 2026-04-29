@@ -245,6 +245,11 @@ QString Icon::getToolTip() const
     lines << tr("Adaptive XML icon");
     lines << "";
     lines << tr("XML:") << Path::display(adaptiveDescriptor.xmlPath);
+    if (!adaptiveDescriptor.previewMask.isEmpty()) {
+        lines << "";
+        lines << tr("Preview mask:") << adaptiveDescriptor.previewMask;
+        lines << tr("Preview-only launcher mask; APK resources are not changed.");
+    }
     lines << "";
     lines << tr("Foreground:") << adaptiveDescriptor.foregroundRef;
     if (!adaptiveDescriptor.foregroundPath.isEmpty()) {
