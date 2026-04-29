@@ -40,6 +40,7 @@
 * Added oversampled adaptive XML preview composition for smoother antialiasing.
 * Added launcher entry roles and ordered application icons before activity and activity-alias launcher icons.
 * Hardened resource qualifier handling for values aliases/colors and added diagnostics for ambiguous resource choices.
+* Documented resource candidate selection diagnostics: APK resources are selected by the lowest `score`, and logs show candidate scores and the selected resource.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
