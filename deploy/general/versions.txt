@@ -29,6 +29,7 @@
 * Enabled Apktool greedy resource resolving to recover obfuscated launcher resource file names.
 * Added support for Apktool-renamed Android XML namespace attributes such as `n0:icon` and `n0:drawable`.
 * Added an Apktool build compatibility cleanup/retry for unsupported Android manifest attributes reported by aapt2.
+* Fixed adaptive icon write-back for extensionless bitmap resources used by obfuscated APKs.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

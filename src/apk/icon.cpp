@@ -104,12 +104,14 @@ bool Icon::save(QString filename)
 
     const bool explicitExport = !filename.isEmpty();
     if (explicitExport) {
+        const bool needsFormatHint = QFileInfo(filename).suffix().isEmpty();
+        const char *format = needsFormatHint ? "PNG" : NULL;
         if (isAdaptiveIcon()) {
             qDebug().noquote() << "Exporting adaptive icon preview:\n" + getToolTip();
             qDebug().noquote() << "Export file:" << Path::display(filename);
         }
         QDir().mkpath(QFileInfo(filename).absolutePath());
-        return getPixmap().save(filename, NULL, 100);
+        return getPixmap().save(filename, format, 100);
     }
 
     if (virtualIcon && saveTargets.isEmpty()) {
@@ -128,10 +130,17 @@ bool Icon::save(QString filename)
     bool result = true;
     foreach (const QString &target, targets) {
         QDir().mkpath(QFileInfo(target).absolutePath());
+        const bool needsFormatHint = QFileInfo(target).suffix().isEmpty();
+        const char *format = needsFormatHint ? "PNG" : NULL;
+        const bool saved = getPixmap().save(target, format, 100);
         if (isAdaptiveIcon()) {
-            qDebug().noquote() << "Adaptive icon save target:" << Path::display(target);
+            qDebug().noquote() << "Adaptive icon save target:" << Path::display(target)
+                               << (needsFormatHint ? "(PNG)" : "")
+                               << (saved ? "OK" : "FAILED");
+        } else if (!saved) {
+            qWarning().noquote() << "Could not save icon:" << Path::display(target);
         }
-        result = getPixmap().save(target, NULL, 100) && result;
+        result = saved && result;
     }
     if (result && adaptiveDescriptor.needsXmlPatch()) {
         result = patchAdaptiveForeground();
