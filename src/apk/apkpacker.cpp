@@ -281,6 +281,31 @@ bool Packer::removeAndroidManifestAttributes(const QString &manifestPath, const 
     if (names.isEmpty()) {
         return false;
     }
+
+    QFile textFile(manifestPath);
+    if (textFile.open(QFile::ReadOnly | QFile::Text)) {
+        QString xmlText = QString::fromUtf8(textFile.readAll());
+        textFile.close();
+
+        int removed = 0;
+        foreach (const QString &name, names) {
+            QRegularExpression attrRx(QString("\\s+(?:[A-Za-z_][A-Za-z0-9_.-]*:)?%1=\"[^\"]*\"").arg(QRegularExpression::escape(name)));
+            QRegularExpressionMatchIterator it = attrRx.globalMatch(xmlText);
+            while (it.hasNext()) {
+                it.next();
+                ++removed;
+            }
+            xmlText.replace(attrRx, QString());
+        }
+
+        if (removed > 0 && textFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+            QTextStream out(&textFile);
+            out << xmlText;
+            qDebug().noquote() << QString("Removed unsupported Android manifest attributes (%1): %2").arg(reason, names.join(", "));
+            return true;
+        }
+    }
+
     QFile file(manifestPath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         return false;
