@@ -28,6 +28,7 @@
 * Added rendering for adaptive icon XML layers that use shape gradients, layer-list, inline vector, inset, and rotate wrappers.
 * Enabled Apktool greedy resource resolving to recover obfuscated launcher resource file names.
 * Added support for Apktool-renamed Android XML namespace attributes such as `n0:icon` and `n0:drawable`.
+* Added an Apktool build retry that removes unsupported Android manifest attributes reported by aapt2.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

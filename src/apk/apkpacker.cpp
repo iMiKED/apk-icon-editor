@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QRegularExpression>
+#include <QTextStream>
 #include <QtXml/QDomDocument>
 
 using Apk::Packer;
@@ -24,6 +25,7 @@ void Packer::pack(Apk::File *apk, QString temp)
 
     signError.clear();
     alignError.clear();
+    retriedMissingManifestAttributes = false;
 
     const QString APKTOOL = QDir::fromNativeSeparators(apk->getApktool());
     const QString TEMPAPK = temp + "/packed/temp.zip";
@@ -65,6 +67,12 @@ void Packer::pack(Apk::File *apk, QString temp)
                 return;
             default: {
                 const QString errorText = apktool->readAllStandardError().replace("\r\n", "\n");
+                if (!retriedMissingManifestAttributes && removeMissingAndroidManifestAttributes(CONTENTS + "/AndroidManifest.xml", errorText)) {
+                    retriedMissingManifestAttributes = true;
+                    qDebug() << "Retrying Apktool build after removing unsupported Android manifest attributes.";
+                    startApktoolBuild(APKTOOL, CONTENTS, TEMPAPK, temp + "/framework/");
+                    return;
+                }
                 qDebug() << errorText;
                 emit error(Apk::ERROR.arg("Apktool"), errorText);
                 break;
@@ -85,7 +93,7 @@ void Packer::pack(Apk::File *apk, QString temp)
         }
     });
 
-    apktool->start("java", QStringList() << "-jar" << APKTOOL << "b" << CONTENTS << "-f" << "-o" << TEMPAPK << "-p" << temp + "/framework/");
+    startApktoolBuild(APKTOOL, CONTENTS, TEMPAPK, temp + "/framework/");
 }
 
 void Packer::cancel()
@@ -243,6 +251,64 @@ void Packer::signWithPem(Apk::File *apk, QString apkPath)
              << pem << pk8 << apkPath << apkDest;
     }
     signer->start(java.isEmpty() ? "java" : java, args);
+}
+
+void Packer::startApktoolBuild(const QString &apktoolPath, const QString &contents, const QString &output, const QString &frameworks)
+{
+    apktool->start("java", QStringList() << "-jar" << apktoolPath << "b" << contents << "-f" << "-o" << output << "-p" << frameworks);
+}
+
+bool Packer::removeMissingAndroidManifestAttributes(const QString &manifestPath, const QString &errorText) const
+{
+    QRegularExpression rx("attribute android:([A-Za-z0-9_]+) not found");
+    QRegularExpressionMatchIterator matches = rx.globalMatch(errorText);
+    QStringList names;
+    while (matches.hasNext()) {
+        const QString name = matches.next().captured(1);
+        if (!name.isEmpty() && !names.contains(name)) {
+            names.append(name);
+        }
+    }
+    if (names.isEmpty()) {
+        return false;
+    }
+
+    QFile file(manifestPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return false;
+    }
+    QDomDocument doc;
+    if (!doc.setContent(file.readAll())) {
+        return false;
+    }
+    file.close();
+
+    int removed = 0;
+    QDomNodeList nodes = doc.elementsByTagName("*");
+    for (int i = 0; i < nodes.count(); ++i) {
+        QDomElement element = nodes.at(i).toElement();
+        QDomNamedNodeMap attrs = element.attributes();
+        for (int j = attrs.count() - 1; j >= 0; --j) {
+            const QDomAttr attr = attrs.item(j).toAttr();
+            const QString localName = attr.name().section(':', -1);
+            if (names.contains(localName)) {
+                element.removeAttribute(attr.name());
+                ++removed;
+            }
+        }
+    }
+    if (!removed) {
+        return false;
+    }
+
+    if (!file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate)) {
+        return false;
+    }
+    QTextStream out(&file);
+    doc.save(out, 4);
+
+    qDebug().noquote() << QString("Removed unsupported Android manifest attributes for Apktool retry: %1").arg(names.join(", "));
+    return true;
 }
 
 void Packer::signWithKeystore(Apk::File *apk, QString apkPath)
