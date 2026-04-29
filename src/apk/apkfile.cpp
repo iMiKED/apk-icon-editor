@@ -240,16 +240,24 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         QStringList saveTargets;
         AdaptiveIconDescriptor descriptor = result.descriptor;
         QPixmap previewPixmap = result.pixmap;
+        bool usesReadyBitmapPreview = false;
         const ResourceResolver::Value directBitmap = resolver.resolveBitmap(iconRef, type);
         if (directBitmap.found) {
             const QPixmap directPixmap(directBitmap.filePath);
             if (!directPixmap.isNull()) {
                 previewPixmap = directPixmap;
+                usesReadyBitmapPreview = true;
                 descriptor.previewSource = "ready bitmap with the same resource id";
                 descriptor.previewPath = directBitmap.filePath;
                 saveTargets.append(directBitmap.filePath);
                 qDebug().noquote() << "Adaptive icon preview uses ready bitmap resource:" << Path::display(directBitmap.filePath);
             }
+        }
+        if (!usesReadyBitmapPreview) {
+            previewPixmap = AdaptiveIcon::applyPreviewMask(previewPixmap);
+            descriptor.previewSource = "composed XML layers with fallback launcher mask";
+            descriptor.previewMask = "circle";
+            qDebug().noquote() << "Adaptive icon preview uses composed XML layers with fallback launcher mask:" << Path::display(result.xmlPath);
         }
         if (!descriptor.foregroundPath.isEmpty()) {
             saveTargets.append(descriptor.foregroundPath);

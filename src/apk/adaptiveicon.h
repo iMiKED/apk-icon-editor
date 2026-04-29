@@ -19,6 +19,7 @@ public:
     };
 
     static Result resolve(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Type type, const QSize &size);
+    static QPixmap applyPreviewMask(const QPixmap &pixmap);
 
 private:
     static bool parseXml(const QString &xmlPath, ResourceRef *background, ResourceRef *foreground);
