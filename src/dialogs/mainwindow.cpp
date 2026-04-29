@@ -917,9 +917,32 @@ bool MainWindow::icon_open(QString filename)
         }
     }
 
+    QPixmap imported(filename);
+    if (imported.isNull()) {
+        warning(tr("Can't Load Icon"), tr("You are trying to load invalid or unsupported icon."));
+        return false;
+    }
+
+    if (icon->isAdaptiveIcon()) {
+        const QString text = tr("This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.");
+        const QString details = icon->getToolTip();
+        QMessageBox box(this);
+        box.setIcon(QMessageBox::Information);
+        box.setWindowTitle(tr("Adaptive Icon Replacement"));
+        box.setText(text);
+        box.setDetailedText(details);
+        box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        box.setDefaultButton(QMessageBox::Ok);
+        if (box.exec() != QMessageBox::Ok) {
+            qDebug().noquote() << "Adaptive icon replacement cancelled:" << Path::display(icon->getAdaptiveXmlPath());
+            return false;
+        }
+        qDebug().noquote() << "Adaptive icon replacement confirmed: foreground-only; background layer is preserved.";
+    }
+
     QPixmap backup = icon->getPixmap();
 
-    if (icon->replace(QPixmap(filename))) {
+    if (icon->replace(imported)) {
         repaint();
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
         const QSize size = device->getIconSize(icon->getType()).size;

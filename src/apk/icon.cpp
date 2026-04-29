@@ -155,6 +155,12 @@ bool Icon::replace(QPixmap pixmap)
     }
     if (isAdaptiveIcon()) {
         qDebug().noquote() << "Replacing adaptive icon:\n" + getToolTip();
+        qDebug().noquote() << "Adaptive icon replacement policy:"
+                           << "foreground-only;"
+                           << "background layer is preserved;"
+                           << (adaptiveDescriptor.usesCustomForeground()
+                               ? "custom foreground XML patch will be used"
+                               : "existing foreground bitmap will be overwritten");
     }
     setPixmap(pixmap);
     modified = true;
@@ -257,10 +263,14 @@ QString Icon::getToolTip() const
     }
     lines << "";
     lines << tr("Write-back:");
-    if (adaptiveDescriptor.customForegroundRef.isEmpty()) {
-        lines << tr("existing bitmap foreground");
+    lines << tr("Mode: foreground-only replacement");
+    if (!adaptiveDescriptor.foregroundPath.isEmpty()) {
+        lines << tr("Target: existing bitmap foreground");
     } else {
-        lines << tr("custom bitmap foreground") << adaptiveDescriptor.customForegroundRef;
+        lines << tr("Target: custom bitmap foreground");
+    }
+    if (!adaptiveDescriptor.customForegroundRef.isEmpty()) {
+        lines << adaptiveDescriptor.customForegroundRef;
     }
     if (!saveTargets.isEmpty()) {
         QStringList displayTargets;

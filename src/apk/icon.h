@@ -18,6 +18,7 @@ struct AdaptiveIconDescriptor {
 
     bool isValid() const { return !xmlPath.isEmpty(); }
     bool needsXmlPatch() const { return !xmlPath.isEmpty() && !customForegroundRef.isEmpty(); }
+    bool usesCustomForeground() const { return !customForegroundRef.isEmpty(); }
 };
 
 class Icon : public QObject
