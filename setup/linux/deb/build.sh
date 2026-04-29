@@ -4,7 +4,7 @@ export DEBEMAIL="imiked@users.noreply.github.com"
 export DEBFULLNAME="iMiKED"
 
 PACKAGE="apk-icon-editor"
-VERSION="3.0.0~beta1"
+VERSION="3.0.0~beta2"
 
 clean() {
     rm ../apk-icon-editor_*.tar.xz ../apk-icon-editor_*.tar.gz ../apk-icon-editor_*.dsc ../apk-icon-editor_*.changes ../apk-icon-editor_*.build 2> /dev/null

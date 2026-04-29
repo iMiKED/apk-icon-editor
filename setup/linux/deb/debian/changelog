@@ -1,3 +1,12 @@
+apk-icon-editor (3.0.0~beta2-1) unstable; urgency=low
+
+  * Added adaptive XML launcher icon preview, replacement, export, write-back, and APK repacking support.
+  * Added AOSP-style adaptive layer inset rendering and oversampled preview composition.
+  * Added launcher entry roles, resource qualifier diagnostics, and foreground-only adaptive icon write-back.
+  * Updated package metadata and artifact names for v3.0.0-beta2.
+
+ -- iMiKED <imiked@users.noreply.github.com>  Thu, 30 Apr 2026 02:45:00 +0700
+
 apk-icon-editor (3.0.0~beta1-1) unstable; urgency=low
 
   * Updated dependencies: JDK recommendation, Qt to v6.8.3 LTS, and Apktool to v3.0.2.

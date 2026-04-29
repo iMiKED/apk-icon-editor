@@ -20,5 +20,5 @@ find "bin/macosx/apk-icon-editor.app" -name ".DS_Store" -type f -delete
 
 mkdir "setup/macosx/build"
 cp -R bin/macosx/apk-icon-editor.app "setup/macosx/build/APK Icon Editor.app"
-ditto -c -k --sequesterRsrc --keepParent "setup/macosx/build/APK Icon Editor.app" "setup/macosx/build/apk-icon-editor_3.0.0-beta1${ARTIFACT_SUFFIX}.app.zip"
-appdmg setup/macosx/appdmg.json "setup/macosx/build/apk-icon-editor_3.0.0-beta1${ARTIFACT_SUFFIX}.dmg" || { echo "Could not create installer."; exit 4; }
+ditto -c -k --sequesterRsrc --keepParent "setup/macosx/build/APK Icon Editor.app" "setup/macosx/build/apk-icon-editor_3.0.0-beta2${ARTIFACT_SUFFIX}.app.zip"
+appdmg setup/macosx/appdmg.json "setup/macosx/build/apk-icon-editor_3.0.0-beta2${ARTIFACT_SUFFIX}.dmg" || { echo "Could not create installer."; exit 4; }
