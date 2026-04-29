@@ -244,12 +244,12 @@ QString Icon::getEntryRoleTitle() const
 int Icon::getEntryPriority() const
 {
     switch (entryRole) {
-        case EntryActivityIcon: return 0;
-        case EntryActivityRoundIcon: return 1;
-        case EntryActivityAliasIcon: return 2;
-        case EntryActivityAliasRoundIcon: return 3;
-        case EntryApplicationIcon: return 4;
-        case EntryApplicationRoundIcon: return 5;
+        case EntryApplicationIcon: return 0;
+        case EntryApplicationRoundIcon: return 1;
+        case EntryActivityIcon: return 2;
+        case EntryActivityRoundIcon: return 3;
+        case EntryActivityAliasIcon: return 4;
+        case EntryActivityAliasRoundIcon: return 5;
     }
     return 10;
 }
