@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export DEBEMAIL="imiked@users.noreply.github.com"
+export DEBEMAIL="M-I-B@yandex.ru"
 export DEBFULLNAME="iMiKED"
 
 PACKAGE="apk-icon-editor"

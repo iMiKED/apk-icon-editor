@@ -1,7 +1,7 @@
 Source: apk-icon-editor
 Section: editors
 Priority: optional
-Maintainer: iMiKED <imiked@users.noreply.github.com>
+Maintainer: iMiKED <M-I-B@yandex.ru>
 Build-Depends: debhelper (>= 13), qt6-base-dev, qt6-tools-dev-tools, g++, make, zlib1g-dev
 Standards-Version: 4.7.0
 Homepage: https://github.com/iMiKED/apk-icon-editor

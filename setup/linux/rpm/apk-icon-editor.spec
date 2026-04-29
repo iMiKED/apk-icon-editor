@@ -44,5 +44,5 @@ qmake6 PREFIX=%{_prefix} "DEFINES+=CI"
 %{_datadir}/icons/hicolor/*/mimetypes/application-vnd.android.package-archive.png
 
 %changelog
-* Sun Apr 26 2026 iMiKED <imiked@users.noreply.github.com> - 3.0.0-0.beta1
+* Sun Apr 26 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta1
 - Added RPM packaging for Fedora and Red Hat compatible distributions.
