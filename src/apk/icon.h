@@ -14,6 +14,10 @@ struct AdaptiveIconDescriptor {
     QString backgroundRef;
     QString backgroundPath;
     QColor backgroundColor;
+    QString monochromeRef;
+    QString monochromePath;
+    QColor monochromeColor;
+    bool monochromeRenderable = false;
     QString customForegroundRef;
 
     bool isValid() const { return !xmlPath.isEmpty(); }

@@ -257,11 +257,15 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         }
         const QString foregroundKey = resourceKey(ResourceRef(descriptor.foregroundRef));
         const QString backgroundKey = resourceKey(ResourceRef(descriptor.backgroundRef));
+        const QString monochromeKey = resourceKey(ResourceRef(descriptor.monochromeRef));
         if (!foregroundKey.isEmpty()) {
             adaptiveLayerRefs.insert(foregroundKey);
         }
         if (!backgroundKey.isEmpty()) {
             adaptiveLayerRefs.insert(backgroundKey);
+        }
+        if (!monochromeKey.isEmpty()) {
+            adaptiveLayerRefs.insert(monochromeKey);
         }
         iconsModel.add(result.xmlPath, result.pixmap, saveTargets, descriptor, type, scope);
         added = true;

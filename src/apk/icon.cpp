@@ -261,6 +261,20 @@ QString Icon::getToolTip() const
     } else {
         lines << tr("Not resolved");
     }
+    if (!adaptiveDescriptor.monochromeRef.isEmpty() || adaptiveDescriptor.monochromeRenderable) {
+        lines << "";
+        lines << tr("Monochrome:") << (adaptiveDescriptor.monochromeRef.isEmpty() ? tr("inline layer") : adaptiveDescriptor.monochromeRef);
+        if (!adaptiveDescriptor.monochromePath.isEmpty()) {
+            lines << Path::display(adaptiveDescriptor.monochromePath);
+        } else if (adaptiveDescriptor.monochromeColor.isValid()) {
+            lines << adaptiveDescriptor.monochromeColor.name(QColor::HexArgb).toUpper();
+        } else if (adaptiveDescriptor.monochromeRenderable) {
+            lines << tr("Vector/XML monochrome layer");
+        } else {
+            lines << tr("Not resolved");
+        }
+        lines << tr("Used by Android themed icons; not used for the normal preview.");
+    }
     lines << "";
     lines << tr("Write-back:");
     lines << tr("Mode: foreground-only replacement");

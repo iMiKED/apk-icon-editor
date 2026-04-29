@@ -44,16 +44,22 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
 
     const QDomElement backgroundNode = root.firstChildElement("background");
     const QDomElement foregroundNode = root.firstChildElement("foreground");
+    const QDomElement monochromeNode = root.firstChildElement("monochrome");
     ResourceRef backgroundRef(drawableAttr(backgroundNode));
     ResourceRef foregroundRef(drawableAttr(foregroundNode));
+    ResourceRef monochromeRef(drawableAttr(monochromeNode));
 
     QPixmap backgroundPixmap;
     QPixmap foregroundVector;
+    QPixmap monochromePixmap;
     ResourceResolver::Value background = backgroundRef.isValid()
             ? resolveLayer(resolver, backgroundRef, type, size, &backgroundPixmap)
             : ResourceResolver::Value();
     ResourceResolver::Value foreground = foregroundRef.isValid()
             ? resolveLayer(resolver, foregroundRef, type, size, &foregroundVector)
+            : ResourceResolver::Value();
+    ResourceResolver::Value monochrome = monochromeRef.isValid()
+            ? resolveLayer(resolver, monochromeRef, type, size, &monochromePixmap)
             : ResourceResolver::Value();
     if (!backgroundNode.isNull() && !backgroundRef.isValid()) {
         backgroundPixmap = renderDrawableElement(resolver, backgroundNode, type, size);
@@ -64,6 +70,11 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
         foregroundVector = renderDrawableElement(resolver, foregroundNode, type, size);
         foreground.found = !foregroundVector.isNull();
         foreground.isXml = foreground.found;
+    }
+    if (!monochromeNode.isNull() && !monochromeRef.isValid()) {
+        monochromePixmap = renderDrawableElement(resolver, monochromeNode, type, size);
+        monochrome.found = !monochromePixmap.isNull();
+        monochrome.isXml = monochrome.found;
     }
     if (!foreground.found) {
         qDebug() << "Adaptive icon foreground is not renderable:" << (foregroundRef.original().isEmpty() ? QString("inline foreground") : foregroundRef.original());
@@ -84,6 +95,10 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     result.descriptor.backgroundRef = backgroundRef.original();
     result.descriptor.backgroundPath = background.filePath;
     result.descriptor.backgroundColor = background.color;
+    result.descriptor.monochromeRef = monochromeRef.original();
+    result.descriptor.monochromePath = monochrome.isBitmap ? monochrome.filePath : QString();
+    result.descriptor.monochromeColor = monochrome.color;
+    result.descriptor.monochromeRenderable = monochrome.found || !monochromePixmap.isNull();
     result.type = type;
     return result;
 }
@@ -250,7 +265,7 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
         return QPixmap::fromImage(canvas);
     }
 
-    if (tag == "item" || tag == "rotate" || tag == "inset" || tag == "background" || tag == "foreground") {
+    if (tag == "item" || tag == "rotate" || tag == "inset" || tag == "background" || tag == "foreground" || tag == "monochrome") {
         const QString attr = drawableAttr(node);
         const ResourceRef ref(attr);
         QPixmap pixmap;
