@@ -21,6 +21,11 @@ static void setUtf8Encoding(QTextStream &stream)
 #endif
 }
 
+static QSize scaledSize(const QSize &size, int scale)
+{
+    return QSize(size.width() * scale, size.height() * scale);
+}
+
 AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Type type, const QSize &size)
 {
     Result result;
@@ -50,7 +55,9 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     ResourceRef backgroundRef(drawableAttr(backgroundNode));
     ResourceRef foregroundRef(drawableAttr(foregroundNode));
     ResourceRef monochromeRef(drawableAttr(monochromeNode));
-    const QSize layerSize = adaptiveLayerSize(size);
+    static const int previewOversample = 2;
+    const QSize renderSize = scaledSize(size, previewOversample);
+    const QSize layerSize = adaptiveLayerSize(renderSize);
 
     QPixmap backgroundPixmap;
     QPixmap foregroundVector;
@@ -84,9 +91,12 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
         return result;
     }
 
-    QPixmap pixmap = render(background, foreground, size, foregroundVector, backgroundPixmap);
+    QPixmap pixmap = render(background, foreground, renderSize, foregroundVector, backgroundPixmap);
     if (pixmap.isNull()) {
         return result;
+    }
+    if (previewOversample > 1) {
+        pixmap = pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
 
     result.valid = true;
