@@ -36,6 +36,7 @@
 * Preferred ready bitmap resources with the same adaptive XML resource id for preview, matching APK Info behavior and preserving app-provided icon shape/scale.
 * Removed forced fallback launcher masking from composed adaptive XML previews; the next rendering step will follow AOSP layer sizing/inset rules instead.
 * Applied AOSP-style adaptive layer inset when composing adaptive XML previews from foreground and background layers.
+* Rendered XML/vector adaptive icon layers directly at inset layer size to avoid blurry upscaled previews.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

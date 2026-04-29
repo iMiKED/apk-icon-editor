@@ -50,31 +50,32 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     ResourceRef backgroundRef(drawableAttr(backgroundNode));
     ResourceRef foregroundRef(drawableAttr(foregroundNode));
     ResourceRef monochromeRef(drawableAttr(monochromeNode));
+    const QSize layerSize = adaptiveLayerSize(size);
 
     QPixmap backgroundPixmap;
     QPixmap foregroundVector;
     QPixmap monochromePixmap;
     ResourceResolver::Value background = backgroundRef.isValid()
-            ? resolveLayer(resolver, backgroundRef, type, size, &backgroundPixmap)
+            ? resolveLayer(resolver, backgroundRef, type, layerSize, &backgroundPixmap)
             : ResourceResolver::Value();
     ResourceResolver::Value foreground = foregroundRef.isValid()
-            ? resolveLayer(resolver, foregroundRef, type, size, &foregroundVector)
+            ? resolveLayer(resolver, foregroundRef, type, layerSize, &foregroundVector)
             : ResourceResolver::Value();
     ResourceResolver::Value monochrome = monochromeRef.isValid()
-            ? resolveLayer(resolver, monochromeRef, type, size, &monochromePixmap)
+            ? resolveLayer(resolver, monochromeRef, type, layerSize, &monochromePixmap)
             : ResourceResolver::Value();
     if (!backgroundNode.isNull() && !backgroundRef.isValid()) {
-        backgroundPixmap = renderDrawableElement(resolver, backgroundNode, type, size);
+        backgroundPixmap = renderDrawableElement(resolver, backgroundNode, type, layerSize);
         background.found = !backgroundPixmap.isNull();
         background.isXml = background.found;
     }
     if (!foregroundNode.isNull() && !foregroundRef.isValid()) {
-        foregroundVector = renderDrawableElement(resolver, foregroundNode, type, size);
+        foregroundVector = renderDrawableElement(resolver, foregroundNode, type, layerSize);
         foreground.found = !foregroundVector.isNull();
         foreground.isXml = foreground.found;
     }
     if (!monochromeNode.isNull() && !monochromeRef.isValid()) {
-        monochromePixmap = renderDrawableElement(resolver, monochromeNode, type, size);
+        monochromePixmap = renderDrawableElement(resolver, monochromeNode, type, layerSize);
         monochrome.found = !monochromePixmap.isNull();
         monochrome.isXml = monochrome.found;
     }
@@ -176,6 +177,12 @@ QRectF AdaptiveIcon::adaptiveLayerRect(const QSize &size)
     const qreal insetX = size.width() * extraInsetPercentage;
     const qreal insetY = size.height() * extraInsetPercentage;
     return QRectF(-insetX, -insetY, size.width() + insetX * 2.0, size.height() + insetY * 2.0);
+}
+
+QSize AdaptiveIcon::adaptiveLayerSize(const QSize &size)
+{
+    const QRectF rect = adaptiveLayerRect(size);
+    return rect.size().toSize();
 }
 
 ResourceResolver::Value AdaptiveIcon::resolveLayer(const ResourceResolver &resolver, const ResourceRef &ref, Icon::Type type, const QSize &size, QPixmap *pixmap)
