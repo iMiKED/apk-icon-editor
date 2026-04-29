@@ -251,10 +251,6 @@ QString Icon::getToolTip() const
         if (!adaptiveDescriptor.previewPath.isEmpty()) {
             lines << Path::display(adaptiveDescriptor.previewPath);
         }
-        if (!adaptiveDescriptor.previewMask.isEmpty()) {
-            lines << tr("Fallback mask:") << adaptiveDescriptor.previewMask;
-            lines << tr("Preview-only launcher mask; APK resources are not changed.");
-        }
     }
     lines << "";
     lines << tr("Foreground:") << adaptiveDescriptor.foregroundRef;

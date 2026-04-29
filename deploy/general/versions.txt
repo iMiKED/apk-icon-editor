@@ -34,7 +34,7 @@
 * Added adaptive XML monochrome layer metadata and filtering for Android themed icons.
 * Added drawable XML shape rendering for adaptive icon backgrounds, including oval, rounded corners, stroke, and layer item insets.
 * Preferred ready bitmap resources with the same adaptive XML resource id for preview, matching APK Info behavior and preserving app-provided icon shape/scale.
-* Applied a fallback launcher preview mask only when an adaptive XML icon has no ready bitmap preview resource.
+* Removed forced fallback launcher masking from composed adaptive XML previews; the next rendering step will follow AOSP layer sizing/inset rules instead.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

@@ -169,27 +169,6 @@ QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const Re
     return QPixmap::fromImage(canvas);
 }
 
-QPixmap AdaptiveIcon::applyPreviewMask(const QPixmap &pixmap)
-{
-    if (pixmap.isNull()) {
-        return pixmap;
-    }
-
-    QImage canvas(pixmap.size(), QImage::Format_ARGB32_Premultiplied);
-    canvas.fill(Qt::transparent);
-
-    QPainter painter(&canvas);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform);
-    QPainterPath mask;
-    mask.addEllipse(QRectF(0, 0, pixmap.width(), pixmap.height()));
-    painter.setClipPath(mask);
-    painter.drawPixmap(canvas.rect(), pixmap);
-    painter.end();
-
-    return QPixmap::fromImage(canvas);
-}
-
 ResourceResolver::Value AdaptiveIcon::resolveLayer(const ResourceResolver &resolver, const ResourceRef &ref, Icon::Type type, const QSize &size, QPixmap *pixmap)
 {
     ResourceResolver::Value bitmap = resolver.resolveBitmap(ref, type);

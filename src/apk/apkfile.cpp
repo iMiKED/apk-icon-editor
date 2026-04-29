@@ -254,10 +254,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             }
         }
         if (!usesReadyBitmapPreview) {
-            previewPixmap = AdaptiveIcon::applyPreviewMask(previewPixmap);
-            descriptor.previewSource = "composed XML layers with fallback launcher mask";
-            descriptor.previewMask = "circle";
-            qDebug().noquote() << "Adaptive icon preview uses composed XML layers with fallback launcher mask:" << Path::display(result.xmlPath);
+            descriptor.previewSource = "composed XML layers";
         }
         if (!descriptor.foregroundPath.isEmpty()) {
             saveTargets.append(descriptor.foregroundPath);
