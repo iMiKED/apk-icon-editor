@@ -158,6 +158,9 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
     steps:
+      - name: Checkout release notes
+        uses: actions/checkout@v4
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -169,8 +172,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          notes_file="deploy/general/release-notes/${GITHUB_REF_NAME}.md"
+          notes_args=(--notes "Automated prerelease build.")
+          if [ -f "$notes_file" ]; then
+            notes_args=(--notes-file "$notes_file")
+          fi
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
-            gh release create "$GITHUB_REF_NAME" --prerelease --title "$GITHUB_REF_NAME" --notes "Automated prerelease build."
+            gh release create "$GITHUB_REF_NAME" --prerelease --title "$GITHUB_REF_NAME" "${notes_args[@]}"
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor-3.0.0-0.beta1.fc40.src.rpm" -y || true
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0.beta1-1_amd64.deb" -y || true
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0-beta1.app.zip" -y || true

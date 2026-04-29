@@ -42,6 +42,7 @@
 * Hardened resource qualifier handling for values aliases/colors and added diagnostics for ambiguous resource choices.
 * Documented resource candidate selection diagnostics: APK resources are selected by the lowest `score`, and logs show candidate scores and the selected resource.
 * Updated release packaging metadata and artifact names for v3.0.0-beta2.
+* Added v3.0.0-beta2 GitHub Release notes for automated prerelease publishing.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
