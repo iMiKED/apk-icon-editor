@@ -122,6 +122,7 @@ ResourceResolver::Value ResourceResolver::resolveXml(const ResourceRef &ref) con
             value.isXml = true;
             value.filePath = candidate.filePath;
             value.type = candidate.type;
+            logFileResolution(ref, "xml", matches, candidate, Icon::Unknown);
             return value;
         }
     }
@@ -155,6 +156,7 @@ ResourceResolver::Value ResourceResolver::resolveBitmap(const ResourceRef &ref, 
     value.isBitmap = true;
     value.filePath = bitmaps.first().filePath;
     value.type = bitmaps.first().type;
+    logFileResolution(ref, "bitmap", bitmaps, bitmaps.first(), preferredType);
     return value;
 }
 
@@ -165,11 +167,24 @@ ResourceResolver::Value ResourceResolver::resolveColor(const ResourceRef &ref) c
         resolved = ref;
     }
 
-    const QString key = keyForRef(resolved);
-    if (colors.contains(key)) {
+    QList<ColorCandidate> matches = colorCandidates(resolved);
+    if (!matches.isEmpty()) {
+        std::sort(matches.begin(), matches.end(), [=](const ColorCandidate &a, const ColorCandidate &b) {
+            const int scoreA = valueScore(a.qualifiers);
+            const int scoreB = valueScore(b.qualifiers);
+            if (scoreA != scoreB) {
+                return scoreA < scoreB;
+            }
+            return a.filePath < b.filePath;
+        });
         Value value;
         value.found = true;
-        value.color = colors.value(key);
+        value.color = matches.first().color;
+        QStringList candidateFiles;
+        foreach (const ColorCandidate &candidate, matches) {
+            candidateFiles << candidate.filePath;
+        }
+        logValueResolution(resolved, "color", candidateFiles, matches.first().filePath);
         return value;
     }
     return Value();
@@ -182,12 +197,26 @@ ResourceRef ResourceResolver::resolveAlias(const ResourceRef &ref, int depth) co
         return ResourceRef();
     }
 
-    const QString key = keyForRef(ref);
-    if (!aliases.contains(key)) {
+    QList<AliasCandidate> matches = aliasCandidates(ref);
+    if (matches.isEmpty()) {
         return ResourceRef();
     }
 
-    ResourceRef alias(aliases.value(key));
+    std::sort(matches.begin(), matches.end(), [=](const AliasCandidate &a, const AliasCandidate &b) {
+        const int scoreA = valueScore(a.qualifiers);
+        const int scoreB = valueScore(b.qualifiers);
+        if (scoreA != scoreB) {
+            return scoreA < scoreB;
+        }
+        return a.filePath < b.filePath;
+    });
+    QStringList candidateFiles;
+    foreach (const AliasCandidate &candidate, matches) {
+        candidateFiles << QString("%1 -> %2").arg(candidate.filePath, candidate.value);
+    }
+    logValueResolution(ref, "alias", candidateFiles, QString("%1 -> %2").arg(matches.first().filePath, matches.first().value));
+
+    ResourceRef alias(matches.first().value);
     ResourceRef next = resolveAlias(alias, depth + 1);
     return next.isValid() ? next : alias;
 }
@@ -248,6 +277,7 @@ void ResourceResolver::parseValuesFile(const QString &filePath)
     }
 
     QDomElement resources = doc.firstChildElement("resources");
+    const QStringList qualifiers = QFileInfo(filePath).dir().dirName().split('-').mid(1);
     QDomElement node = resources.firstChildElement();
     while (!node.isNull()) {
         const QString tag = node.tagName();
@@ -257,30 +287,60 @@ void ResourceResolver::parseValuesFile(const QString &filePath)
             const QString key = tag + "/" + name;
             if (tag == "color") {
                 if (text.startsWith('@')) {
-                    aliases.insert(key, text);
+                    AliasCandidate alias;
+                    alias.value = text;
+                    alias.qualifiers = qualifiers;
+                    alias.filePath = QDir::cleanPath(filePath);
+                    aliases[key].append(alias);
                 } else {
                     QColor color(text);
                     if (color.isValid()) {
-                        colors.insert(key, color);
+                        ColorCandidate candidate;
+                        candidate.color = color;
+                        candidate.qualifiers = qualifiers;
+                        candidate.filePath = QDir::cleanPath(filePath);
+                        colors[key].append(candidate);
                     }
                 }
             } else if ((tag == "drawable" || tag == "mipmap") && text.startsWith('@')) {
-                aliases.insert(key, text);
+                AliasCandidate alias;
+                alias.value = text;
+                alias.qualifiers = qualifiers;
+                alias.filePath = QDir::cleanPath(filePath);
+                aliases[key].append(alias);
             } else if (tag == "item") {
                 const QString type = node.attribute("type");
                 const QString itemKey = type + "/" + name;
                 if (!type.isEmpty() && text.startsWith('@')) {
-                    aliases.insert(itemKey, text);
+                    AliasCandidate alias;
+                    alias.value = text;
+                    alias.qualifiers = qualifiers;
+                    alias.filePath = QDir::cleanPath(filePath);
+                    aliases[itemKey].append(alias);
                 } else if (type == "color") {
                     QColor color(text);
                     if (color.isValid()) {
-                        colors.insert(itemKey, color);
+                        ColorCandidate candidate;
+                        candidate.color = color;
+                        candidate.qualifiers = qualifiers;
+                        candidate.filePath = QDir::cleanPath(filePath);
+                        colors[itemKey].append(candidate);
                     }
                 }
             }
         }
         node = node.nextSiblingElement();
     }
+}
+
+QList<ResourceResolver::ColorCandidate> ResourceResolver::colorCandidates(const ResourceRef &ref) const
+{
+    return colors.value(keyForRef(ref));
+}
+
+QList<ResourceResolver::AliasCandidate> ResourceResolver::aliasCandidates(const ResourceRef &ref) const
+{
+    return aliases.value(keyForRef(ref));
 }
 
 QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const ResourceRef &ref) const
@@ -355,6 +415,11 @@ int ResourceResolver::xmlScore(const Candidate &candidate) const
     return result;
 }
 
+int ResourceResolver::valueScore(const QStringList &qualifiers) const
+{
+    return qualifierPenalty(qualifiers);
+}
+
 int ResourceResolver::qualifierPenalty(const QStringList &qualifiers) const
 {
     int penalty = 0;
@@ -374,6 +439,41 @@ int ResourceResolver::qualifierPenalty(const QStringList &qualifiers) const
         }
     }
     return penalty;
+}
+
+void ResourceResolver::logFileResolution(const ResourceRef &ref, const QString &kind, const QList<Candidate> &candidates, const Candidate &selected, Icon::Type preferredType) const
+{
+    if (candidates.count() < 2) {
+        return;
+    }
+    const QString key = QString("file|%1|%2|%3|%4").arg(kind, ref.original(), QString::number(preferredType), selected.filePath);
+    if (loggedUnsupportedRefs.contains(key)) {
+        return;
+    }
+    loggedUnsupportedRefs.insert(key);
+
+    QStringList lines;
+    foreach (const Candidate &candidate, candidates) {
+        lines << QString("  - %1 [%2] score=%3").arg(candidate.dirName + "/" + QFileInfo(candidate.filePath).fileName(),
+                                                     candidate.qualifiers.join(','),
+                                                     QString::number(kind == "xml" ? xmlScore(candidate) : score(candidate, preferredType)));
+    }
+    qDebug().noquote() << QString("Resource %1 candidates for %2:\n%3\nSelected: %4")
+                          .arg(kind, ref.original(), lines.join("\n"), selected.dirName + "/" + QFileInfo(selected.filePath).fileName());
+}
+
+void ResourceResolver::logValueResolution(const ResourceRef &ref, const QString &kind, const QStringList &candidates, const QString &selected) const
+{
+    if (candidates.count() < 2) {
+        return;
+    }
+    const QString key = QString("value|%1|%2|%3").arg(kind, ref.original(), selected);
+    if (loggedUnsupportedRefs.contains(key)) {
+        return;
+    }
+    loggedUnsupportedRefs.insert(key);
+    qDebug().noquote() << QString("Resource %1 candidates for %2:\n  - %3\nSelected: %4")
+                          .arg(kind, ref.original(), candidates.join("\n  - "), selected);
 }
 
 int ResourceResolver::rankForType(Icon::Type type) const

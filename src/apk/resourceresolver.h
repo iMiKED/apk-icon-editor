@@ -31,6 +31,18 @@ public:
         Icon::Type type = Icon::Unknown;
     };
 
+    struct ColorCandidate {
+        QColor color;
+        QStringList qualifiers;
+        QString filePath;
+    };
+
+    struct AliasCandidate {
+        QString value;
+        QStringList qualifiers;
+        QString filePath;
+    };
+
     explicit ResourceResolver(const QString &contentsPath);
 
     QList<Candidate> candidates(const ResourceRef &ref) const;
@@ -49,15 +61,20 @@ private:
     void loadValues();
     void parseValuesFile(const QString &filePath);
     QList<Candidate> fileCandidates(const ResourceRef &ref) const;
+    QList<ColorCandidate> colorCandidates(const ResourceRef &ref) const;
+    QList<AliasCandidate> aliasCandidates(const ResourceRef &ref) const;
     int score(const Candidate &candidate, Icon::Type preferredType) const;
     int xmlScore(const Candidate &candidate) const;
+    int valueScore(const QStringList &qualifiers) const;
     int qualifierPenalty(const QStringList &qualifiers) const;
     int rankForType(Icon::Type type) const;
+    void logFileResolution(const ResourceRef &ref, const QString &kind, const QList<Candidate> &candidates, const Candidate &selected, Icon::Type preferredType) const;
+    void logValueResolution(const ResourceRef &ref, const QString &kind, const QStringList &candidates, const QString &selected) const;
     void logUnsupportedRef(const ResourceRef &ref, const QString &context) const;
 
     QString contentsPath;
-    QMap<QString, QColor> colors;
-    QMap<QString, QString> aliases;
+    QMap<QString, QList<ColorCandidate> > colors;
+    QMap<QString, QList<AliasCandidate> > aliases;
     mutable QSet<QString> loggedUnsupportedRefs;
 };
 
