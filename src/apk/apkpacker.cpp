@@ -47,6 +47,10 @@ void Packer::pack(Apk::File *apk, QString temp)
 
     emit loading(30, tr("Saving string resources..."));
     apk->saveTitles();
+    removeAndroidManifestAttributes(
+                CONTENTS + "/AndroidManifest.xml",
+                QStringList() << "zygotePreloadNativeLib" << "nativeService",
+                "pre-build compatibility cleanup");
 
     // Pack APK (Apktool):
 
@@ -269,10 +273,14 @@ bool Packer::removeMissingAndroidManifestAttributes(const QString &manifestPath,
             names.append(name);
         }
     }
+    return removeAndroidManifestAttributes(manifestPath, names, "aapt2 missing-attribute retry");
+}
+
+bool Packer::removeAndroidManifestAttributes(const QString &manifestPath, const QStringList &names, const QString &reason) const
+{
     if (names.isEmpty()) {
         return false;
     }
-
     QFile file(manifestPath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         return false;
@@ -307,7 +315,7 @@ bool Packer::removeMissingAndroidManifestAttributes(const QString &manifestPath,
     QTextStream out(&file);
     doc.save(out, 4);
 
-    qDebug().noquote() << QString("Removed unsupported Android manifest attributes for Apktool retry: %1").arg(names.join(", "));
+    qDebug().noquote() << QString("Removed unsupported Android manifest attributes (%1): %2").arg(reason, names.join(", "));
     return true;
 }
 
