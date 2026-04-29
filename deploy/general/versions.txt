@@ -38,6 +38,7 @@
 * Applied AOSP-style adaptive layer inset when composing adaptive XML previews from foreground and background layers.
 * Rendered XML/vector adaptive icon layers directly at inset layer size to avoid blurry upscaled previews.
 * Added oversampled adaptive XML preview composition for smoother antialiasing.
+* Added launcher entry roles and Android-like icon precedence for application, roundIcon, activity, and activity-alias launcher icons.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.

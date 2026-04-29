@@ -21,10 +21,11 @@ static void setUtf8Encoding(QTextStream &stream)
 #endif
 }
 
-Icon::Icon(QString filename, Type type, Scope scope)
+Icon::Icon(QString filename, Type type, Scope scope, EntryRole entryRole)
 {
     this->type = type;
     this->scope = scope;
+    this->entryRole = entryRole;
     modified = false;
     virtualIcon = false;
 
@@ -60,8 +61,8 @@ Icon::Icon(QString filename, Type type, Scope scope)
     load(filename);
 }
 
-Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type, Scope scope)
-    : Icon(filename, type, scope)
+Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type, Scope scope, EntryRole entryRole)
+    : Icon(filename, type, scope, entryRole)
 {
     qualifiers.clear();
     QString dpi;
@@ -83,8 +84,8 @@ Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTarge
     setPixmap(pixmap);
 }
 
-Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type, Scope scope)
-    : Icon(filename, pixmap, saveTargets, type, scope)
+Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type, Scope scope, EntryRole entryRole)
+    : Icon(filename, pixmap, saveTargets, type, scope, entryRole)
 {
     this->adaptiveDescriptor = adaptiveDescriptor;
 }
@@ -222,6 +223,37 @@ Icon::Scope Icon::getScope() const
     return scope;
 }
 
+Icon::EntryRole Icon::getEntryRole() const
+{
+    return entryRole;
+}
+
+QString Icon::getEntryRoleTitle() const
+{
+    switch (entryRole) {
+        case EntryApplicationIcon: return tr("Application icon");
+        case EntryApplicationRoundIcon: return tr("Application roundIcon");
+        case EntryActivityIcon: return tr("Launcher activity icon");
+        case EntryActivityRoundIcon: return tr("Launcher activity roundIcon");
+        case EntryActivityAliasIcon: return tr("Launcher activity-alias icon");
+        case EntryActivityAliasRoundIcon: return tr("Launcher activity-alias roundIcon");
+    }
+    return tr("Launcher icon");
+}
+
+int Icon::getEntryPriority() const
+{
+    switch (entryRole) {
+        case EntryActivityIcon: return 0;
+        case EntryActivityRoundIcon: return 1;
+        case EntryActivityAliasIcon: return 2;
+        case EntryActivityAliasRoundIcon: return 3;
+        case EntryApplicationIcon: return 4;
+        case EntryApplicationRoundIcon: return 5;
+    }
+    return 10;
+}
+
 bool Icon::isAdaptiveIcon() const
 {
     return adaptiveDescriptor.isValid();
@@ -238,11 +270,13 @@ QString Icon::getTitle() const
 QString Icon::getToolTip() const
 {
     if (!isAdaptiveIcon()) {
-        return tr("Bitmap icon") + "\n" + Path::display(filePath);
+        return tr("Bitmap icon") + "\n\n" + tr("Launcher entry:") + "\n" + getEntryRoleTitle() + "\n\n" + Path::display(filePath);
     }
 
     QStringList lines;
     lines << tr("Adaptive XML icon");
+    lines << "";
+    lines << tr("Launcher entry:") << getEntryRoleTitle();
     lines << "";
     lines << tr("XML:") << Path::display(adaptiveDescriptor.xmlPath);
     if (!adaptiveDescriptor.previewSource.isEmpty()) {

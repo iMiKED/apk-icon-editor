@@ -61,7 +61,7 @@ namespace Apk {
 
     private:
         QString getIconPath(Icon::Type type);
-        bool addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope);
+        bool addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
         bool isAdaptiveLayerResource(const QString &resourceType, const QString &resourceName) const;
 
         QString filePath;     ///< APK filename.

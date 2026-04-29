@@ -176,6 +176,27 @@ QString Manifest::getApplicationLabel() const
     return applicationLabel.value();
 }
 
+QList<Manifest::IconEntry> Manifest::getLauncherIconEntries() const
+{
+    QList<IconEntry> entries;
+    QStringList seen;
+    for (int i = 0; i < activityIcons.count(); ++i) {
+        const QDomAttr attr = activityIcons.at(i);
+        const QString value = attr.value();
+        if (value.isEmpty() || value == getApplicationIcon() || seen.contains(value)) {
+            continue;
+        }
+        const QDomNode parent = attr.ownerElement();
+        IconEntry entry;
+        entry.value = value;
+        entry.round = attr.name().section(':', -1) == "roundIcon";
+        entry.alias = parent.isElement() && parent.toElement().tagName() == "activity-alias";
+        entries.append(entry);
+        seen.append(value);
+    }
+    return entries;
+}
+
 QStringList Manifest::getActivityIcons() const
 {
     QStringList values;

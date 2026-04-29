@@ -12,9 +12,9 @@ public:
     explicit IconsModel(QObject *parent = 0) : QAbstractListModel(parent) {}
     ~IconsModel();
 
-    void add(const QString &filename, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication);
-    void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication);
-    void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication);
+    void add(const QString &filename, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
+    void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
+    void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
     bool remove(Icon *icon);
     void clone(Icon *source);
     void updateAdaptiveFamily(Icon *source);
@@ -31,6 +31,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
 private:
+    void sortIcons();
     QList<Icon *> icons;
 };
 

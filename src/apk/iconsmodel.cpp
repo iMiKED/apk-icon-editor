@@ -7,14 +7,14 @@ IconsModel::~IconsModel()
     qDeleteAll(icons);
 }
 
-void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope)
+void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole)
 {
     // Add:
 
-    const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
-    qDebug().noquote() << QString("Added %1 icon: %2").arg(scopeStr, Path::display(filename));
+    Icon roleProbe(QString(), type, scope, entryRole);
+    qDebug().noquote() << QString("Added %1: %2").arg(roleProbe.getEntryRoleTitle(), Path::display(filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
-        Icon *icon = new Icon(filename, type, scope);
+        Icon *icon = new Icon(filename, type, scope, entryRole);
         icons.append(icon);
         connect(icon, &Icon::updated, [=]() {
             QModelIndex index = this->index(icons.indexOf(icon), 0);
@@ -24,22 +24,16 @@ void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope
 
     // Sort:
 
-    std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
-        if (a->getScope() != b->getScope()) {
-            return a->getScope() < b->getScope();
-        } else {
-            return a->getType() < b->getType();
-        }
-    });
+    sortIcons();
     emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
 }
 
-void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type, Icon::Scope scope)
+void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole)
 {
-    const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
-    qDebug().noquote() << QString("Added adaptive %1 icon: %2").arg(scopeStr, Path::display(filename));
+    Icon roleProbe(QString(), type, scope, entryRole);
+    qDebug().noquote() << QString("Added adaptive %1: %2").arg(roleProbe.getEntryRoleTitle(), Path::display(filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
-        Icon *icon = new Icon(filename, pixmap, saveTargets, type, scope);
+        Icon *icon = new Icon(filename, pixmap, saveTargets, type, scope, entryRole);
         icons.append(icon);
         connect(icon, &Icon::updated, [=]() {
             QModelIndex index = this->index(icons.indexOf(icon), 0);
@@ -47,22 +41,16 @@ void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStri
         });
     endInsertRows();
 
-    std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
-        if (a->getScope() != b->getScope()) {
-            return a->getScope() < b->getScope();
-        } else {
-            return a->getType() < b->getType();
-        }
-    });
+    sortIcons();
     emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
 }
 
-void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type, Icon::Scope scope)
+void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole)
 {
-    const QString scopeStr = (scope == Icon::ScopeApplication ? "application" : "activity");
-    qDebug().noquote() << QString("Added adaptive %1 icon: %2").arg(scopeStr, Path::display(filename));
+    Icon roleProbe(QString(), type, scope, entryRole);
+    qDebug().noquote() << QString("Added adaptive %1: %2").arg(roleProbe.getEntryRoleTitle(), Path::display(filename));
     beginInsertRows(QModelIndex(), icons.count(), icons.count());
-        Icon *icon = new Icon(filename, pixmap, saveTargets, adaptiveDescriptor, type, scope);
+        Icon *icon = new Icon(filename, pixmap, saveTargets, adaptiveDescriptor, type, scope, entryRole);
         icons.append(icon);
         connect(icon, &Icon::updated, [=]() {
             QModelIndex index = this->index(icons.indexOf(icon), 0);
@@ -70,14 +58,18 @@ void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStri
         });
     endInsertRows();
 
-    std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
-        if (a->getScope() != b->getScope()) {
-            return a->getScope() < b->getScope();
-        } else {
-            return a->getType() < b->getType();
-        }
-    });
+    sortIcons();
     emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
+}
+
+void IconsModel::sortIcons()
+{
+    std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
+        if (a->getEntryPriority() != b->getEntryPriority()) {
+            return a->getEntryPriority() < b->getEntryPriority();
+        }
+        return a->getType() < b->getType();
+    });
 }
 
 bool IconsModel::remove(Icon *icon)

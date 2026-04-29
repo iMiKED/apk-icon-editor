@@ -48,9 +48,18 @@ public:
         ScopeActivity
     };
 
-    explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication);
-    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication);
-    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type = Unknown, Scope scope = ScopeApplication);
+    enum EntryRole {
+        EntryApplicationIcon,
+        EntryApplicationRoundIcon,
+        EntryActivityIcon,
+        EntryActivityRoundIcon,
+        EntryActivityAliasIcon,
+        EntryActivityAliasRoundIcon
+    };
+
+    explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -65,6 +74,9 @@ public:
     const AdaptiveIconDescriptor &getAdaptiveDescriptor() const;
     Type getType() const;
     Scope getScope() const;
+    EntryRole getEntryRole() const;
+    QString getEntryRoleTitle() const;
+    int getEntryPriority() const;
     bool isAdaptiveIcon() const;
 
     bool revert();                                  ///< Reverts the original icon (loaded from the original filename).
@@ -108,6 +120,7 @@ private:
     QStringList qualifiers;
     Type type;
     Scope scope;
+    EntryRole entryRole;
     bool modified;
     bool virtualIcon;
 
