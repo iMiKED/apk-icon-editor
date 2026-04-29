@@ -23,6 +23,7 @@ public:
 private:
     static bool parseXml(const QString &xmlPath, ResourceRef *background, ResourceRef *foreground);
     static QPixmap render(const ResourceResolver::Value &background, const ResourceResolver::Value &foreground, const QSize &size, const QPixmap &foregroundOverride = QPixmap(), const QPixmap &backgroundOverride = QPixmap());
+    static QRectF adaptiveLayerRect(const QSize &size);
     static ResourceResolver::Value resolveLayer(const ResourceResolver &resolver, const ResourceRef &ref, Icon::Type type, const QSize &size, QPixmap *pixmap);
     static QPixmap renderDrawableXml(const ResourceResolver &resolver, const QString &filePath, Icon::Type type, const QSize &size);
     static QPixmap renderDrawableElement(const ResourceResolver &resolver, const QDomElement &node, Icon::Type type, const QSize &size);

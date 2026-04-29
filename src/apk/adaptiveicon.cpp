@@ -143,12 +143,13 @@ QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const Re
 
     QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
     canvas.fill(Qt::transparent);
+    const QRectF layerRect = adaptiveLayerRect(size);
 
     QPainter painter(&canvas);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     if (!backgroundOverride.isNull()) {
-        painter.drawPixmap(canvas.rect(), backgroundOverride);
+        painter.drawPixmap(layerRect, backgroundOverride, backgroundOverride.rect());
     } else if (background.color.isValid()) {
         painter.fillRect(canvas.rect(), background.color);
     }
@@ -156,17 +157,25 @@ QPixmap AdaptiveIcon::render(const ResourceResolver::Value &background, const Re
     if (backgroundOverride.isNull() && background.isBitmap && !background.filePath.isEmpty()) {
         QPixmap bg(background.filePath);
         if (!bg.isNull()) {
-            painter.drawPixmap(canvas.rect(), bg);
+            painter.drawPixmap(layerRect, bg, bg.rect());
         }
     }
 
     QPixmap fg = foregroundOverride.isNull() ? QPixmap(foreground.filePath) : foregroundOverride;
     if (!fg.isNull()) {
-        painter.drawPixmap(canvas.rect(), fg);
+        painter.drawPixmap(layerRect, fg, fg.rect());
     }
 
     painter.end();
     return QPixmap::fromImage(canvas);
+}
+
+QRectF AdaptiveIcon::adaptiveLayerRect(const QSize &size)
+{
+    static const qreal extraInsetPercentage = 0.25;
+    const qreal insetX = size.width() * extraInsetPercentage;
+    const qreal insetY = size.height() * extraInsetPercentage;
+    return QRectF(-insetX, -insetY, size.width() + insetX * 2.0, size.height() + insetY * 2.0);
 }
 
 ResourceResolver::Value AdaptiveIcon::resolveLayer(const ResourceResolver &resolver, const ResourceRef &ref, Icon::Type type, const QSize &size, QPixmap *pixmap)

@@ -254,7 +254,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             }
         }
         if (!usesReadyBitmapPreview) {
-            descriptor.previewSource = "composed XML layers";
+            descriptor.previewSource = "composed XML layers with AOSP-style layer inset";
         }
         if (!descriptor.foregroundPath.isEmpty()) {
             saveTargets.append(descriptor.foregroundPath);
