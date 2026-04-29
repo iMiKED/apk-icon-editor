@@ -4,6 +4,7 @@
 #include "resourceref.h"
 #include "resourceresolver.h"
 #include <QDomElement>
+#include <QPainterPath>
 #include <QPixmap>
 
 class AdaptiveIcon
@@ -27,6 +28,8 @@ private:
     static QPixmap renderDrawableElement(const ResourceResolver &resolver, const QDomElement &node, Icon::Type type, const QSize &size);
     static QString drawableAttr(const QDomElement &node);
     static QColor resolveColorValue(const ResourceResolver &resolver, const QString &value);
+    static qreal dimensionAttr(const QString &value, qreal fallback = 0.0);
+    static QPainterPath shapePath(const QDomElement &node, const QSize &size);
     static qreal percentAttr(const QString &value, qreal fallback = 0.5);
 };
 

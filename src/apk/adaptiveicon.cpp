@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QLinearGradient>
 #include <QPainter>
+#include <QPen>
+#include <QRegularExpression>
 #include <QTextStream>
 #include <QDebug>
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -220,8 +222,10 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
         QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
         canvas.fill(Qt::transparent);
         QPainter painter(&canvas);
+        painter.setRenderHint(QPainter::Antialiasing);
         const QDomElement solid = node.firstChildElement("solid");
         const QDomElement gradient = node.firstChildElement("gradient");
+        const QPainterPath path = shapePath(node, size);
         if (!gradient.isNull()) {
             const QColor start = resolveColorValue(resolver, drawableAttr(gradient).isEmpty() ? gradient.attribute("android:startColor") : drawableAttr(gradient));
             const QColor end = resolveColorValue(resolver, gradient.attribute("android:endColor"));
@@ -231,10 +235,19 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
             }
             brush.setColorAt(0, start.isValid() ? start : Qt::transparent);
             brush.setColorAt(1, end.isValid() ? end : start);
-            painter.fillRect(canvas.rect(), brush);
+            painter.fillPath(path, brush);
         } else if (!solid.isNull()) {
             const QColor color = resolveColorValue(resolver, solid.attribute("android:color"));
-            painter.fillRect(canvas.rect(), color.isValid() ? color : Qt::transparent);
+            painter.fillPath(path, color.isValid() ? color : Qt::transparent);
+        }
+        const QDomElement stroke = node.firstChildElement("stroke");
+        if (!stroke.isNull()) {
+            const QColor strokeColor = resolveColorValue(resolver, stroke.attribute("android:color"));
+            const qreal width = dimensionAttr(stroke.attribute("android:width"), 0.0);
+            if (strokeColor.isValid() && width > 0.0) {
+                QPen pen(strokeColor, width);
+                painter.strokePath(path, pen);
+            }
         }
         painter.end();
         return QPixmap::fromImage(canvas);
@@ -300,6 +313,21 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
         if (pixmap.isNull()) {
             return pixmap;
         }
+        if (tag == "item" || tag == "inset") {
+            const qreal left = dimensionAttr(node.attribute(tag == "inset" ? "android:insetLeft" : "android:left"), 0.0);
+            const qreal top = dimensionAttr(node.attribute(tag == "inset" ? "android:insetTop" : "android:top"), 0.0);
+            const qreal right = dimensionAttr(node.attribute(tag == "inset" ? "android:insetRight" : "android:right"), 0.0);
+            const qreal bottom = dimensionAttr(node.attribute(tag == "inset" ? "android:insetBottom" : "android:bottom"), 0.0);
+            if (!qFuzzyIsNull(left) || !qFuzzyIsNull(top) || !qFuzzyIsNull(right) || !qFuzzyIsNull(bottom)) {
+                QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+                canvas.fill(Qt::transparent);
+                QPainter painter(&canvas);
+                painter.setRenderHint(QPainter::SmoothPixmapTransform);
+                painter.drawPixmap(QRectF(left, top, size.width() - left - right, size.height() - top - bottom), pixmap, pixmap.rect());
+                painter.end();
+                pixmap = QPixmap::fromImage(canvas);
+            }
+        }
         if (tag == "rotate") {
             const qreal degrees = node.attribute("android:fromDegrees").toDouble();
             if (!qFuzzyIsNull(degrees)) {
@@ -352,6 +380,64 @@ QColor AdaptiveIcon::resolveColorValue(const ResourceResolver &resolver, const Q
         }
     }
     return QColor(value);
+}
+
+qreal AdaptiveIcon::dimensionAttr(const QString &value, qreal fallback)
+{
+    QString text = value.trimmed();
+    if (text.isEmpty()) {
+        return fallback;
+    }
+
+    static const QRegularExpression number("^(-?\\d+(?:\\.\\d+)?)");
+    const QRegularExpressionMatch match = number.match(text);
+    if (!match.hasMatch()) {
+        return fallback;
+    }
+
+    bool ok = false;
+    const qreal result = match.captured(1).toDouble(&ok);
+    return ok ? result : fallback;
+}
+
+QPainterPath AdaptiveIcon::shapePath(const QDomElement &node, const QSize &size)
+{
+    QPainterPath path;
+    const QRectF rect(0, 0, size.width(), size.height());
+    const QString shape = node.attribute("android:shape", "rectangle");
+    if (shape == "oval") {
+        path.addEllipse(rect);
+        return path;
+    }
+
+    const QDomElement corners = node.firstChildElement("corners");
+    const qreal radius = dimensionAttr(corners.attribute("android:radius"), 0.0);
+    const qreal topLeft = dimensionAttr(corners.attribute("android:topLeftRadius"), radius);
+    const qreal topRight = dimensionAttr(corners.attribute("android:topRightRadius"), radius);
+    const qreal bottomRight = dimensionAttr(corners.attribute("android:bottomRightRadius"), radius);
+    const qreal bottomLeft = dimensionAttr(corners.attribute("android:bottomLeftRadius"), radius);
+    if (!qFuzzyIsNull(topLeft - topRight)
+            || !qFuzzyIsNull(topLeft - bottomRight)
+            || !qFuzzyIsNull(topLeft - bottomLeft)) {
+        path.moveTo(rect.left() + topLeft, rect.top());
+        path.lineTo(rect.right() - topRight, rect.top());
+        path.quadTo(rect.right(), rect.top(), rect.right(), rect.top() + topRight);
+        path.lineTo(rect.right(), rect.bottom() - bottomRight);
+        path.quadTo(rect.right(), rect.bottom(), rect.right() - bottomRight, rect.bottom());
+        path.lineTo(rect.left() + bottomLeft, rect.bottom());
+        path.quadTo(rect.left(), rect.bottom(), rect.left(), rect.bottom() - bottomLeft);
+        path.lineTo(rect.left(), rect.top() + topLeft);
+        path.quadTo(rect.left(), rect.top(), rect.left() + topLeft, rect.top());
+        path.closeSubpath();
+        return path;
+    }
+
+    if (radius > 0.0) {
+        path.addRoundedRect(rect, radius, radius);
+    } else {
+        path.addRect(rect);
+    }
+    return path;
 }
 
 qreal AdaptiveIcon::percentAttr(const QString &value, qreal fallback)

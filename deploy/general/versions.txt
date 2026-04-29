@@ -32,6 +32,7 @@
 * Fixed adaptive icon write-back for extensionless bitmap resources used by obfuscated APKs.
 * Added an explicit foreground-only adaptive icon replacement policy in tooltips, logs, and the Replace Icon confirmation dialog.
 * Added adaptive XML monochrome layer metadata and filtering for Android themed icons.
+* Added drawable XML shape rendering for adaptive icon backgrounds, including oval, rounded corners, stroke, and layer item insets.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
