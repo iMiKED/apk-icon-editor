@@ -235,13 +235,22 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             continue;
         }
 
-        if (scope == Icon::ScopeApplication) {
-            thumbnail.addPixmap(result.pixmap);
-        }
         adaptiveLayerRefs.insert(resourceKey(iconRef));
 
         QStringList saveTargets;
         AdaptiveIconDescriptor descriptor = result.descriptor;
+        QPixmap previewPixmap = result.pixmap;
+        const ResourceResolver::Value directBitmap = resolver.resolveBitmap(iconRef, type);
+        if (directBitmap.found) {
+            const QPixmap directPixmap(directBitmap.filePath);
+            if (!directPixmap.isNull()) {
+                previewPixmap = directPixmap;
+                descriptor.previewSource = "ready bitmap with the same resource id";
+                descriptor.previewPath = directBitmap.filePath;
+                saveTargets.append(directBitmap.filePath);
+                qDebug().noquote() << "Adaptive icon preview uses ready bitmap resource:" << Path::display(directBitmap.filePath);
+            }
+        }
         if (!descriptor.foregroundPath.isEmpty()) {
             saveTargets.append(descriptor.foregroundPath);
         } else {
@@ -267,7 +276,11 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
         if (!monochromeKey.isEmpty()) {
             adaptiveLayerRefs.insert(monochromeKey);
         }
-        iconsModel.add(result.xmlPath, result.pixmap, saveTargets, descriptor, type, scope);
+        saveTargets.removeDuplicates();
+        if (scope == Icon::ScopeApplication) {
+            thumbnail.addPixmap(previewPixmap);
+        }
+        iconsModel.add(result.xmlPath, previewPixmap, saveTargets, descriptor, type, scope);
         added = true;
     }
 

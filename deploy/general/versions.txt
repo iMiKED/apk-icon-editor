@@ -33,7 +33,7 @@
 * Added an explicit foreground-only adaptive icon replacement policy in tooltips, logs, and the Replace Icon confirmation dialog.
 * Added adaptive XML monochrome layer metadata and filtering for Android themed icons.
 * Added drawable XML shape rendering for adaptive icon backgrounds, including oval, rounded corners, stroke, and layer item insets.
-* Added a preview-only launcher mask for adaptive XML icons without changing APK resources.
+* Preferred ready bitmap resources with the same adaptive XML resource id for preview, matching APK Info behavior and preserving app-provided icon shape/scale.
 
 ## 3.0.0-beta1
 * Updated dependencies: JDK recommendation, Qt to *v6.8.3 LTS*, and *Apktool* to *v3.0.2*.
