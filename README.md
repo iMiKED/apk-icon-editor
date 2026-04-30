@@ -2,6 +2,8 @@
 
 This repository is a fork of the original [APK Icon Editor](https://github.com/kefir500/apk-icon-editor) maintained by [iMiKED from 4PDA](https://4pda.to/forum/index.php?showuser=1017942).
 
+[![Build](https://github.com/iMiKED/apk-icon-editor/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/iMiKED/apk-icon-editor/actions/workflows/build.yml)
+[![CodeQL](https://github.com/iMiKED/apk-icon-editor/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/iMiKED/apk-icon-editor/actions/workflows/github-code-scanning/codeql)
 [![Latest Release](https://img.shields.io/github/v/release/iMiKED/apk-icon-editor?include_prereleases&label=release)](https://github.com/iMiKED/apk-icon-editor/releases)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/iMiKED/apk-icon-editor/blob/master/LICENSE)
 
