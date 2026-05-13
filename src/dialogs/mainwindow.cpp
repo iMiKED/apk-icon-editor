@@ -603,7 +603,7 @@ void MainWindow::settings_load()
 
 bool MainWindow::resetApktool()
 {
-    const QString FRAMEWORK = Settings::get_temp() + "/apk-icon-editor/framework/1.apk";
+    const QString FRAMEWORK = Settings::get_temp() + "/apk-icon-editor-reborn/framework/1.apk";
     return QFile::remove(FRAMEWORK);
 }
 
@@ -1121,7 +1121,7 @@ bool MainWindow::apk_open(QString filename)
     loadingDialog->setProgress(20, QApplication::translate("Apk::Unpacker", "Unpacking APK..."));
     QApplication::processEvents();
 
-    const QString destination = Settings::get_temp() + "/apk-icon-editor/";
+    const QString destination = Settings::get_temp() + "/apk-icon-editor-reborn/";
     const QString apktool = Settings::get_apktool();
     const bool smali = Settings::get_smali();
     apk_close();
@@ -1176,13 +1176,13 @@ bool MainWindow::apk_save(QString filename)
     apk->setFileKeystore(Settings::get_keystore(), alias, pass_store, pass_alias);
     apk->setKeystore(USING_KEYSTORE);
 
-    apkManager->pack(apk, Settings::get_temp() + "/apk-icon-editor/");
+    apkManager->pack(apk, Settings::get_temp() + "/apk-icon-editor-reborn/");
     return true;
 }
 
 void MainWindow::apk_explore()
 {
-    const QString TEMPDIR = Settings::get_temp() + "/apk-icon-editor/apk";
+    const QString TEMPDIR = Settings::get_temp() + "/apk-icon-editor-reborn/apk";
     QDesktopServices::openUrl(QUrl::fromLocalFile(TEMPDIR));
 }
 
@@ -1214,9 +1214,9 @@ void MainWindow::associate() const
 #ifdef Q_OS_WIN
     QString exe = QDir::toNativeSeparators(QApplication::applicationFilePath());
     QSettings reg("HKEY_CURRENT_USER\\Software\\Classes", QSettings::NativeFormat);
-    reg.setValue("apk-icon-editor.apk/DefaultIcon/Default", exe + ",1");
-    reg.setValue("apk-icon-editor.apk/Shell/Open/Command/Default", exe + " \"%1\"");
-    reg.setValue(".apk/Default", "apk-icon-editor.apk");
+    reg.setValue("apk-icon-editor-reborn.apk/DefaultIcon/Default", exe + ",1");
+    reg.setValue("apk-icon-editor-reborn.apk/Shell/Open/Command/Default", exe + " \"%1\"");
+    reg.setValue(".apk/Default", "apk-icon-editor-reborn.apk");
 #endif
 }
 

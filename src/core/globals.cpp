@@ -75,14 +75,14 @@ QString Path::Data::shared()
 #ifndef Q_OS_LINUX
     return QApplication::applicationDirPath() + '/';
 #else
-    return QApplication::applicationDirPath() + "/../share/apk-icon-editor/";
+    return QApplication::applicationDirPath() + "/../share/apk-icon-editor-reborn/";
 #endif
 }
 
 QString Path::Data::recent()
 {
 #ifndef PORTABLE
-    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/apk-icon-editor/cache/recent";
+    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/apk-icon-editor-reborn/cache/recent";
 #else
     return Path::App::dir() + "data/recent/";
 #endif
@@ -102,7 +102,7 @@ QString Path::Data::temp()
 QString Path::Log::dir()
 {
 #ifndef PORTABLE
-    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/apk-icon-editor/logs/";
+    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + "/apk-icon-editor-reborn/logs/";
 #else
     return Path::App::dir() + "data/logs/";
 #endif
@@ -110,7 +110,7 @@ QString Path::Log::dir()
 
 QString Path::Log::file()
 {
-    return Path::Log::dir() + "apk-icon-editor.log";
+    return Path::Log::dir() + "apk-icon-editor-reborn.log";
 }
 
 QString Path::display(QString path)

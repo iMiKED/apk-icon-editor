@@ -1,3 +1,10 @@
+apk-icon-editor-reborn (3.0.0~beta3-1) unstable; urgency=low
+
+  * Rename application and binary package to APK Icon Editor Reborn.
+  * Add resource table alias support for adaptive XML launcher icons.
+
+ -- iMiKED <M-I-B@yandex.ru>  Thu, 14 May 2026 04:45:00 +0700
+
 apk-icon-editor (3.0.0~beta2-1) unstable; urgency=low
 
   * Added adaptive XML launcher icon preview, replacement, export, write-back, and APK repacking support.

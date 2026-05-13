@@ -1,4 +1,4 @@
-Source: apk-icon-editor
+Source: apk-icon-editor-reborn
 Section: editors
 Priority: optional
 Maintainer: iMiKED <M-I-B@yandex.ru>
@@ -8,7 +8,7 @@ Homepage: https://github.com/iMiKED/apk-icon-editor
 Vcs-Git: https://github.com/iMiKED/apk-icon-editor.git
 Vcs-Browser: https://github.com/iMiKED/apk-icon-editor
 
-Package: apk-icon-editor
+Package: apk-icon-editor-reborn
 Architecture: any
 Depends: zipalign, default-jdk-headless | java17-runtime-headless | java17-runtime, ${shlibs:Depends}, ${misc:Depends}
 Description: Simple APK resource editor

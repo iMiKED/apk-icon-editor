@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=APK Icon Editor
+Name=APK Icon Editor Reborn
 Comment=APK resource editor
 GenericName=APK resource editor
-Exec=/usr/bin/apk-icon-editor %F
-Path=/usr/share/apk-icon-editor
+Exec=/usr/bin/apk-icon-editor-reborn %F
+Path=/usr/share/apk-icon-editor-reborn
 Icon=apk-icon-editor
 Categories=Utility;
 Terminal=false

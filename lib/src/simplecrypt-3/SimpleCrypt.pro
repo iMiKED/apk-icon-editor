@@ -7,7 +7,7 @@ CONFIG += staticlib
 SOURCES += simplecrypt.cpp
 HEADERS += simplecrypt.h
 
-# APK Icon Editor:
+# APK Icon Editor Reborn:
 
 DESTDIR = $$PWD/../../bin
 

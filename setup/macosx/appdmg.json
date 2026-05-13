@@ -1,10 +1,10 @@
 {
-  "title": "APK Icon Editor",
+  "title": "APK Icon Editor Reborn",
   "icon": "../../deploy/macosx/Resources/icon.icns",
   "background": "background.png",
   "icon-size": 128,
   "contents": [
-    { "x": 160, "y": 200, "type": "file", "path": "build/APK Icon Editor.app" },
+    { "x": 160, "y": 200, "type": "file", "path": "build/APK Icon Editor Reborn.app" },
     { "x": 430, "y": 200, "type": "link", "path": "/Applications" }
   ]
 }

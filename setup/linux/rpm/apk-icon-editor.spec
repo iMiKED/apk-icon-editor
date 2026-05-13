@@ -1,8 +1,8 @@
-%global app_version 3.0.0-beta2
+%global app_version 3.0.0-beta3
 %global _missing_build_ids_terminate_build 0
 %global debug_package %{nil}
 
-Name:           apk-icon-editor
+Name:           apk-icon-editor-reborn
 Version:        3.0.0
 Release:        0.beta1%{?dist}
 Summary:        Simple APK resource editor
@@ -20,7 +20,7 @@ Requires:       java-17-openjdk-devel
 Requires:       hicolor-icon-theme
 
 %description
-APK Icon Editor is a cross-platform APK editor designed to edit and replace APK
+APK Icon Editor Reborn is a cross-platform APK editor designed to edit and replace APK
 resources such as icons, strings, images, application name, and version.
 
 %prep
@@ -36,13 +36,17 @@ qmake6 PREFIX=%{_prefix} "DEFINES+=CI"
 %files
 %license LICENSE
 %doc README.md
-%{_bindir}/apk-icon-editor
+%{_bindir}/apk-icon-editor-reborn
 %{_bindir}/zipalign
-%{_datadir}/apk-icon-editor/
+%{_datadir}/apk-icon-editor-reborn/
 %{_datadir}/applications/apk-icon-editor.desktop
 %{_datadir}/icons/hicolor/*/apps/apk-icon-editor.png
 %{_datadir}/icons/hicolor/*/mimetypes/application-vnd.android.package-archive.png
 
 %changelog
+* Thu May 14 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta3
+- Renamed application and binary package to APK Icon Editor Reborn.
+- Added resource table alias support for adaptive XML launcher icons.
+
 * Sun Apr 26 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta1
 - Added RPM packaging for Fedora and Red Hat compatible distributions.

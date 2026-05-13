@@ -2,21 +2,21 @@
 !include FileFunc.nsh
 !include nsProcess.nsh
 
-!define APPNAME "APK Icon Editor"
+!define APPNAME "APK Icon Editor Reborn"
 !define COMPANYNAME "Alexander Gorishnyak / iMiKED"
 !define VERSIONMAJOR 3
 !define VERSIONMINOR 0
 !define VERSIONPATCH 0
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
-!define VERSIONDISPLAY "${VERSION}-beta2"
+!define VERSIONDISPLAY "${VERSION}-beta3"
 !define ABOUTURL "https://github.com/iMiKED/apk-icon-editor"
 !define UPDATEURL "https://github.com/iMiKED/apk-icon-editor/releases"
-!define EXE "$INSTDIR\apk-icon-editor.exe"
+!define EXE "$INSTDIR\apk-icon-editor-reborn.exe"
 
 Name "${APPNAME} v${VERSIONDISPLAY}"
-OutFile "apk-icon-editor_${VERSIONDISPLAY}.exe"
+OutFile "apk-icon-editor-reborn_${VERSIONDISPLAY}.exe"
 InstallDir "$PROGRAMFILES\${APPNAME}"
-InstallDirRegKey HKCU "Software\apk-icon-editor" "InstallDir"
+InstallDirRegKey HKCU "Software\apk-icon-editor-reborn" "InstallDir"
 RequestExecutionLevel admin
 SetCompressor /SOLID lzma
 
@@ -29,7 +29,7 @@ SetCompressor /SOLID lzma
 # Before Install:
 
 Function .onInit
-	${nsProcess::FindProcess} "apk-icon-editor.exe" $R0
+	${nsProcess::FindProcess} "apk-icon-editor-reborn.exe" $R0
 	${If} $R0 == 0
 		MessageBox MB_YESNO "${APPNAME} is currently running. Close?" IDYES close IDNO abort
 	${Else}
@@ -39,14 +39,14 @@ abort:
 	MessageBox MB_OK "${APPNAME} needs to be closed before installation."
 	Abort
 close:
-	${nsProcess::KillProcess} "apk-icon-editor.exe" $R5
+	${nsProcess::KillProcess} "apk-icon-editor-reborn.exe" $R5
 continue:
 FunctionEnd
 
 # Before Uninstall:
 
 Function un.onInit
-	${nsProcess::FindProcess} "apk-icon-editor.exe" $R0
+	${nsProcess::FindProcess} "apk-icon-editor-reborn.exe" $R0
 	${If} $R0 == 0
 		MessageBox MB_YESNO "${APPNAME} is currently running. Close?" IDYES close IDNO abort
 	${Else}
@@ -56,7 +56,7 @@ abort:
 	MessageBox MB_OK "${APPNAME} needs to be closed before uninstalling."
 	Abort
 close:
-	${nsProcess::KillProcess} "apk-icon-editor.exe" $R5
+	${nsProcess::KillProcess} "apk-icon-editor-reborn.exe" $R5
 continue:
 FunctionEnd
 
@@ -90,7 +90,7 @@ Section
 	CreateShortCut "$SMPROGRAMS\${APPNAME}.lnk" ${EXE} "" "" "" "" "" "${APPNAME} v${VERSIONDISPLAY}"
 	${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
 	IntFmt $0 "0x%08X" $0
-	WriteRegStr HKCU "Software\apk-icon-editor" "InstallDir" "$INSTDIR"
+	WriteRegStr HKCU "Software\apk-icon-editor-reborn" "InstallDir" "$INSTDIR"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayName" "${APPNAME}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayVersion" "${VERSIONDISPLAY}"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}" "DisplayIcon" "$\"$INSTDIR\gfx\icon.ico$\""
@@ -111,9 +111,9 @@ Section "Desktop Shortcut" SEC_DESKTOP
 SectionEnd
 
 Section "Associate APK" SEC_ASSOCIATE
-	WriteRegStr HKCU "Software\Classes\apk-icon-editor.apk\DefaultIcon" "" "${EXE},1"
-	WriteRegStr HKCU "Software\Classes\apk-icon-editor.apk\Shell\Open\Command" "" "${EXE} $\"%1$\""
-	WriteRegStr HKCU "Software\Classes\.apk" "" "apk-icon-editor.apk"
+	WriteRegStr HKCU "Software\Classes\apk-icon-editor-reborn.apk\DefaultIcon" "" "${EXE},1"
+	WriteRegStr HKCU "Software\Classes\apk-icon-editor-reborn.apk\Shell\Open\Command" "" "${EXE} $\"%1$\""
+	WriteRegStr HKCU "Software\Classes\.apk" "" "apk-icon-editor-reborn.apk"
 SectionEnd
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
@@ -125,7 +125,7 @@ SectionEnd
 
 Section "-un.Uninstall"
 	Delete "${EXE}"
-	Delete "$INSTDIR\apk-icon-editor.visualelementsmanifest.xml"
+	Delete "$INSTDIR\apk-icon-editor-reborn.visualelementsmanifest.xml"
 	Delete "$INSTDIR\authors.txt"
 	Delete "$INSTDIR\faq.txt"
 	Delete "$INSTDIR\versions.txt"
@@ -219,13 +219,13 @@ Section "-un.Uninstall"
 	Delete "$DESKTOP\${APPNAME}.lnk"
 	Delete "$SMPROGRAMS\${APPNAME}.lnk"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
-	DeleteRegKey HKCU "Software\apk-icon-editor"
+	DeleteRegKey HKCU "Software\apk-icon-editor-reborn"
 SectionEnd
 
 Section "un.Remove settings" SEC_DELETE
-	RMDir /r "$APPDATA\apk-icon-editor"
-	RMDir /r "$TEMP\apk-icon-editor"
-	DeleteRegKey HKCU "Software\Classes\apk-icon-editor.apk"
+	RMDir /r "$APPDATA\apk-icon-editor-reborn"
+	RMDir /r "$TEMP\apk-icon-editor-reborn"
+	DeleteRegKey HKCU "Software\Classes\apk-icon-editor-reborn.apk"
 	DeleteRegKey HKCU "Software\Classes\.apk"
 SectionEnd
 

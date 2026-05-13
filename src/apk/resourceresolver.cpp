@@ -1,4 +1,5 @@
 #include "resourceresolver.h"
+#include "resourcearsc.h"
 #include <QDir>
 #include <QDirIterator>
 #include <QDomDocument>
@@ -29,16 +30,30 @@ ResourceResolver::ResourceResolver(const QString &contentsPath)
     : contentsPath(QDir::cleanPath(QDir::fromNativeSeparators(contentsPath)))
 {
     loadValues();
+    loadResourceTableAliases();
 }
 
 QList<ResourceResolver::Candidate> ResourceResolver::candidates(const ResourceRef &ref) const
 {
     logUnsupportedRef(ref, "resolve resource");
+    QList<Candidate> result = fileCandidates(ref);
     ResourceRef resolved = resolveAlias(ref);
-    if (!resolved.isValid()) {
-        resolved = ref;
+    if (resolved.isValid()) {
+        const QList<Candidate> aliasFiles = fileCandidates(resolved);
+        foreach (const Candidate &candidate, aliasFiles) {
+            bool exists = false;
+            foreach (const Candidate &existing, result) {
+                if (existing.filePath == candidate.filePath) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                result.append(candidate);
+            }
+        }
     }
-    return fileCandidates(resolved);
+    return result;
 }
 
 QList<ResourceResolver::Candidate> ResourceResolver::bitmapCandidatesByName(const QString &name) const
@@ -330,6 +345,20 @@ void ResourceResolver::parseValuesFile(const QString &filePath)
             }
         }
         node = node.nextSiblingElement();
+    }
+}
+
+void ResourceResolver::loadResourceTableAliases()
+{
+    const QMap<QString, QString> tableAliases = ResourceArsc::readReferenceAliases(QDir::cleanPath(contentsPath + "/resources.arsc"));
+    for (QMap<QString, QString>::const_iterator it = tableAliases.constBegin(); it != tableAliases.constEnd(); ++it) {
+        AliasCandidate alias;
+        alias.value = it.value();
+        alias.filePath = QDir::cleanPath(contentsPath + "/resources.arsc");
+        aliases[it.key()].append(alias);
+    }
+    if (!tableAliases.isEmpty()) {
+        qDebug().noquote() << QString("Loaded %1 resource table aliases from resources.arsc").arg(tableAliases.count());
     }
 }
 

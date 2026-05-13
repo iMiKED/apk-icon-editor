@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "APK Icon Editor"
+PROJECT_NAME           = "APK Icon Editor Reborn"
 PROJECT_NUMBER         =
 PROJECT_BRIEF          =
 PROJECT_LOGO           = img/logo.png

@@ -59,6 +59,7 @@ public:
 
 private:
     void loadValues();
+    void loadResourceTableAliases();
     void parseValuesFile(const QString &filePath);
     QList<Candidate> fileCandidates(const ResourceRef &ref) const;
     QList<ColorCandidate> colorCandidates(const ResourceRef &ref) const;
