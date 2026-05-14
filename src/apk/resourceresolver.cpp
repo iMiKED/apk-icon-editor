@@ -26,9 +26,16 @@ static QString keyForRef(const ResourceRef &ref)
     return ref.type() + "/" + ref.name();
 }
 
-ResourceResolver::ResourceResolver(const QString &contentsPath)
+ResourceResolver::ResourceResolver(const QString &contentsPath, const QStringList &extraContentsPaths)
     : contentsPath(QDir::cleanPath(QDir::fromNativeSeparators(contentsPath)))
 {
+    contentsPaths << this->contentsPath;
+    foreach (const QString &path, extraContentsPaths) {
+        const QString clean = QDir::cleanPath(QDir::fromNativeSeparators(path));
+        if (!clean.isEmpty() && !contentsPaths.contains(clean)) {
+            contentsPaths << clean;
+        }
+    }
     loadValues();
     loadResourceTableAliases();
 }
@@ -273,11 +280,13 @@ QString ResourceResolver::qualifierForType(Icon::Type type)
 
 void ResourceResolver::loadValues()
 {
-    QDirIterator it(QDir::cleanPath(contentsPath + "/res"), QStringList() << "*.xml", QDir::Files, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        const QFileInfo info(it.next());
-        if (info.dir().dirName().split('-').first() == "values") {
-            parseValuesFile(info.filePath());
+    foreach (const QString &root, contentsPaths) {
+        QDirIterator it(QDir::cleanPath(root + "/res"), QStringList() << "*.xml", QDir::Files, QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            const QFileInfo info(it.next());
+            if (info.dir().dirName().split('-').first() == "values") {
+                parseValuesFile(info.filePath());
+            }
         }
     }
 }
@@ -355,46 +364,49 @@ void ResourceResolver::parseValuesFile(const QString &filePath)
 
 void ResourceResolver::loadResourceTableAliases()
 {
-    const QString tablePath = QDir::cleanPath(contentsPath + "/resources.arsc");
-    const ResourceArsc::Table table = ResourceArsc::readTable(tablePath);
-    foreach (const ResourceArsc::Alias &tableAlias, table.aliases) {
-        AliasCandidate alias;
-        alias.value = tableAlias.value;
-        alias.qualifiers = tableAlias.qualifiers;
-        alias.filePath = tablePath;
-        aliases[tableAlias.key].append(alias);
-    }
-    foreach (const ResourceArsc::Color &tableColor, table.colors) {
-        ColorCandidate color;
-        color.color = tableColor.color;
-        color.qualifiers = tableColor.qualifiers;
-        color.filePath = tablePath;
-        colors[tableColor.key].append(color);
-    }
-    foreach (const ResourceArsc::File &tableFile, table.files) {
-        const QString resolvedPath = QDir::cleanPath(contentsPath + "/" + tableFile.path);
-        if (!QFileInfo::exists(resolvedPath)) {
-            continue;
+    foreach (const QString &root, contentsPaths) {
+        const QString tablePath = QDir::cleanPath(root + "/resources.arsc");
+        const ResourceArsc::Table table = ResourceArsc::readTable(tablePath);
+        foreach (const ResourceArsc::Alias &tableAlias, table.aliases) {
+            AliasCandidate alias;
+            alias.value = tableAlias.value;
+            alias.qualifiers = tableAlias.qualifiers;
+            alias.filePath = tablePath;
+            aliases[tableAlias.key].append(alias);
         }
+        foreach (const ResourceArsc::Color &tableColor, table.colors) {
+            ColorCandidate color;
+            color.color = tableColor.color;
+            color.qualifiers = tableColor.qualifiers;
+            color.filePath = tablePath;
+            colors[tableColor.key].append(color);
+        }
+        foreach (const ResourceArsc::File &tableFile, table.files) {
+            const QString resolvedPath = QDir::cleanPath(root + "/" + tableFile.path);
+            if (!QFileInfo::exists(resolvedPath)) {
+                continue;
+            }
 
-        const QFileInfo info(resolvedPath);
-        const QString dirName = info.dir().dirName();
-        const QStringList dirQualifiers = dirName.split('-').mid(1);
-        Candidate candidate;
-        candidate.filePath = resolvedPath;
-        candidate.dirName = dirName;
-        candidate.qualifiers = tableFile.qualifiers.isEmpty() ? dirQualifiers : tableFile.qualifiers;
-        candidate.extension = info.suffix().toLower();
-        candidate.type = typeFromQualifiers(candidate.qualifiers);
-        candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(candidate.filePath).canRead();
-        candidate.isXml = candidate.extension == "xml";
-        tableFiles[tableFile.key].append(candidate);
-    }
-    if (!table.aliases.isEmpty() || !table.colors.isEmpty() || !table.files.isEmpty()) {
-        qDebug().noquote() << QString("Loaded resources.arsc entries: %1 aliases, %2 colors, %3 file values")
-                              .arg(table.aliases.count())
-                              .arg(table.colors.count())
-                              .arg(table.files.count());
+            const QFileInfo info(resolvedPath);
+            const QString dirName = info.dir().dirName();
+            const QStringList dirQualifiers = dirName.split('-').mid(1);
+            Candidate candidate;
+            candidate.filePath = resolvedPath;
+            candidate.dirName = dirName;
+            candidate.qualifiers = tableFile.qualifiers.isEmpty() ? dirQualifiers : tableFile.qualifiers;
+            candidate.extension = info.suffix().toLower();
+            candidate.type = typeFromQualifiers(candidate.qualifiers);
+            candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(candidate.filePath).canRead();
+            candidate.isXml = candidate.extension == "xml";
+            tableFiles[tableFile.key].append(candidate);
+        }
+        if (!table.aliases.isEmpty() || !table.colors.isEmpty() || !table.files.isEmpty()) {
+            qDebug().noquote() << QString("Loaded resources.arsc entries from %1: %2 aliases, %3 colors, %4 file values")
+                                  .arg(QDir::toNativeSeparators(tablePath))
+                                  .arg(table.aliases.count())
+                                  .arg(table.colors.count())
+                                  .arg(table.files.count());
+        }
     }
 }
 
@@ -415,40 +427,42 @@ QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const Resour
         return result;
     }
 
-    const QString resRoot = QDir::cleanPath(contentsPath + "/res");
-    QDirIterator dirs(resRoot, QDir::Dirs | QDir::NoDotAndDotDot);
-    while (dirs.hasNext()) {
-        const QFileInfo dirInfo(dirs.next());
-        const QString dirName = dirInfo.fileName();
-        const QStringList parts = dirName.split('-');
-        if (parts.first() != ref.type()) {
-            continue;
-        }
-
-        QDir dir(dirInfo.filePath());
-        const QFileInfoList files = dir.entryInfoList(QDir::Files);
-        foreach (const QFileInfo &file, files) {
-            if (file.completeBaseName() != ref.name()) {
+    foreach (const QString &root, contentsPaths) {
+        const QString resRoot = QDir::cleanPath(root + "/res");
+        QDirIterator dirs(resRoot, QDir::Dirs | QDir::NoDotAndDotDot);
+        while (dirs.hasNext()) {
+            const QFileInfo dirInfo(dirs.next());
+            const QString dirName = dirInfo.fileName();
+            const QStringList parts = dirName.split('-');
+            if (parts.first() != ref.type()) {
                 continue;
             }
 
-            Candidate candidate;
-            candidate.filePath = QDir::cleanPath(file.filePath());
-            candidate.dirName = dirName;
-            candidate.qualifiers = parts.mid(1);
-            candidate.extension = file.suffix().toLower();
-            candidate.type = typeFromQualifiers(candidate.qualifiers);
-            candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(file.filePath()).canRead();
-            candidate.isXml = candidate.extension == "xml";
-            bool exists = false;
-            foreach (const Candidate &existing, result) {
-                if (existing.filePath == candidate.filePath) {
-                    exists = true;
-                    break;
+            QDir dir(dirInfo.filePath());
+            const QFileInfoList files = dir.entryInfoList(QDir::Files);
+            foreach (const QFileInfo &file, files) {
+                if (file.completeBaseName() != ref.name()) {
+                    continue;
                 }
-            }
-            if (!exists) {
-                result.append(candidate);
+
+                Candidate candidate;
+                candidate.filePath = QDir::cleanPath(file.filePath());
+                candidate.dirName = dirName;
+                candidate.qualifiers = parts.mid(1);
+                candidate.extension = file.suffix().toLower();
+                candidate.type = typeFromQualifiers(candidate.qualifiers);
+                candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(file.filePath()).canRead();
+                candidate.isXml = candidate.extension == "xml";
+                bool exists = false;
+                foreach (const Candidate &existing, result) {
+                    if (existing.filePath == candidate.filePath) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    result.append(candidate);
+                }
             }
         }
     }

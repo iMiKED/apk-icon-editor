@@ -43,7 +43,7 @@ public:
         QString filePath;
     };
 
-    explicit ResourceResolver(const QString &contentsPath);
+    explicit ResourceResolver(const QString &contentsPath, const QStringList &extraContentsPaths = QStringList());
 
     QList<Candidate> candidates(const ResourceRef &ref, Icon::Type preferredType = Icon::Unknown) const;
     QList<Candidate> bitmapCandidatesByName(const QString &name) const;
@@ -74,6 +74,7 @@ private:
     void logUnsupportedRef(const ResourceRef &ref, const QString &context) const;
 
     QString contentsPath;
+    QStringList contentsPaths;
     QMap<QString, QList<ColorCandidate> > colors;
     QMap<QString, QList<AliasCandidate> > aliases;
     QMap<QString, QList<Candidate> > tableFiles;

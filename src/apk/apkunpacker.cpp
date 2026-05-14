@@ -4,9 +4,125 @@
 #include <QApplication>
 #include <QDir>
 #include <QDomDocument>
+#include <QFileInfo>
+#include <QRegularExpression>
 #include <QDebug>
 
 using Apk::Unpacker;
+
+namespace {
+
+static QString manifestAttribute(const QString &manifestPath, const QString &name)
+{
+    QFile file(manifestPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return QString();
+    }
+
+    QDomDocument doc;
+    if (!doc.setContent(file.readAll())) {
+        return QString();
+    }
+
+    const QDomElement manifest = doc.firstChildElement("manifest");
+    if (manifest.isNull()) {
+        return QString();
+    }
+
+    return manifest.attribute(name);
+}
+
+static QString safeDirectoryName(const QString &fileName)
+{
+    QString result = QFileInfo(fileName).completeBaseName();
+    result.replace(QRegularExpression("[^A-Za-z0-9._-]+"), "_");
+    return result.isEmpty() ? "split" : result;
+}
+
+static bool unpackSplitApk(const QString &filepath, const QString &destination, const QString &apktoolPath, const QString &frameworks)
+{
+    QDir(destination).removeRecursively();
+
+    QStringList args;
+    args << "-jar";
+    args << apktoolPath;
+    args << "d" << filepath;
+    args << "-f";
+    args << "--res-resolve-mode" << "greedy";
+    args << "-s";
+    args << "-o" << destination;
+    args << "-p" << frameworks;
+
+    QProcess process;
+    process.start("java", args);
+    if (!process.waitForStarted(30000)) {
+        qDebug().noquote() << "Split APK decode failed to start:" << QDir::toNativeSeparators(filepath);
+        return false;
+    }
+    if (!process.waitForFinished(-1)) {
+        qDebug().noquote() << "Split APK decode did not finish:" << QDir::toNativeSeparators(filepath);
+        return false;
+    }
+    if (process.exitCode() != 0) {
+        const QString errorText = QString::fromUtf8(process.readAllStandardError()).replace("\r\n", "\n").trimmed();
+        qDebug().noquote() << "Split APK decode skipped:" << QDir::toNativeSeparators(filepath);
+        if (!errorText.isEmpty()) {
+            qDebug().noquote() << errorText;
+        }
+        return false;
+    }
+    return true;
+}
+
+static QStringList unpackCompatibleSplits(const QString &baseApkPath, const QString &baseContentsPath, const QString &apktoolPath, const QString &frameworks)
+{
+    QStringList result;
+    const QString basePackage = manifestAttribute(QDir::cleanPath(baseContentsPath + "/AndroidManifest.xml"), "package");
+    if (basePackage.isEmpty()) {
+        return result;
+    }
+
+    const QFileInfo baseInfo(baseApkPath);
+    QDir dir(baseInfo.dir());
+    const QFileInfoList candidates = dir.entryInfoList(QStringList() << "*.apk", QDir::Files, QDir::Name);
+    if (candidates.count() <= 1) {
+        return result;
+    }
+
+    const QString splitsRoot = QDir::cleanPath(baseContentsPath + "/_splits");
+    QDir().mkpath(splitsRoot);
+    foreach (const QFileInfo &candidate, candidates) {
+        if (candidate.canonicalFilePath() == baseInfo.canonicalFilePath()) {
+            continue;
+        }
+
+        const QString splitDir = QDir::cleanPath(splitsRoot + "/" + safeDirectoryName(candidate.fileName()));
+        qDebug().noquote() << "Checking sibling APK as possible split:" << QDir::toNativeSeparators(candidate.filePath());
+        if (!unpackSplitApk(candidate.filePath(), splitDir, apktoolPath, frameworks)) {
+            QDir(splitDir).removeRecursively();
+            continue;
+        }
+
+        const QString manifestPath = QDir::cleanPath(splitDir + "/AndroidManifest.xml");
+        const QString splitPackage = manifestAttribute(manifestPath, "package");
+        const QString splitName = manifestAttribute(manifestPath, "split");
+        if (splitPackage != basePackage || splitName.isEmpty()) {
+            qDebug().noquote() << "Skipping sibling APK because it is not a compatible split:" << QDir::toNativeSeparators(candidate.filePath());
+            QDir(splitDir).removeRecursively();
+            continue;
+        }
+
+        qDebug().noquote() << QString("Detected split APK: %1 (%2)")
+                              .arg(splitName, QDir::toNativeSeparators(candidate.filePath()));
+        result << splitDir;
+    }
+    if (!result.isEmpty()) {
+        qDebug().noquote() << QString("Loaded %1 read-only split APK resource roots").arg(result.count());
+    }
+    return result;
+}
+
+} // namespace
 
 Unpacker::Unpacker(QObject *parent) : QObject(parent)
 {
@@ -42,7 +158,9 @@ void Unpacker::unpack(QString filepath, QString destination, QString apktoolPath
         switch (code) {
             case 0: {
                 emit loading(70, tr("Reading AndroidManifest.xml..."));
-                Apk::File *apk = new Apk::File(destination);
+                emit loading(72, tr("Checking split APK resources..."));
+                const QStringList splitContentsPaths = unpackCompatibleSplits(filepath, destination, apktoolPath, frameworks);
+                Apk::File *apk = new Apk::File(destination, splitContentsPaths);
                 apk->setFilePath(filepath);
                 qDebug() << "Done.\n";
                 emit loading(100, tr("APK successfully loaded"));

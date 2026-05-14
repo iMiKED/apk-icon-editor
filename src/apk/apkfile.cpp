@@ -31,11 +31,17 @@ static Icon::EntryRole entryRoleFor(const Manifest::IconEntry &entry)
     return Icon::EntryActivityIcon;
 }
 
-Apk::File::File(const QString &contentsPath)
+Apk::File::File(const QString &contentsPath, const QStringList &splitContentsPaths)
 {
     // Be careful with the "contentsPath" variable: this directory is recursively removed in the destructor.
 
     this->contentsPath = QDir::cleanPath(QDir::fromNativeSeparators(contentsPath));
+    foreach (const QString &path, splitContentsPaths) {
+        const QString clean = QDir::cleanPath(QDir::fromNativeSeparators(path));
+        if (!clean.isEmpty() && !this->splitContentsPaths.contains(clean)) {
+            this->splitContentsPaths << clean;
+        }
+    }
 
     // Parse application manifest:
 
@@ -56,7 +62,7 @@ Apk::File::File(const QString &contentsPath)
 
     // Parse resource directories:
 
-    ResourceResolver resolver(this->contentsPath);
+    ResourceResolver resolver(this->contentsPath, this->splitContentsPaths);
     foreach (const Manifest::IconEntry &entry, launcherIconEntries) {
         addAdaptiveIcons(resolver, ResourceRef(entry.value), Icon::ScopeActivity, entryRoleFor(entry));
     }
@@ -264,7 +270,9 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
                 usesReadyBitmapPreview = true;
                 descriptor.previewSource = "ready bitmap with the same resource id";
                 descriptor.previewPath = directBitmap.filePath;
-                saveTargets.append(directBitmap.filePath);
+                if (directBitmap.filePath.startsWith(this->contentsPath + "/")) {
+                    saveTargets.append(directBitmap.filePath);
+                }
                 qDebug().noquote() << "Adaptive icon preview uses ready bitmap resource:" << Path::display(directBitmap.filePath);
             }
         }
@@ -272,11 +280,13 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             descriptor.previewSource = "composed XML layers with AOSP-style layer inset";
         }
         if (!descriptor.foregroundPath.isEmpty()) {
-            saveTargets.append(descriptor.foregroundPath);
+            if (descriptor.foregroundPath.startsWith(this->contentsPath + "/")) {
+                saveTargets.append(descriptor.foregroundPath);
+            }
         } else {
             const QString qualifier = ResourceResolver::qualifierForType(type);
             const int resIndex = result.xmlPath.indexOf("/res/");
-            if (!qualifier.isEmpty() && resIndex >= 0) {
+            if (!qualifier.isEmpty() && resIndex >= 0 && result.xmlPath.startsWith(this->contentsPath + "/")) {
                 const QString contentsRoot = result.xmlPath.left(resIndex);
                 const QString customName = iconRef.name() + "_foreground_custom";
                 const QString resourceType = iconRef.type().isEmpty() ? "mipmap" : iconRef.type();

@@ -16,7 +16,7 @@ namespace Apk {
     class File {
 
     public:
-        explicit File(const QString &contentsPath);
+        explicit File(const QString &contentsPath, const QStringList &splitContentsPaths = QStringList());
         ~File();
 
         void saveIcons();
@@ -66,6 +66,7 @@ namespace Apk {
 
         QString filePath;     ///< APK filename.
         QString contentsPath; ///< Path to APK contents directory.
+        QStringList splitContentsPaths; ///< Read-only decoded split APK resource roots.
         QSet<QString> adaptiveLayerRefs;
 
         QIcon thumbnail;
