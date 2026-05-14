@@ -11,6 +11,7 @@
 * Added qualifier-aware resource table alias resolution for density, version, night, locale, MCC and MNC configurations, including density-aware alias scoring.
 * Added resources.arsc scalar value resolution for table-only color values and file path resources used by adaptive XML icons.
 * Added read-only split APK resource discovery for adaptive XML icon previews when compatible split APKs are stored next to base.apk.
+* Improved adaptive icon diagnostics by showing base/split resource sources, split discovery summaries, and inline XML/vector layer metadata.
 
 ## 3.0.0-beta2
 * Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.

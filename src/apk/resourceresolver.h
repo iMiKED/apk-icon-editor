@@ -69,6 +69,7 @@ private:
     int valueScore(const QStringList &qualifiers, Icon::Type preferredType = Icon::Unknown) const;
     int qualifierPenalty(const QStringList &qualifiers) const;
     int rankForType(Icon::Type type) const;
+    QString sourceLabelForPath(const QString &filePath) const;
     void logFileResolution(const ResourceRef &ref, const QString &kind, const QList<Candidate> &candidates, const Candidate &selected, Icon::Type preferredType) const;
     void logValueResolution(const ResourceRef &ref, const QString &kind, const QStringList &candidates, const QString &selected) const;
     void logUnsupportedRef(const ResourceRef &ref, const QString &context) const;

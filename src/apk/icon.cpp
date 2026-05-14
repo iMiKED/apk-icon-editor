@@ -287,7 +287,7 @@ QString Icon::getToolTip() const
         }
     }
     lines << "";
-    lines << tr("Foreground:") << adaptiveDescriptor.foregroundRef;
+    lines << tr("Foreground:") << (adaptiveDescriptor.foregroundRef.isEmpty() ? tr("inline XML/vector layer") : adaptiveDescriptor.foregroundRef);
     if (!adaptiveDescriptor.foregroundPath.isEmpty()) {
         lines << Path::display(adaptiveDescriptor.foregroundPath);
     } else {

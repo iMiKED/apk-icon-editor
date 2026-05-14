@@ -124,12 +124,16 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     result.pixmap = pixmap;
     result.xmlPath = xml.filePath;
     result.descriptor.xmlPath = xml.filePath;
-    result.descriptor.foregroundRef = foregroundRef.original();
+    result.descriptor.foregroundRef = foregroundRef.original().isEmpty() && foreground.found
+            ? "inline XML/vector layer"
+            : foregroundRef.original();
     result.descriptor.foregroundPath = foreground.isBitmap ? foreground.filePath : QString();
     result.descriptor.backgroundRef = backgroundRef.original();
     result.descriptor.backgroundPath = background.filePath;
     result.descriptor.backgroundColor = background.color;
-    result.descriptor.monochromeRef = monochromeRef.original();
+    result.descriptor.monochromeRef = monochromeRef.original().isEmpty() && monochrome.found
+            ? "inline XML/vector layer"
+            : monochromeRef.original();
     result.descriptor.monochromePath = monochrome.isBitmap ? monochrome.filePath : QString();
     result.descriptor.monochromeColor = monochrome.color;
     result.descriptor.monochromeRenderable = monochrome.found || !monochromePixmap.isNull();

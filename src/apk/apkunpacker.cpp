@@ -91,15 +91,19 @@ static QStringList unpackCompatibleSplits(const QString &baseApkPath, const QStr
 
     const QString splitsRoot = QDir::cleanPath(baseContentsPath + "/_splits");
     QDir().mkpath(splitsRoot);
+    int checked = 0;
+    int skipped = 0;
     foreach (const QFileInfo &candidate, candidates) {
         if (candidate.canonicalFilePath() == baseInfo.canonicalFilePath()) {
             continue;
         }
 
+        ++checked;
         const QString splitDir = QDir::cleanPath(splitsRoot + "/" + safeDirectoryName(candidate.fileName()));
         qDebug().noquote() << "Checking sibling APK as possible split:" << QDir::toNativeSeparators(candidate.filePath());
         if (!unpackSplitApk(candidate.filePath(), splitDir, apktoolPath, frameworks)) {
             QDir(splitDir).removeRecursively();
+            ++skipped;
             continue;
         }
 
@@ -109,12 +113,19 @@ static QStringList unpackCompatibleSplits(const QString &baseApkPath, const QStr
         if (splitPackage != basePackage || splitName.isEmpty()) {
             qDebug().noquote() << "Skipping sibling APK because it is not a compatible split:" << QDir::toNativeSeparators(candidate.filePath());
             QDir(splitDir).removeRecursively();
+            ++skipped;
             continue;
         }
 
         qDebug().noquote() << QString("Detected split APK: %1 (%2)")
                               .arg(splitName, QDir::toNativeSeparators(candidate.filePath()));
         result << splitDir;
+    }
+    if (checked > 0) {
+        qDebug().noquote() << QString("Split APK summary: %1 checked, %2 compatible, %3 skipped")
+                              .arg(checked)
+                              .arg(result.count())
+                              .arg(skipped);
     }
     if (!result.isEmpty()) {
         qDebug().noquote() << QString("Loaded %1 read-only split APK resource roots").arg(result.count());
