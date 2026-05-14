@@ -13,6 +13,7 @@
 * Added read-only split APK resource discovery for adaptive XML icon previews when compatible split APKs are stored next to base.apk.
 * Improved adaptive icon diagnostics by showing base/split resource sources, split discovery summaries, and inline XML/vector layer metadata.
 * Added a clear preview-only/read-only policy for adaptive icons that use split APK resources; split APK replacement and repacking are intentionally blocked.
+* Optimized split APK discovery to run only when the decoded base manifest declares split resource metadata, and then only decode split-like sibling APK filenames.
 
 ## 3.0.0-beta2
 * Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.

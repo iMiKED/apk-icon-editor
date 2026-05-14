@@ -12,6 +12,30 @@ using Apk::Unpacker;
 
 namespace {
 
+static QDomAttr attributeByLocalName(const QDomElement &element, const QString &name)
+{
+    QDomElement node = element;
+    QDomAttr attr = node.attributeNode(name);
+    if (!attr.isNull()) {
+        return attr;
+    }
+
+    const QDomNamedNodeMap attrs = element.attributes();
+    for (int i = 0; i < attrs.count(); ++i) {
+        const QDomAttr candidate = attrs.item(i).toAttr();
+        if (candidate.name().section(':', -1) == name) {
+            return candidate;
+        }
+    }
+    return QDomAttr();
+}
+
+static QString attributeValue(const QDomElement &element, const QString &name)
+{
+    const QDomAttr attr = attributeByLocalName(element, name);
+    return attr.isNull() ? QString() : attr.value();
+}
+
 static QString manifestAttribute(const QString &manifestPath, const QString &name)
 {
     QFile file(manifestPath);
@@ -29,7 +53,61 @@ static QString manifestAttribute(const QString &manifestPath, const QString &nam
         return QString();
     }
 
-    return manifest.attribute(name);
+    return attributeValue(manifest, name);
+}
+
+static bool isTruthyManifestValue(const QString &value)
+{
+    const QString normalized = value.trimmed().toLower();
+    return normalized == "true" || normalized == "1";
+}
+
+static bool manifestRequestsSplitResources(const QString &manifestPath)
+{
+    QFile file(manifestPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return false;
+    }
+
+    QDomDocument doc;
+    if (!doc.setContent(file.readAll())) {
+        return false;
+    }
+
+    const QDomElement manifest = doc.firstChildElement("manifest");
+    if (manifest.isNull()) {
+        return false;
+    }
+
+    if (!attributeValue(manifest, "requiredSplitTypes").isEmpty()
+        || !attributeValue(manifest, "splitTypes").isEmpty()
+        || isTruthyManifestValue(attributeValue(manifest, "isSplitRequired"))
+        || isTruthyManifestValue(attributeValue(manifest, "isolatedSplits"))) {
+        return true;
+    }
+
+    const QDomElement application = manifest.firstChildElement("application");
+    if (application.isNull()) {
+        return false;
+    }
+
+    if (isTruthyManifestValue(attributeValue(application, "isSplitRequired"))
+        || isTruthyManifestValue(attributeValue(application, "isolatedSplits"))) {
+        return true;
+    }
+
+    for (QDomElement meta = application.firstChildElement("meta-data"); !meta.isNull(); meta = meta.nextSiblingElement("meta-data")) {
+        const QString name = attributeValue(meta, "name");
+        if (name == "com.android.vending.splits.required" && isTruthyManifestValue(attributeValue(meta, "value"))) {
+            return true;
+        }
+        if (name == "com.android.vending.splits"
+            && (!attributeValue(meta, "resource").isEmpty() || !attributeValue(meta, "value").isEmpty())) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 static QString safeDirectoryName(const QString &fileName)
@@ -74,11 +152,28 @@ static bool unpackSplitApk(const QString &filepath, const QString &destination, 
     return true;
 }
 
+static bool isLikelySplitApkName(const QString &fileName)
+{
+    const QString baseName = QFileInfo(fileName).completeBaseName().toLower();
+    return baseName.startsWith("config.")
+           || baseName.startsWith("split_config.")
+           || baseName.startsWith("split.")
+           || baseName.contains(".config.")
+           || baseName.contains("_config.")
+           || baseName.endsWith(".split")
+           || baseName.endsWith("_split");
+}
+
 static QStringList unpackCompatibleSplits(const QString &baseApkPath, const QString &baseContentsPath, const QString &apktoolPath, const QString &frameworks)
 {
     QStringList result;
     const QString basePackage = manifestAttribute(QDir::cleanPath(baseContentsPath + "/AndroidManifest.xml"), "package");
     if (basePackage.isEmpty()) {
+        return result;
+    }
+
+    if (!manifestRequestsSplitResources(QDir::cleanPath(baseContentsPath + "/AndroidManifest.xml"))) {
+        qDebug().noquote() << "Split APK check skipped: base manifest does not declare split resource metadata.";
         return result;
     }
 
@@ -89,15 +184,25 @@ static QStringList unpackCompatibleSplits(const QString &baseApkPath, const QStr
         return result;
     }
 
-    const QString splitsRoot = QDir::cleanPath(baseContentsPath + "/_splits");
-    QDir().mkpath(splitsRoot);
-    int checked = 0;
-    int skipped = 0;
+    QFileInfoList splitCandidates;
     foreach (const QFileInfo &candidate, candidates) {
         if (candidate.canonicalFilePath() == baseInfo.canonicalFilePath()) {
             continue;
         }
+        if (isLikelySplitApkName(candidate.fileName())) {
+            splitCandidates << candidate;
+        }
+    }
+    if (splitCandidates.isEmpty()) {
+        qDebug().noquote() << "Split APK check skipped: no split-like sibling APK filenames found.";
+        return result;
+    }
 
+    const QString splitsRoot = QDir::cleanPath(baseContentsPath + "/_splits");
+    QDir().mkpath(splitsRoot);
+    int checked = 0;
+    int skipped = 0;
+    foreach (const QFileInfo &candidate, splitCandidates) {
         ++checked;
         const QString splitDir = QDir::cleanPath(splitsRoot + "/" + safeDirectoryName(candidate.fileName()));
         qDebug().noquote() << "Checking sibling APK as possible split:" << QDir::toNativeSeparators(candidate.filePath());
