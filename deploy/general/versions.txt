@@ -7,6 +7,7 @@
 * Added adaptive XML rendering support for drawable color XML files and percent-based inset drawables.
 * Renamed application branding and package/binary names to APK Icon Editor Reborn.
 * Added v3.0.0-beta3 release notes.
+* Updated About and Authors labels to distinguish Reborn author from the original app author.
 
 ## 3.0.0-beta2
 * Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.
