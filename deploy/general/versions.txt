@@ -9,6 +9,7 @@
 * Added v3.0.0-beta3 release notes.
 * Updated About and Authors labels to distinguish Reborn author from the original app author.
 * Added qualifier-aware resource table alias resolution for density, version, night, locale, MCC and MNC configurations, including density-aware alias scoring.
+* Added resources.arsc scalar value resolution for table-only color values and file path resources used by adaptive XML icons.
 
 ## 3.0.0-beta2
 * Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.

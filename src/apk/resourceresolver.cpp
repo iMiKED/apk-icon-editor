@@ -355,16 +355,46 @@ void ResourceResolver::parseValuesFile(const QString &filePath)
 
 void ResourceResolver::loadResourceTableAliases()
 {
-    const QList<ResourceArsc::Alias> tableAliases = ResourceArsc::readReferenceAliases(QDir::cleanPath(contentsPath + "/resources.arsc"));
-    foreach (const ResourceArsc::Alias &tableAlias, tableAliases) {
+    const QString tablePath = QDir::cleanPath(contentsPath + "/resources.arsc");
+    const ResourceArsc::Table table = ResourceArsc::readTable(tablePath);
+    foreach (const ResourceArsc::Alias &tableAlias, table.aliases) {
         AliasCandidate alias;
         alias.value = tableAlias.value;
         alias.qualifiers = tableAlias.qualifiers;
-        alias.filePath = QDir::cleanPath(contentsPath + "/resources.arsc");
+        alias.filePath = tablePath;
         aliases[tableAlias.key].append(alias);
     }
-    if (!tableAliases.isEmpty()) {
-        qDebug().noquote() << QString("Loaded %1 resource table aliases from resources.arsc").arg(tableAliases.count());
+    foreach (const ResourceArsc::Color &tableColor, table.colors) {
+        ColorCandidate color;
+        color.color = tableColor.color;
+        color.qualifiers = tableColor.qualifiers;
+        color.filePath = tablePath;
+        colors[tableColor.key].append(color);
+    }
+    foreach (const ResourceArsc::File &tableFile, table.files) {
+        const QString resolvedPath = QDir::cleanPath(contentsPath + "/" + tableFile.path);
+        if (!QFileInfo::exists(resolvedPath)) {
+            continue;
+        }
+
+        const QFileInfo info(resolvedPath);
+        const QString dirName = info.dir().dirName();
+        const QStringList dirQualifiers = dirName.split('-').mid(1);
+        Candidate candidate;
+        candidate.filePath = resolvedPath;
+        candidate.dirName = dirName;
+        candidate.qualifiers = tableFile.qualifiers.isEmpty() ? dirQualifiers : tableFile.qualifiers;
+        candidate.extension = info.suffix().toLower();
+        candidate.type = typeFromQualifiers(candidate.qualifiers);
+        candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(candidate.filePath).canRead();
+        candidate.isXml = candidate.extension == "xml";
+        tableFiles[tableFile.key].append(candidate);
+    }
+    if (!table.aliases.isEmpty() || !table.colors.isEmpty() || !table.files.isEmpty()) {
+        qDebug().noquote() << QString("Loaded resources.arsc entries: %1 aliases, %2 colors, %3 file values")
+                              .arg(table.aliases.count())
+                              .arg(table.colors.count())
+                              .arg(table.files.count());
     }
 }
 
@@ -380,7 +410,7 @@ QList<ResourceResolver::AliasCandidate> ResourceResolver::aliasCandidates(const 
 
 QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const ResourceRef &ref) const
 {
-    QList<Candidate> result;
+    QList<Candidate> result = tableFiles.value(keyForRef(ref));
     if (!ref.isValid()) {
         return result;
     }
@@ -410,7 +440,16 @@ QList<ResourceResolver::Candidate> ResourceResolver::fileCandidates(const Resour
             candidate.type = typeFromQualifiers(candidate.qualifiers);
             candidate.isBitmap = isBitmapExtension(candidate.extension) || QImageReader(file.filePath()).canRead();
             candidate.isXml = candidate.extension == "xml";
-            result.append(candidate);
+            bool exists = false;
+            foreach (const Candidate &existing, result) {
+                if (existing.filePath == candidate.filePath) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                result.append(candidate);
+            }
         }
     }
     return result;

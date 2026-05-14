@@ -11,6 +11,11 @@ const quint16 RES_TABLE_TYPE = 0x0002;
 const quint16 RES_TABLE_PACKAGE_TYPE = 0x0200;
 const quint16 RES_TABLE_TYPE_TYPE = 0x0201;
 const quint8 TYPE_REFERENCE = 0x01;
+const quint8 TYPE_STRING = 0x03;
+const quint8 TYPE_INT_COLOR_ARGB8 = 0x1c;
+const quint8 TYPE_INT_COLOR_RGB8 = 0x1d;
+const quint8 TYPE_INT_COLOR_ARGB4 = 0x1e;
+const quint8 TYPE_INT_COLOR_RGB4 = 0x1f;
 const quint32 UTF8_FLAG = 0x00000100;
 const quint32 FLAG_COMPLEX = 0x0001;
 const quint32 NO_ENTRY = 0xffffffff;
@@ -148,9 +153,18 @@ private:
     int offsetsStart = 0;
 };
 
-struct RefValue {
+struct TableValue {
+    enum Kind {
+        Reference,
+        Color,
+        File
+    };
+
+    Kind kind = Reference;
     quint32 sourceId = 0;
     quint32 targetId = 0;
+    QColor color;
+    QString filePath;
     QStringList qualifiers;
 };
 
@@ -243,9 +257,28 @@ QStringList parseConfigQualifiers(const QByteArray &data, int offset)
     return qualifiers;
 }
 
+QColor colorForValue(quint8 dataType, quint32 value)
+{
+    if (dataType == TYPE_INT_COLOR_ARGB8) {
+        return QColor::fromRgba(value);
+    }
+    if (dataType == TYPE_INT_COLOR_RGB8) {
+        return QColor::fromRgba(0xff000000u | value);
+    }
+    if (dataType == TYPE_INT_COLOR_ARGB4 || dataType == TYPE_INT_COLOR_RGB4) {
+        const int a4 = dataType == TYPE_INT_COLOR_ARGB4 ? int((value >> 12) & 0x0f) : 0x0f;
+        const int r4 = int((value >> 8) & 0x0f);
+        const int g4 = int((value >> 4) & 0x0f);
+        const int b4 = int(value & 0x0f);
+        return QColor((r4 << 4) | r4, (g4 << 4) | g4, (b4 << 4) | b4, (a4 << 4) | a4);
+    }
+    return QColor();
+}
+
 void parseTypeChunk(const QByteArray &data, int typeOffset, quint32 packageId,
                     const StringPool &typeStrings, const StringPool &keyStrings,
-                    QHash<quint32, QString> *idToKey, QList<RefValue> *references)
+                    const StringPool &valueStrings,
+                    QHash<quint32, QString> *idToKey, QList<TableValue> *values)
 {
     if (!validChunk(data, typeOffset) || u16(data, typeOffset) != RES_TABLE_TYPE_TYPE) {
         return;
@@ -302,17 +335,38 @@ void parseTypeChunk(const QByteArray &data, int typeOffset, quint32 packageId,
         const quint8 dataType = quint8(data.at(valuePos + 3));
         const quint32 valueData = u32(data, valuePos + 4);
         if (dataType == TYPE_REFERENCE && valueData != 0 && valueData != resourceId) {
-            RefValue ref;
+            TableValue ref;
+            ref.kind = TableValue::Reference;
             ref.sourceId = resourceId;
             ref.targetId = valueData;
             ref.qualifiers = qualifiers;
-            references->append(ref);
+            values->append(ref);
+        } else if (dataType >= TYPE_INT_COLOR_ARGB8 && dataType <= TYPE_INT_COLOR_RGB4) {
+            TableValue color;
+            color.kind = TableValue::Color;
+            color.sourceId = resourceId;
+            color.color = colorForValue(dataType, valueData);
+            color.qualifiers = qualifiers;
+            if (color.color.isValid()) {
+                values->append(color);
+            }
+        } else if (dataType == TYPE_STRING && (typeName == "drawable" || typeName == "mipmap")) {
+            const QString path = valueStrings.at(valueData);
+            if (path.startsWith("res/")) {
+                TableValue file;
+                file.kind = TableValue::File;
+                file.sourceId = resourceId;
+                file.filePath = path;
+                file.qualifiers = qualifiers;
+                values->append(file);
+            }
         }
     }
 }
 
 void parsePackage(const QByteArray &data, int packageOffset,
-                  QHash<quint32, QString> *idToKey, QList<RefValue> *references)
+                  const StringPool &valueStrings,
+                  QHash<quint32, QString> *idToKey, QList<TableValue> *values)
 {
     if (!validChunk(data, packageOffset) || u16(data, packageOffset) != RES_TABLE_PACKAGE_TYPE) {
         return;
@@ -342,7 +396,7 @@ void parsePackage(const QByteArray &data, int packageOffset,
         const quint16 type = u16(data, offset);
         const quint32 size = u32(data, offset + 4);
         if (type == RES_TABLE_TYPE_TYPE) {
-            parseTypeChunk(data, offset, packageId, typeStrings, keyStrings, idToKey, references);
+            parseTypeChunk(data, offset, packageId, typeStrings, keyStrings, valueStrings, idToKey, values);
         }
         offset += int(size);
     }
@@ -350,23 +404,29 @@ void parsePackage(const QByteArray &data, int packageOffset,
 
 } // namespace
 
-QList<ResourceArsc::Alias> ResourceArsc::readReferenceAliases(const QString &filePath)
+ResourceArsc::Table ResourceArsc::readTable(const QString &filePath)
 {
-    QList<Alias> aliases;
+    Table table;
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly)) {
-        return aliases;
+        return table;
     }
 
     const QByteArray data = file.readAll();
     if (!validChunk(data, 0) || u16(data, 0) != RES_TABLE_TYPE) {
-        return aliases;
+        return table;
+    }
+
+    StringPool valueStrings;
+    const int firstChunkOffset = u16(data, 0 + 2);
+    if (!valueStrings.parse(data, firstChunkOffset)) {
+        return table;
     }
 
     QHash<quint32, QString> idToKey;
-    QList<RefValue> references;
+    QList<TableValue> values;
 
-    int offset = u16(data, 0 + 2);
+    int offset = firstChunkOffset;
     while (hasBytes(data, offset, 8)) {
         if (!validChunk(data, offset)) {
             break;
@@ -374,21 +434,44 @@ QList<ResourceArsc::Alias> ResourceArsc::readReferenceAliases(const QString &fil
         const quint16 type = u16(data, offset);
         const quint32 size = u32(data, offset + 4);
         if (type == RES_TABLE_PACKAGE_TYPE) {
-            parsePackage(data, offset, &idToKey, &references);
+            parsePackage(data, offset, valueStrings, &idToKey, &values);
         }
         offset += int(size);
     }
 
-    foreach (const RefValue &ref, references) {
-        const QString source = keyForId(ref.sourceId, idToKey);
-        const QString target = keyForId(ref.targetId, idToKey);
-        if (!source.isEmpty() && !target.isEmpty()) {
-            Alias alias;
-            alias.key = source;
-            alias.value = "@" + target;
-            alias.qualifiers = ref.qualifiers;
-            aliases.append(alias);
+    foreach (const TableValue &value, values) {
+        const QString source = keyForId(value.sourceId, idToKey);
+        if (source.isEmpty()) {
+            continue;
+        }
+
+        if (value.kind == TableValue::Reference) {
+            const QString target = keyForId(value.targetId, idToKey);
+            if (!target.isEmpty()) {
+                Alias alias;
+                alias.key = source;
+                alias.value = "@" + target;
+                alias.qualifiers = value.qualifiers;
+                table.aliases.append(alias);
+            }
+        } else if (value.kind == TableValue::Color) {
+            Color color;
+            color.key = source;
+            color.color = value.color;
+            color.qualifiers = value.qualifiers;
+            table.colors.append(color);
+        } else if (value.kind == TableValue::File) {
+            File fileValue;
+            fileValue.key = source;
+            fileValue.path = value.filePath;
+            fileValue.qualifiers = value.qualifiers;
+            table.files.append(fileValue);
         }
     }
-    return aliases;
+    return table;
+}
+
+QList<ResourceArsc::Alias> ResourceArsc::readReferenceAliases(const QString &filePath)
+{
+    return readTable(filePath).aliases;
 }

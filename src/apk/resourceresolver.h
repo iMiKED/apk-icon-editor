@@ -76,6 +76,7 @@ private:
     QString contentsPath;
     QMap<QString, QList<ColorCandidate> > colors;
     QMap<QString, QList<AliasCandidate> > aliases;
+    QMap<QString, QList<Candidate> > tableFiles;
     mutable QSet<QString> loggedUnsupportedRefs;
 };
 
