@@ -33,11 +33,11 @@ ResourceResolver::ResourceResolver(const QString &contentsPath)
     loadResourceTableAliases();
 }
 
-QList<ResourceResolver::Candidate> ResourceResolver::candidates(const ResourceRef &ref) const
+QList<ResourceResolver::Candidate> ResourceResolver::candidates(const ResourceRef &ref, Icon::Type preferredType) const
 {
     logUnsupportedRef(ref, "resolve resource");
     QList<Candidate> result = fileCandidates(ref);
-    ResourceRef resolved = resolveAlias(ref);
+    ResourceRef resolved = resolveAlias(ref, preferredType);
     if (resolved.isValid()) {
         const QList<Candidate> aliasFiles = fileCandidates(resolved);
         foreach (const Candidate &candidate, aliasFiles) {
@@ -146,7 +146,7 @@ ResourceResolver::Value ResourceResolver::resolveXml(const ResourceRef &ref) con
 
 ResourceResolver::Value ResourceResolver::resolveBitmap(const ResourceRef &ref, Icon::Type preferredType) const
 {
-    QList<Candidate> matches = candidates(ref);
+    QList<Candidate> matches = candidates(ref, preferredType);
     QList<Candidate> bitmaps;
     foreach (const Candidate &candidate, matches) {
         if (candidate.isBitmap) {
@@ -205,7 +205,7 @@ ResourceResolver::Value ResourceResolver::resolveColor(const ResourceRef &ref) c
     return Value();
 }
 
-ResourceRef ResourceResolver::resolveAlias(const ResourceRef &ref, int depth) const
+ResourceRef ResourceResolver::resolveAlias(const ResourceRef &ref, Icon::Type preferredType, int depth) const
 {
     logUnsupportedRef(ref, "resolve alias");
     if (!ref.isValid() || depth > 8) {
@@ -218,8 +218,8 @@ ResourceRef ResourceResolver::resolveAlias(const ResourceRef &ref, int depth) co
     }
 
     std::sort(matches.begin(), matches.end(), [=](const AliasCandidate &a, const AliasCandidate &b) {
-        const int scoreA = valueScore(a.qualifiers);
-        const int scoreB = valueScore(b.qualifiers);
+        const int scoreA = valueScore(a.qualifiers, preferredType);
+        const int scoreB = valueScore(b.qualifiers, preferredType);
         if (scoreA != scoreB) {
             return scoreA < scoreB;
         }
@@ -227,12 +227,17 @@ ResourceRef ResourceResolver::resolveAlias(const ResourceRef &ref, int depth) co
     });
     QStringList candidateFiles;
     foreach (const AliasCandidate &candidate, matches) {
-        candidateFiles << QString("%1 -> %2").arg(candidate.filePath, candidate.value);
+        candidateFiles << QString("%1 [%2] score=%3 -> %4").arg(candidate.filePath,
+                                                                 candidate.qualifiers.join(','),
+                                                                 QString::number(valueScore(candidate.qualifiers, preferredType)),
+                                                                 candidate.value);
     }
-    logValueResolution(ref, "alias", candidateFiles, QString("%1 -> %2").arg(matches.first().filePath, matches.first().value));
+    logValueResolution(ref, "alias", candidateFiles, QString("%1 [%2] -> %3").arg(matches.first().filePath,
+                                                                                  matches.first().qualifiers.join(','),
+                                                                                  matches.first().value));
 
     ResourceRef alias(matches.first().value);
-    ResourceRef next = resolveAlias(alias, depth + 1);
+    ResourceRef next = resolveAlias(alias, preferredType, depth + 1);
     return next.isValid() ? next : alias;
 }
 
@@ -350,12 +355,13 @@ void ResourceResolver::parseValuesFile(const QString &filePath)
 
 void ResourceResolver::loadResourceTableAliases()
 {
-    const QMap<QString, QString> tableAliases = ResourceArsc::readReferenceAliases(QDir::cleanPath(contentsPath + "/resources.arsc"));
-    for (QMap<QString, QString>::const_iterator it = tableAliases.constBegin(); it != tableAliases.constEnd(); ++it) {
+    const QList<ResourceArsc::Alias> tableAliases = ResourceArsc::readReferenceAliases(QDir::cleanPath(contentsPath + "/resources.arsc"));
+    foreach (const ResourceArsc::Alias &tableAlias, tableAliases) {
         AliasCandidate alias;
-        alias.value = it.value();
+        alias.value = tableAlias.value;
+        alias.qualifiers = tableAlias.qualifiers;
         alias.filePath = QDir::cleanPath(contentsPath + "/resources.arsc");
-        aliases[it.key()].append(alias);
+        aliases[tableAlias.key].append(alias);
     }
     if (!tableAliases.isEmpty()) {
         qDebug().noquote() << QString("Loaded %1 resource table aliases from resources.arsc").arg(tableAliases.count());
@@ -444,9 +450,24 @@ int ResourceResolver::xmlScore(const Candidate &candidate) const
     return result;
 }
 
-int ResourceResolver::valueScore(const QStringList &qualifiers) const
+int ResourceResolver::valueScore(const QStringList &qualifiers, Icon::Type preferredType) const
 {
-    return qualifierPenalty(qualifiers);
+    int result = qualifierPenalty(qualifiers);
+    const Icon::Type type = typeFromQualifiers(qualifiers);
+    const bool nodpi = qualifiers.contains("nodpi");
+    const bool anydpi = qualifiers.contains("anydpi");
+
+    if (preferredType == Icon::Unknown) {
+        return type == Icon::Unknown ? result : result + 100 + rankForType(type);
+    }
+
+    if (type == preferredType) {
+        return result;
+    }
+    if (type == Icon::Unknown) {
+        return result + (nodpi ? 35 : anydpi ? 45 : 100);
+    }
+    return result + qAbs(rankForType(type) - rankForType(preferredType)) * 10;
 }
 
 int ResourceResolver::qualifierPenalty(const QStringList &qualifiers) const

@@ -45,13 +45,13 @@ public:
 
     explicit ResourceResolver(const QString &contentsPath);
 
-    QList<Candidate> candidates(const ResourceRef &ref) const;
+    QList<Candidate> candidates(const ResourceRef &ref, Icon::Type preferredType = Icon::Unknown) const;
     QList<Candidate> bitmapCandidatesByName(const QString &name) const;
     Value resolveBest(const ResourceRef &ref, Icon::Type preferredType) const;
     Value resolveXml(const ResourceRef &ref) const;
     Value resolveBitmap(const ResourceRef &ref, Icon::Type preferredType) const;
     Value resolveColor(const ResourceRef &ref) const;
-    ResourceRef resolveAlias(const ResourceRef &ref, int depth = 0) const;
+    ResourceRef resolveAlias(const ResourceRef &ref, Icon::Type preferredType = Icon::Unknown, int depth = 0) const;
 
     static bool isBitmapExtension(const QString &extension);
     static Icon::Type typeFromQualifiers(const QStringList &qualifiers);
@@ -66,7 +66,7 @@ private:
     QList<AliasCandidate> aliasCandidates(const ResourceRef &ref) const;
     int score(const Candidate &candidate, Icon::Type preferredType) const;
     int xmlScore(const Candidate &candidate) const;
-    int valueScore(const QStringList &qualifiers) const;
+    int valueScore(const QStringList &qualifiers, Icon::Type preferredType = Icon::Unknown) const;
     int qualifierPenalty(const QStringList &qualifiers) const;
     int rankForType(Icon::Type type) const;
     void logFileResolution(const ResourceRef &ref, const QString &kind, const QList<Candidate> &candidates, const Candidate &selected, Icon::Type preferredType) const;

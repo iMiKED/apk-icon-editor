@@ -1,13 +1,20 @@
 #ifndef RESOURCEARSC_H
 #define RESOURCEARSC_H
 
-#include <QMap>
+#include <QList>
 #include <QString>
+#include <QStringList>
 
 class ResourceArsc
 {
 public:
-    static QMap<QString, QString> readReferenceAliases(const QString &filePath);
+    struct Alias {
+        QString key;
+        QString value;
+        QStringList qualifiers;
+    };
+
+    static QList<Alias> readReferenceAliases(const QString &filePath);
 };
 
 #endif // RESOURCEARSC_H

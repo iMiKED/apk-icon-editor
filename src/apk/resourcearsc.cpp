@@ -151,11 +151,96 @@ private:
 struct RefValue {
     quint32 sourceId = 0;
     quint32 targetId = 0;
+    QStringList qualifiers;
 };
 
 QString keyForId(quint32 id, const QHash<quint32, QString> &idToKey)
 {
     return idToKey.value(id);
+}
+
+QString densityQualifier(quint16 density)
+{
+    switch (density) {
+        case 120: return "ldpi";
+        case 160: return "mdpi";
+        case 240: return "hdpi";
+        case 320: return "xhdpi";
+        case 480: return "xxhdpi";
+        case 640: return "xxxhdpi";
+        case 0xffff: return "anydpi";
+        case 0xfffe: return "nodpi";
+        default: return QString();
+    }
+}
+
+QString localePart(const QByteArray &data, int offset)
+{
+    if (!hasBytes(data, offset, 2)) {
+        return QString();
+    }
+    const uchar first = uchar(data.at(offset));
+    const uchar second = uchar(data.at(offset + 1));
+    if (first == 0 || second == 0) {
+        return QString();
+    }
+    if ((first & 0x80) == 0) {
+        return QString(QChar(char(first))) + QChar(char(second));
+    }
+    return QString();
+}
+
+QStringList parseConfigQualifiers(const QByteArray &data, int offset)
+{
+    QStringList qualifiers;
+    if (!hasBytes(data, offset, 4)) {
+        return qualifiers;
+    }
+
+    const quint32 size = u32(data, offset);
+    if (size == 0 || size > quint32(data.size() - offset)) {
+        return qualifiers;
+    }
+
+    if (size >= 8) {
+        const quint16 mcc = u16(data, offset + 4);
+        const quint16 mnc = u16(data, offset + 6);
+        if (mcc != 0) {
+            qualifiers << QString("mcc%1").arg(mcc);
+        }
+        if (mnc != 0) {
+            qualifiers << QString("mnc%1").arg(mnc);
+        }
+    }
+    if (size >= 12) {
+        const QString language = localePart(data, offset + 8);
+        const QString country = localePart(data, offset + 10);
+        if (!language.isEmpty()) {
+            qualifiers << language;
+            if (!country.isEmpty()) {
+                qualifiers << ("r" + country.toUpper());
+            }
+        }
+    }
+    if (size >= 16) {
+        const QString density = densityQualifier(u16(data, offset + 14));
+        if (!density.isEmpty()) {
+            qualifiers << density;
+        }
+    }
+    if (size >= 28) {
+        const quint16 sdk = u16(data, offset + 24);
+        if (sdk != 0) {
+            qualifiers << QString("v%1").arg(sdk);
+        }
+    }
+    if (size >= 32) {
+        const quint8 uiMode = quint8(data.at(offset + 29));
+        if ((uiMode & 0x30) == 0x20) {
+            qualifiers << "night";
+        }
+    }
+    return qualifiers;
 }
 
 void parseTypeChunk(const QByteArray &data, int typeOffset, quint32 packageId,
@@ -170,6 +255,7 @@ void parseTypeChunk(const QByteArray &data, int typeOffset, quint32 packageId,
     const quint32 entryCount = u32(data, typeOffset + 12);
     const quint32 entriesStart = u32(data, typeOffset + 16);
     const quint16 headerSize = u16(data, typeOffset + 2);
+    const QStringList qualifiers = parseConfigQualifiers(data, typeOffset + 20);
     if (typeId == 0) {
         return;
     }
@@ -219,6 +305,7 @@ void parseTypeChunk(const QByteArray &data, int typeOffset, quint32 packageId,
             RefValue ref;
             ref.sourceId = resourceId;
             ref.targetId = valueData;
+            ref.qualifiers = qualifiers;
             references->append(ref);
         }
     }
@@ -263,9 +350,9 @@ void parsePackage(const QByteArray &data, int packageOffset,
 
 } // namespace
 
-QMap<QString, QString> ResourceArsc::readReferenceAliases(const QString &filePath)
+QList<ResourceArsc::Alias> ResourceArsc::readReferenceAliases(const QString &filePath)
 {
-    QMap<QString, QString> aliases;
+    QList<Alias> aliases;
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly)) {
         return aliases;
@@ -296,7 +383,11 @@ QMap<QString, QString> ResourceArsc::readReferenceAliases(const QString &filePat
         const QString source = keyForId(ref.sourceId, idToKey);
         const QString target = keyForId(ref.targetId, idToKey);
         if (!source.isEmpty() && !target.isEmpty()) {
-            aliases.insert(source, "@" + target);
+            Alias alias;
+            alias.key = source;
+            alias.value = "@" + target;
+            alias.qualifiers = ref.qualifiers;
+            aliases.append(alias);
         }
     }
     return aliases;
