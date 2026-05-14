@@ -602,10 +602,6 @@ int ResourceResolver::rankForType(Icon::Type type) const
 QString ResourceResolver::sourceLabelForPath(const QString &filePath) const
 {
     const QString clean = QDir::cleanPath(QDir::fromNativeSeparators(filePath));
-    if (clean == contentsPath || clean.startsWith(contentsPath + "/")) {
-        return "base";
-    }
-
     const QString marker = "/_splits/";
     const int splitIndex = clean.indexOf(marker);
     if (splitIndex >= 0) {
@@ -614,6 +610,9 @@ QString ResourceResolver::sourceLabelForPath(const QString &filePath) const
         if (!splitName.isEmpty()) {
             return "split:" + splitName;
         }
+    }
+    if (clean == contentsPath || clean.startsWith(contentsPath + "/")) {
+        return "base";
     }
     return "external";
 }

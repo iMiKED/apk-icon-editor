@@ -910,6 +910,18 @@ bool MainWindow::icon_open(QString filename)
         return false;
     }
 
+    if (icon->isAdaptiveIcon() && icon->getAdaptiveDescriptor().usesReadOnlySplitResources) {
+        QMessageBox box(this);
+        box.setIcon(QMessageBox::Warning);
+        box.setWindowTitle(tr("Split APK Resources"));
+        box.setText(tr("This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet."));
+        box.setDetailedText(icon->getToolTip());
+        box.setStandardButtons(QMessageBox::Ok);
+        box.exec();
+        qDebug().noquote() << "Adaptive icon replacement blocked: split APK resources are read-only.";
+        return false;
+    }
+
     if (filename.isEmpty()) {
         filename = QFileDialog::getOpenFileName(this, tr("Import Icon"), NULL, Image::Formats::openDialogFilter());
         if (filename.isEmpty()) {

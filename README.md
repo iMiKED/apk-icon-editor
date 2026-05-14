@@ -21,7 +21,7 @@ This repository contains **APK Icon Editor Reborn**, a fork of the original [APK
 - Multilingual interface.
 
 ## 3.0.0 Beta Status
-The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta3` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, and simple `resources.arsc` reference aliases; color backgrounds, percent insets, WebP launcher layers, and vector foreground previews are rendered in-app.
+The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta3` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, and vector foreground previews are rendered in-app.
 
 Adaptive/vector previews are intended for display, replacement, export, and safe APK repacking. The editor shows adaptive icon metadata in tooltips and logs, including the launcher entry, XML descriptor, foreground, background, monochrome layer when present, preview source, and write-back target.
 
@@ -29,11 +29,15 @@ Adaptive/vector previews are intended for display, replacement, export, and safe
 
 Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
 
+Split APK resources are currently supported for preview only. If an adaptive icon uses a resource from a split APK, the tooltip and logs mark it as read-only and replacement/repacking of that split APK set is intentionally blocked. Classic single-APK repacking remains supported.
+
 ## 3.0.0-beta3 Release Notes
 Highlights:
 
 - Renamed the application, binary, and package branding to **APK Icon Editor Reborn**.
 - Added simple `resources.arsc` reference alias resolution for adaptive XML launcher icons.
+- Added read-only split APK resource discovery for adaptive XML icon previews.
+- Documented and enforced preview-only behavior for adaptive icons that use split APK resources.
 - Preserved direct XML resource candidates when default values aliases exist for the same launcher icon.
 - Fixed Snapseed-style adaptive icons that combine direct adaptive XML, values aliases, vector foregrounds, color XML backgrounds, and percent insets.
 

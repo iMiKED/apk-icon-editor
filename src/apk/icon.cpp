@@ -116,6 +116,9 @@ bool Icon::save(QString filename)
     }
 
     if (virtualIcon && saveTargets.isEmpty()) {
+        if (isAdaptiveIcon() && adaptiveDescriptor.usesReadOnlySplitResources) {
+            qWarning().noquote() << "Adaptive icon write-back skipped because it uses read-only split APK resources:\n" + getToolTip();
+        }
         return true;
     }
     if (!saveTargets.isEmpty() && !modified) {
@@ -154,6 +157,10 @@ bool Icon::replace(QPixmap pixmap)
     if (pixmap.isNull()) {
         return false;
     }
+    if (isAdaptiveIcon() && adaptiveDescriptor.usesReadOnlySplitResources) {
+        qWarning().noquote() << "Adaptive icon replacement blocked because it uses read-only split APK resources:\n" + getToolTip();
+        return false;
+    }
     if (isAdaptiveIcon()) {
         qDebug().noquote() << "Replacing adaptive icon:\n" + getToolTip();
         qDebug().noquote() << "Adaptive icon replacement policy:"
@@ -161,7 +168,10 @@ bool Icon::replace(QPixmap pixmap)
                            << "background layer is preserved;"
                            << (adaptiveDescriptor.usesCustomForeground()
                                ? "custom foreground XML patch will be used"
-                               : "existing foreground bitmap will be overwritten");
+                               : "existing foreground bitmap will be overwritten")
+                           << (adaptiveDescriptor.usesReadOnlySplitResources
+                               ? "split APK resources are read-only and will not be repacked"
+                               : "");
     }
     setPixmap(pixmap);
     modified = true;
@@ -284,6 +294,22 @@ QString Icon::getToolTip() const
         lines << tr("Preview source:") << adaptiveDescriptor.previewSource;
         if (!adaptiveDescriptor.previewPath.isEmpty()) {
             lines << Path::display(adaptiveDescriptor.previewPath);
+        }
+    }
+    if (adaptiveDescriptor.splitResourcesAvailable) {
+        lines << "";
+        lines << tr("Split APK resources:");
+        if (adaptiveDescriptor.usesReadOnlySplitResources) {
+            lines << tr("Used for preview only; split APK repacking is not supported yet.");
+            QStringList displaySplitPaths;
+            foreach (const QString &path, adaptiveDescriptor.splitResourcePaths) {
+                displaySplitPaths << Path::display(path);
+            }
+            if (!displaySplitPaths.isEmpty()) {
+                lines << displaySplitPaths.join("\n");
+            }
+        } else {
+            lines << tr("Loaded read-only; this icon resolves from base APK resources.");
         }
     }
     lines << "";

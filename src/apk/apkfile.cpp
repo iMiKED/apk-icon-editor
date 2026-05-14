@@ -260,6 +260,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
 
         QStringList saveTargets;
         AdaptiveIconDescriptor descriptor = result.descriptor;
+        applySplitResourcePolicy(&descriptor);
         QPixmap previewPixmap = result.pixmap;
         bool usesReadyBitmapPreview = false;
         const ResourceResolver::Value directBitmap = resolver.resolveBitmap(iconRef, type);
@@ -270,8 +271,11 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
                 usesReadyBitmapPreview = true;
                 descriptor.previewSource = "ready bitmap with the same resource id";
                 descriptor.previewPath = directBitmap.filePath;
-                if (directBitmap.filePath.startsWith(this->contentsPath + "/")) {
+                applySplitResourcePolicy(&descriptor);
+                if (isBaseResourcePath(directBitmap.filePath)) {
                     saveTargets.append(directBitmap.filePath);
+                } else if (isSplitResourcePath(directBitmap.filePath)) {
+                    qDebug().noquote() << "Adaptive icon ready bitmap is from a read-only split resource:" << Path::display(directBitmap.filePath);
                 }
                 qDebug().noquote() << "Adaptive icon preview uses ready bitmap resource:" << Path::display(directBitmap.filePath);
             }
@@ -280,20 +284,25 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             descriptor.previewSource = "composed XML layers with AOSP-style layer inset";
         }
         if (!descriptor.foregroundPath.isEmpty()) {
-            if (descriptor.foregroundPath.startsWith(this->contentsPath + "/")) {
+            if (isBaseResourcePath(descriptor.foregroundPath)) {
                 saveTargets.append(descriptor.foregroundPath);
+            } else if (isSplitResourcePath(descriptor.foregroundPath)) {
+                qDebug().noquote() << "Adaptive icon foreground is from a read-only split resource:" << Path::display(descriptor.foregroundPath);
             }
         } else {
             const QString qualifier = ResourceResolver::qualifierForType(type);
             const int resIndex = result.xmlPath.indexOf("/res/");
-            if (!qualifier.isEmpty() && resIndex >= 0 && result.xmlPath.startsWith(this->contentsPath + "/")) {
+            if (!qualifier.isEmpty() && resIndex >= 0 && isBaseResourcePath(result.xmlPath)) {
                 const QString contentsRoot = result.xmlPath.left(resIndex);
                 const QString customName = iconRef.name() + "_foreground_custom";
                 const QString resourceType = iconRef.type().isEmpty() ? "mipmap" : iconRef.type();
                 saveTargets.append(QDir::cleanPath(QString("%1/res/%2-%3/%4.png").arg(contentsRoot, resourceType, qualifier, customName)));
                 descriptor.customForegroundRef = QString("@%1/%2").arg(resourceType, customName);
+            } else if (isSplitResourcePath(result.xmlPath)) {
+                qDebug().noquote() << "Adaptive icon XML is from a read-only split resource:" << Path::display(result.xmlPath);
             }
         }
+        applySplitResourcePolicy(&descriptor);
         const QString foregroundKey = resourceKey(ResourceRef(descriptor.foregroundRef));
         const QString backgroundKey = resourceKey(ResourceRef(descriptor.backgroundRef));
         const QString monochromeKey = resourceKey(ResourceRef(descriptor.monochromeRef));
@@ -345,6 +354,49 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
 bool Apk::File::isAdaptiveLayerResource(const QString &resourceType, const QString &resourceName) const
 {
     return adaptiveLayerRefs.contains(resourceKey(resourceType, resourceName));
+}
+
+bool Apk::File::isBaseResourcePath(const QString &path) const
+{
+    const QString clean = QDir::cleanPath(QDir::fromNativeSeparators(path));
+    if (isSplitResourcePath(clean)) {
+        return false;
+    }
+    return clean == contentsPath || clean.startsWith(contentsPath + "/");
+}
+
+bool Apk::File::isSplitResourcePath(const QString &path) const
+{
+    const QString clean = QDir::cleanPath(QDir::fromNativeSeparators(path));
+    foreach (const QString &splitPath, splitContentsPaths) {
+        if (clean == splitPath || clean.startsWith(splitPath + "/")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Apk::File::applySplitResourcePolicy(AdaptiveIconDescriptor *descriptor) const
+{
+    if (!descriptor) {
+        return;
+    }
+
+    descriptor->splitResourcesAvailable = !splitContentsPaths.isEmpty();
+    QStringList paths;
+    paths << descriptor->xmlPath
+          << descriptor->foregroundPath
+          << descriptor->backgroundPath
+          << descriptor->monochromePath
+          << descriptor->previewPath;
+    paths.removeAll(QString());
+    foreach (const QString &path, paths) {
+        if (isSplitResourcePath(path)) {
+            descriptor->usesReadOnlySplitResources = true;
+            descriptor->splitResourcePaths << QDir::cleanPath(QDir::fromNativeSeparators(path));
+        }
+    }
+    descriptor->splitResourcePaths.removeDuplicates();
 }
 
 // Getters:
