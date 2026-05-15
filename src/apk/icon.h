@@ -21,6 +21,9 @@ struct AdaptiveIconDescriptor {
     QString previewSource;
     QString previewPath;
     QString customForegroundRef;
+    bool splitResourcesAvailable = false;
+    bool usesReadOnlySplitResources = false;
+    QStringList splitResourcePaths;
 
     bool isValid() const { return !xmlPath.isEmpty(); }
     bool needsXmlPatch() const { return !xmlPath.isEmpty() && !customForegroundRef.isEmpty(); }

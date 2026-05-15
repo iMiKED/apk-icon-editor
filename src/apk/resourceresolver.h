@@ -43,15 +43,15 @@ public:
         QString filePath;
     };
 
-    explicit ResourceResolver(const QString &contentsPath);
+    explicit ResourceResolver(const QString &contentsPath, const QStringList &extraContentsPaths = QStringList());
 
-    QList<Candidate> candidates(const ResourceRef &ref) const;
+    QList<Candidate> candidates(const ResourceRef &ref, Icon::Type preferredType = Icon::Unknown) const;
     QList<Candidate> bitmapCandidatesByName(const QString &name) const;
     Value resolveBest(const ResourceRef &ref, Icon::Type preferredType) const;
     Value resolveXml(const ResourceRef &ref) const;
     Value resolveBitmap(const ResourceRef &ref, Icon::Type preferredType) const;
     Value resolveColor(const ResourceRef &ref) const;
-    ResourceRef resolveAlias(const ResourceRef &ref, int depth = 0) const;
+    ResourceRef resolveAlias(const ResourceRef &ref, Icon::Type preferredType = Icon::Unknown, int depth = 0) const;
 
     static bool isBitmapExtension(const QString &extension);
     static Icon::Type typeFromQualifiers(const QStringList &qualifiers);
@@ -59,22 +59,26 @@ public:
 
 private:
     void loadValues();
+    void loadResourceTableAliases();
     void parseValuesFile(const QString &filePath);
     QList<Candidate> fileCandidates(const ResourceRef &ref) const;
     QList<ColorCandidate> colorCandidates(const ResourceRef &ref) const;
     QList<AliasCandidate> aliasCandidates(const ResourceRef &ref) const;
     int score(const Candidate &candidate, Icon::Type preferredType) const;
     int xmlScore(const Candidate &candidate) const;
-    int valueScore(const QStringList &qualifiers) const;
+    int valueScore(const QStringList &qualifiers, Icon::Type preferredType = Icon::Unknown) const;
     int qualifierPenalty(const QStringList &qualifiers) const;
     int rankForType(Icon::Type type) const;
+    QString sourceLabelForPath(const QString &filePath) const;
     void logFileResolution(const ResourceRef &ref, const QString &kind, const QList<Candidate> &candidates, const Candidate &selected, Icon::Type preferredType) const;
     void logValueResolution(const ResourceRef &ref, const QString &kind, const QStringList &candidates, const QString &selected) const;
     void logUnsupportedRef(const ResourceRef &ref, const QString &context) const;
 
     QString contentsPath;
+    QStringList contentsPaths;
     QMap<QString, QList<ColorCandidate> > colors;
     QMap<QString, QList<AliasCandidate> > aliases;
+    QMap<QString, QList<Candidate> > tableFiles;
     mutable QSet<QString> loggedUnsupportedRefs;
 };
 

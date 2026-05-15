@@ -13,6 +13,7 @@ SOURCES += $$PWD/apk.cpp \
            $$PWD/iconsmodel.cpp \
            $$PWD/iconsproxy.cpp \
            $$PWD/resourceref.cpp \
+           $$PWD/resourcearsc.cpp \
            $$PWD/resourceresolver.cpp \
            $$PWD/device.cpp \
            $$PWD/devicemodel.cpp \
@@ -32,6 +33,7 @@ HEADERS += $$PWD/apk.h \
            $$PWD/iconsmodel.h \
            $$PWD/iconsproxy.h \
            $$PWD/resourceref.h \
+           $$PWD/resourcearsc.h \
            $$PWD/resourceresolver.h \
            $$PWD/device.h \
            $$PWD/devicemodel.h \

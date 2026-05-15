@@ -16,7 +16,7 @@ namespace Apk {
     class File {
 
     public:
-        explicit File(const QString &contentsPath);
+        explicit File(const QString &contentsPath, const QStringList &splitContentsPaths = QStringList());
         ~File();
 
         void saveIcons();
@@ -63,9 +63,13 @@ namespace Apk {
         QString getIconPath(Icon::Type type);
         bool addAdaptiveIcons(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Scope scope, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
         bool isAdaptiveLayerResource(const QString &resourceType, const QString &resourceName) const;
+        bool isBaseResourcePath(const QString &path) const;
+        bool isSplitResourcePath(const QString &path) const;
+        void applySplitResourcePolicy(AdaptiveIconDescriptor *descriptor) const;
 
         QString filePath;     ///< APK filename.
         QString contentsPath; ///< Path to APK contents directory.
+        QStringList splitContentsPaths; ///< Read-only decoded split APK resource roots.
         QSet<QString> adaptiveLayerRefs;
 
         QIcon thumbnail;

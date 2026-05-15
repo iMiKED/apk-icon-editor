@@ -30,7 +30,7 @@
 
 ///
 /// Main window class.
-/// This class describes the main "APK Icon Editor" window.
+/// This class describes the main "APK Icon Editor Reborn" window.
 ///
 
 class MainWindow : public QMainWindow {
@@ -86,7 +86,7 @@ public slots:
     bool setPreviewColor();         ///< Displays background color selection dialog.
     void showEffectsDialog();       ///< Displays "Effects" dialog.
 
-    void associate() const;         ///< Sets "APK Icon Editor" as the default application for \c apk files (Windows only).
+    void associate() const;         ///< Sets "APK Icon Editor Reborn" as the default application for \c apk files (Windows only).
     void browseSite() const;        ///< Opens website URL in the default browser.
     void browseBugs() const;        ///< Opens bugs webpage in the default browser.
     void browseTranslate() const;   ///< Opens Crowdin URL in the default browser.

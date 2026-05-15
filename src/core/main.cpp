@@ -1,8 +1,8 @@
 ///
-/// \mainpage APK Icon Editor
+/// \mainpage APK Icon Editor Reborn
 ///
 /// \section Summary
-/// - APK Icon Editor is a free, open-source and cross-platform tool designed to
+/// - APK Icon Editor Reborn is a free, open-source and cross-platform tool designed to
 ///   easily change APK resources such as icons, strings, images,
 ///   application name and version, etc.
 ///

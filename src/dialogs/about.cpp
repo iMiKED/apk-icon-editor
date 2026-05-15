@@ -109,8 +109,8 @@ void About::retranslate()
 #endif
         tr("Built on: %1").arg(buildDateTime) + "<br>" +
         commitLine +
-        tr("Author: %1").arg("Alexander Gorishnyak") + "<br>" +
-        tr("Fork author: %1").arg("<a href='https://4pda.to/forum/index.php?showuser=1017942'>iMiKED from 4PDA</a>") + "<br>" +
+        tr("Reborn author") + ": <a href='https://4pda.to/forum/index.php?showuser=1017942'>iMiKED from 4PDA</a><br>" +
+        tr("Original app author") + ": Alexander Gorishnyak<br>" +
         tr("License") + ": <a href='http://www.gnu.org/licenses/gpl-3.0.html'>GNU GPL v3.0</a>"
     );
 

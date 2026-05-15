@@ -12,7 +12,7 @@ permissions:
 
 env:
   QT_VERSION: 6.8.3
-  APP_VERSION: 3.0.0-beta2
+  APP_VERSION: 3.0.0-beta3
 
 jobs:
   desktop:
@@ -64,15 +64,15 @@ jobs:
           if (-not $vs) { throw "Visual Studio C++ toolchain was not found." }
           $vcvars = Join-Path $vs 'VC\Auxiliary\Build\vcvars64.bat'
           & cmd.exe /d /s /c "call `"$vcvars`" && cd /d `"$pwd`" && qmake `"DEFINES+=CI`" && nmake"
-          windeployqt --release --no-compiler-runtime bin\win64\apk-icon-editor.exe
-          Compress-Archive -Path bin\win64\* -DestinationPath "apk-icon-editor_${env:APP_VERSION}_win64.zip" -Force
+          windeployqt --release --no-compiler-runtime bin\win64\apk-icon-editor-reborn.exe
+          Compress-Archive -Path bin\win64\* -DestinationPath "apk-icon-editor-reborn_${env:APP_VERSION}_win64.zip" -Force
 
       - name: Upload Windows artifact
         if: matrix.target == 'windows'
         uses: actions/upload-artifact@v4
         with:
-          name: apk-icon-editor-${{ env.APP_VERSION }}-win64
-          path: apk-icon-editor_${{ env.APP_VERSION }}_win64.zip
+          name: apk-icon-editor-reborn-${{ env.APP_VERSION }}-win64
+          path: apk-icon-editor-reborn_${{ env.APP_VERSION }}_win64.zip
 
       - name: Install Linux dependencies
         if: matrix.target == 'linux'
@@ -85,20 +85,20 @@ jobs:
         run: |
           ./setup/linux/deb/build.sh
           mkdir -p artifacts/deb
-          cp ../apk-icon-editor_*.deb "artifacts/deb/apk-icon-editor_${APP_VERSION}_amd64.deb"
+          cp ../apk-icon-editor-reborn_*.deb "artifacts/deb/apk-icon-editor-reborn_${APP_VERSION}_amd64.deb"
 
       - name: Build Linux portable package
         if: matrix.target == 'linux'
         run: |
-          tar -C bin -czf "apk-icon-editor_${APP_VERSION}_linux-x86_64.tar.gz" linux
+          tar -C bin -czf "apk-icon-editor-reborn_${APP_VERSION}_linux-x86_64.tar.gz" linux
 
       - name: Upload Linux artifacts
         if: matrix.target == 'linux'
         uses: actions/upload-artifact@v4
         with:
-          name: apk-icon-editor-${{ env.APP_VERSION }}-linux
+          name: apk-icon-editor-reborn-${{ env.APP_VERSION }}-linux
           path: |
-            apk-icon-editor_${{ env.APP_VERSION }}_linux-x86_64.tar.gz
+            apk-icon-editor-reborn_${{ env.APP_VERSION }}_linux-x86_64.tar.gz
             artifacts/deb/*.deb
 
       - name: Install Qt for macOS
@@ -126,10 +126,10 @@ jobs:
         if: matrix.target == 'macos'
         uses: actions/upload-artifact@v4
         with:
-          name: apk-icon-editor-${{ env.APP_VERSION }}${{ matrix.macos_suffix }}
+          name: apk-icon-editor-reborn-${{ env.APP_VERSION }}${{ matrix.macos_suffix }}
           path: |
-            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}${{ matrix.macos_suffix }}.app.zip
-            setup/macosx/build/apk-icon-editor_${{ env.APP_VERSION }}${{ matrix.macos_suffix }}.dmg
+            setup/macosx/build/apk-icon-editor-reborn_${{ env.APP_VERSION }}${{ matrix.macos_suffix }}.app.zip
+            setup/macosx/build/apk-icon-editor-reborn_${{ env.APP_VERSION }}${{ matrix.macos_suffix }}.dmg
 
   rpm:
     name: Linux RPM on Fedora
@@ -149,7 +149,7 @@ jobs:
       - name: Upload RPM artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: apk-icon-editor-${{ env.APP_VERSION }}-rpm
+          name: apk-icon-editor-reborn-${{ env.APP_VERSION }}-rpm
           path: setup/linux/rpm/build/RPMS/**/*.rpm
 
   release:

@@ -17,7 +17,7 @@ bool Settings::init()
     }
 
 #ifndef PORTABLE
-    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "apk-icon-editor", "config");
+    settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "apk-icon-editor-reborn", "config");
 #else
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, Path::App::dir() + "data");
     settings = new QSettings(QSettings::IniFormat, QSettings::UserScope, "settings", "config");

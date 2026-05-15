@@ -133,9 +133,9 @@ public:
 private:
     virtual bool processReply(QNetworkReply *reply);
     virtual void startUpload();
-    void getFolderID();         ///< Retrieve "APK Icon Editor" folder ID at Google Drive.
-    void createFolder();        ///< Create "APK Icon Editor" folder at Google Drive.
-    QString folder;             ///< "APK Icon Editor" folder ID at Google Drive.
+    void getFolderID();         ///< Retrieve "APK Icon Editor Reborn" folder ID at Google Drive.
+    void createFolder();        ///< Create "APK Icon Editor Reborn" folder at Google Drive.
+    QString folder;             ///< "APK Icon Editor Reborn" folder ID at Google Drive.
 };
 
 ///

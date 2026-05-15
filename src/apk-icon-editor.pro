@@ -2,13 +2,13 @@ QT += widgets xml network
 TEMPLATE = app
 CONFIG += c++11
 
-TARGET = apk-icon-editor
+TARGET = apk-icon-editor-reborn
 VERSION = 3.0.0
-APP_VERSION = 3.0.0-beta2
+APP_VERSION = 3.0.0-beta3
 
-QMAKE_TARGET_PRODUCT = APK Icon Editor
+QMAKE_TARGET_PRODUCT = APK Icon Editor Reborn
 QMAKE_TARGET_COMPANY = Alexander Gorishnyak / iMiKED
-QMAKE_TARGET_DESCRIPTION = APK Icon Editor v$$APP_VERSION
+QMAKE_TARGET_DESCRIPTION = APK Icon Editor Reborn v$$APP_VERSION
 QMAKE_TARGET_COPYRIGHT = Copyright (C) 2014-2026
 
 DEFINES += APP='"\\\"$$QMAKE_TARGET_PRODUCT\\\""'
@@ -67,9 +67,9 @@ macx {
 
 SHARED = $$DESTDIR
 win32: SHARED ~= s,/,\\,g
-unix:!macx: SHARED = $$DESTDIR/../share/apk-icon-editor/
+unix:!macx: SHARED = $$DESTDIR/../share/apk-icon-editor-reborn/
 unix:!macx: QMAKE_POST_LINK += mkdir -p $$quote($$SHARED) $$escape_expand(\\n\\t)
-macx:SHARED = $$DESTDIR/apk-icon-editor.app/Contents/MacOS/
+macx:SHARED = $$DESTDIR/apk-icon-editor-reborn.app/Contents/MacOS/
 
 defineTest(deploy) {
     DIRS = $$1
@@ -99,7 +99,7 @@ unix:!macx {
     isEmpty(PREFIX): PREFIX = /usr
     target.path   = $$PREFIX/bin
     share.files   = $$PWD/../deploy/general/*
-    share.path    = $$PREFIX/share/apk-icon-editor
+    share.path    = $$PREFIX/share/apk-icon-editor-reborn
     icons.files   = $$PWD/../res/icons/linux/apk-icon-editor/*
     icons.path    = $$PREFIX/share/icons/hicolor
     desktop.files = $$PWD/../res/icons/linux/apk-icon-editor.desktop

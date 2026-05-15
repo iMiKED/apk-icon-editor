@@ -26,6 +26,27 @@ static QSize scaledSize(const QSize &size, int scale)
     return QSize(size.width() * scale, size.height() * scale);
 }
 
+static qreal dimensionAttrForSize(const QString &value, qreal reference, qreal fallback = 0.0)
+{
+    QString text = value.trimmed();
+    if (text.isEmpty()) {
+        return fallback;
+    }
+
+    static const QRegularExpression number("^(-?\\d+(?:\\.\\d+)?)");
+    const QRegularExpressionMatch match = number.match(text);
+    if (!match.hasMatch()) {
+        return fallback;
+    }
+
+    bool ok = false;
+    const qreal result = match.captured(1).toDouble(&ok);
+    if (!ok) {
+        return fallback;
+    }
+    return text.endsWith('%') ? reference * result / 100.0 : result;
+}
+
 AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Type type, const QSize &size)
 {
     Result result;
@@ -103,12 +124,16 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     result.pixmap = pixmap;
     result.xmlPath = xml.filePath;
     result.descriptor.xmlPath = xml.filePath;
-    result.descriptor.foregroundRef = foregroundRef.original();
+    result.descriptor.foregroundRef = foregroundRef.original().isEmpty() && foreground.found
+            ? "inline XML/vector layer"
+            : foregroundRef.original();
     result.descriptor.foregroundPath = foreground.isBitmap ? foreground.filePath : QString();
     result.descriptor.backgroundRef = backgroundRef.original();
     result.descriptor.backgroundPath = background.filePath;
     result.descriptor.backgroundColor = background.color;
-    result.descriptor.monochromeRef = monochromeRef.original();
+    result.descriptor.monochromeRef = monochromeRef.original().isEmpty() && monochrome.found
+            ? "inline XML/vector layer"
+            : monochromeRef.original();
     result.descriptor.monochromePath = monochrome.isBitmap ? monochrome.filePath : QString();
     result.descriptor.monochromeColor = monochrome.color;
     result.descriptor.monochromeRenderable = monochrome.found || !monochromePixmap.isNull();
@@ -244,6 +269,16 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
         return AndroidVectorRenderer::render(resolver, node, size);
     }
 
+    if (tag == "color") {
+        const QColor color = resolveColorValue(resolver, node.attribute("android:color").isEmpty() ? node.text().trimmed() : node.attribute("android:color"));
+        if (!color.isValid()) {
+            return QPixmap();
+        }
+        QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+        canvas.fill(color);
+        return QPixmap::fromImage(canvas);
+    }
+
     if (tag == "shape") {
         QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
         canvas.fill(Qt::transparent);
@@ -340,10 +375,11 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
             return pixmap;
         }
         if (tag == "item" || tag == "inset") {
-            const qreal left = dimensionAttr(node.attribute(tag == "inset" ? "android:insetLeft" : "android:left"), 0.0);
-            const qreal top = dimensionAttr(node.attribute(tag == "inset" ? "android:insetTop" : "android:top"), 0.0);
-            const qreal right = dimensionAttr(node.attribute(tag == "inset" ? "android:insetRight" : "android:right"), 0.0);
-            const qreal bottom = dimensionAttr(node.attribute(tag == "inset" ? "android:insetBottom" : "android:bottom"), 0.0);
+            const QString uniformInset = tag == "inset" ? node.attribute("android:inset") : QString();
+            const qreal left = dimensionAttrForSize(node.attribute(tag == "inset" ? "android:insetLeft" : "android:left"), size.width(), dimensionAttrForSize(uniformInset, size.width()));
+            const qreal top = dimensionAttrForSize(node.attribute(tag == "inset" ? "android:insetTop" : "android:top"), size.height(), dimensionAttrForSize(uniformInset, size.height()));
+            const qreal right = dimensionAttrForSize(node.attribute(tag == "inset" ? "android:insetRight" : "android:right"), size.width(), dimensionAttrForSize(uniformInset, size.width()));
+            const qreal bottom = dimensionAttrForSize(node.attribute(tag == "inset" ? "android:insetBottom" : "android:bottom"), size.height(), dimensionAttrForSize(uniformInset, size.height()));
             if (!qFuzzyIsNull(left) || !qFuzzyIsNull(top) || !qFuzzyIsNull(right) || !qFuzzyIsNull(bottom)) {
                 QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
                 canvas.fill(Qt::transparent);

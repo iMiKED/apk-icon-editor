@@ -1,5 +1,20 @@
 # Version History
 
+## 3.0.0-beta3
+* Added resource table alias resolution from resources.arsc for adaptive XML icons.
+* Fixed adaptive icon rendering for APKs whose launcher foreground is a resources.arsc alias, such as Snapseed.
+* Fixed resource resolution when an APK provides both a direct XML resource and a default values alias for the same launcher icon.
+* Added adaptive XML rendering support for drawable color XML files and percent-based inset drawables.
+* Renamed application branding and package/binary names to APK Icon Editor Reborn.
+* Added v3.0.0-beta3 release notes.
+* Updated About and Authors labels to distinguish Reborn author from the original app author.
+* Added qualifier-aware resource table alias resolution for density, version, night, locale, MCC and MNC configurations, including density-aware alias scoring.
+* Added resources.arsc scalar value resolution for table-only color values and file path resources used by adaptive XML icons.
+* Added read-only split APK resource discovery for adaptive XML icon previews when compatible split APKs are stored next to base.apk.
+* Improved adaptive icon diagnostics by showing base/split resource sources, split discovery summaries, and inline XML/vector layer metadata.
+* Added a clear preview-only/read-only policy for adaptive icons that use split APK resources; split APK replacement and repacking are intentionally blocked.
+* Optimized split APK discovery to run only when the decoded base manifest declares split resource metadata, and then only decode split-like sibling APK filenames.
+
 ## 3.0.0-beta2
 * Added initial adaptive XML icon support using Apktool-decoded resources without aapt2.
 * Added adaptive icon preview composition from foreground and background resources.
