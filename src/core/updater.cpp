@@ -38,7 +38,7 @@ bool Updater::compare(QString v1, QString v2)
     QStringList segments1 = v1.split(QRegularExpression("\\D"));
     QStringList segments2 = v2.split(QRegularExpression("\\D"));
 
-    for (short i = 0; i < segments1.size(); ++i) {
+    for (qsizetype i = 0; i < segments1.size(); ++i) {
 
         if (segments2.size() <= i) {
             segments2.push_back("0");
