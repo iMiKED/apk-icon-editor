@@ -728,7 +728,7 @@ void MainWindow::recent_update()
     menuRecent->clear();
 
     if (!recent->empty()) {
-        for (short i = 0; i < recent->size(); ++i) {
+        for (int i = 0; i < recent->size(); ++i) {
             const RecentFile RECENT = recent->at(i);
             QAction *actRecent = new QAction(RECENT.filename, menuRecent);
             actRecent->setIcon(RECENT.icon);
