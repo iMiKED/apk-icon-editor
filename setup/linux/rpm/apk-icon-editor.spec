@@ -4,7 +4,7 @@
 
 Name:           apk-icon-editor-reborn
 Version:        3.0.0
-Release:        0.beta1%{?dist}
+Release:        0.beta3%{?dist}
 Summary:        Simple APK resource editor
 
 License:        GPL-3.0-or-later
