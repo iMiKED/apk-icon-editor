@@ -43,7 +43,8 @@ void Authors::parse()
     Q_UNUSED(QT_TR_NOOP("Authors"));
     Q_UNUSED(QT_TR_NOOP("Translators"));
     Q_UNUSED(QT_TR_NOOP("Contributors"));
-    Q_UNUSED(QT_TR_NOOP("Donators"));
+    Q_UNUSED(QT_TR_NOOP("Support APK Icon Editor Reborn"));
+    Q_UNUSED(QT_TR_NOOP("Original APK Icon Editor Donators"));
     Q_UNUSED(QT_TR_NOOP("Special Thanks"));
     Q_UNUSED(QT_TR_NOOP("Testers"));
 

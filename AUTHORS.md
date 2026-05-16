@@ -23,7 +23,17 @@
 - Roder van Arkel
 - [Ameen Ali](https://github.com/AmeenAli)
 
-## Donators
+## Support APK Icon Editor Reborn
+- Russia transfers: [Ozon Bank / SBP](https://finance.ozon.ru/apps/sbp/ozonbankpay/019a0a87-1f4a-7df8-97c7-ef32ebf9a0e3)
+- VISA Kazakhstan: `4400430236422744`
+- [Buy Me a Coffee](https://buymeacoffee.com/danceworldtv)
+- [PayPal](https://paypal.me/imiked)
+- [Boosty](https://boosty.to/danceworldtv/donate)
+- USDT Ethereum (ERC20): `0xBd0593dDF1DFC7fD95bB6F4e6A5c73Da44048B40`
+- USDT TON: `UQCr2Fp7t34QFuO4IesN3Lo3186a93Z1B7Wu76imr6APIXgk`
+- USDT Tron (TRC20): `TE5A3GT84eJ9iT3mYYLv1KXJnMaiZFxNuA`
+
+## Original APK Icon Editor Donators
 - [Julien Veuillet](http://www.wakdev.com)
 - [Cyclos](http://www.cyclos.org)
 - Khalida Begum
