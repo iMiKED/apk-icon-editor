@@ -6,9 +6,25 @@ This repository contains **APK Icon Editor Reborn**, a fork of the original [APK
 [![CodeQL](https://github.com/iMiKED/apk-icon-editor/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/iMiKED/apk-icon-editor/actions/workflows/github-code-scanning/codeql)
 [![Latest Release](https://img.shields.io/github/v/release/iMiKED/apk-icon-editor?include_prereleases&label=release)](https://github.com/iMiKED/apk-icon-editor/releases)
 [![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/iMiKED/apk-icon-editor/blob/master/LICENSE)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-danceworldtv-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/danceworldtv)
+[![PayPal](https://img.shields.io/badge/PayPal-imiked-00457C?logo=paypal&logoColor=white)](https://paypal.me/imiked)
+[![Boosty](https://img.shields.io/badge/Boosty-donate-f15f2c)](https://boosty.to/danceworldtv/donate)
+[![Ozon Bank](https://img.shields.io/badge/Ozon%20Bank-SBP%20transfer-005BFF)](https://finance.ozon.ru/apps/sbp/ozonbankpay/019a0a87-1f4a-7df8-97c7-ef32ebf9a0e3)
 
 ## Description
 **APK Icon Editor Reborn** is a cross-platform APK editor designed to edit and replace APK resources such as icons, strings, images, application name and version. This fork modernizes the original Qt application for current build toolchains and adds beta support for adaptive XML launcher icons decoded by Apktool.
+
+## Support The Project
+If APK Icon Editor Reborn saves you time, you can support the fork author:
+
+- Russia transfers: [Ozon Bank / SBP](https://finance.ozon.ru/apps/sbp/ozonbankpay/019a0a87-1f4a-7df8-97c7-ef32ebf9a0e3);
+- VISA: `4400430236422744`;
+- [Buy Me a Coffee](https://buymeacoffee.com/danceworldtv);
+- [PayPal](https://paypal.me/imiked);
+- [Boosty](https://boosty.to/danceworldtv/donate);
+- USDT Ethereum (ERC20): `0xBd0593dDF1DFC7fD95bB6F4e6A5c73Da44048B40`;
+- USDT TON: `UQCr2Fp7t34QFuO4IesN3Lo3186a93Z1B7Wu76imr6APIXgk`;
+- USDT Tron (TRC20): `TE5A3GT84eJ9iT3mYYLv1KXJnMaiZFxNuA`.
 
 ## Features
 - Edit, replace and extract APK icons, including classic bitmap launcher icons and adaptive XML launcher icons;
