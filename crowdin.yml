@@ -5,11 +5,12 @@ preserve_hierarchy: true
 
 languages_mapping:
   two_letters_code:
-    pt-BR: pt
+    es-ES: es
+    pt-PT: pt
     zh-CN: zh
 
 files:
   - source: "/lang/apk-icon-editor.ts"
     translation: "/lang/translations/apk-icon-editor.%two_letters_code%.ts"
-    type: "ts"
+    type: "qtts"
     update_option: "update_as_unapproved"
