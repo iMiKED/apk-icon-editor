@@ -21,7 +21,19 @@ GIT_COMMIT_URL = https://github.com/iMiKED/apk-icon-editor/commit/$$GIT_COMMIT
 }
 #DEFINES += PORTABLE
 
-TRANSLATIONS += $$PWD/../lang/apk-icon-editor.en.ts
+TRANSLATIONS += $$PWD/../lang/apk-icon-editor.ts \
+                $$PWD/../lang/translations/apk-icon-editor.de.ts \
+                $$PWD/../lang/translations/apk-icon-editor.el.ts \
+                $$PWD/../lang/translations/apk-icon-editor.es.ts \
+                $$PWD/../lang/translations/apk-icon-editor.fr.ts \
+                $$PWD/../lang/translations/apk-icon-editor.hu.ts \
+                $$PWD/../lang/translations/apk-icon-editor.it.ts \
+                $$PWD/../lang/translations/apk-icon-editor.nl.ts \
+                $$PWD/../lang/translations/apk-icon-editor.pt.ts \
+                $$PWD/../lang/translations/apk-icon-editor.ro.ts \
+                $$PWD/../lang/translations/apk-icon-editor.ru.ts \
+                $$PWD/../lang/translations/apk-icon-editor.tr.ts \
+                $$PWD/../lang/translations/apk-icon-editor.zh.ts
 RESOURCES    += $$PWD/../res/resources.qrc
 
 win32 {

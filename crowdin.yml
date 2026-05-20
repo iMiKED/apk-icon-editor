@@ -1,0 +1,15 @@
+project_id_env: CROWDIN_PROJECT_ID
+api_token_env: CROWDIN_PERSONAL_TOKEN
+base_path: "."
+preserve_hierarchy: true
+
+languages_mapping:
+  two_letters_code:
+    pt-BR: pt
+    zh-CN: zh
+
+files:
+  - source: "/lang/apk-icon-editor.ts"
+    translation: "/lang/translations/apk-icon-editor.%two_letters_code%.ts"
+    type: "ts"
+    update_option: "update_as_unapproved"

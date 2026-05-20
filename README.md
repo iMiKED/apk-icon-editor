@@ -38,6 +38,17 @@ If APK Icon Editor Reborn saves you time, you can support the fork author:
 - Cloud storage upload: *Dropbox*, *Google Drive*, *Microsoft OneDrive*;
 - Multilingual interface.
 
+## Translations
+APK Icon Editor Reborn uses its own Crowdin localization project: [apk-icon-editor-reborn](https://crowdin.com/project/apk-icon-editor-reborn).
+
+The repository includes Qt Linguist source files and a Crowdin configuration:
+
+- source strings: `lang/apk-icon-editor.ts`;
+- imported translation baseline: `lang/translations/apk-icon-editor.<lang>.ts`;
+- Crowdin config: `crowdin.yml`.
+
+To enable synchronization, create the Crowdin project under your account, then add `CROWDIN_PROJECT_ID` and `CROWDIN_PERSONAL_TOKEN` as GitHub repository secrets. The manual `Crowdin localization` workflow can upload sources/translations and create translation update PRs.
+
 ## 3.0.0 Beta Status
 The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta3` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, and vector foreground previews are rendered in-app.
 

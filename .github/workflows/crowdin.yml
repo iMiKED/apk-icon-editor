@@ -1,0 +1,70 @@
+name: Crowdin localization
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Crowdin sync mode"
+        required: true
+        default: "upload-sources"
+        type: choice
+        options:
+          - upload-sources
+          - upload-translations
+          - download-translations
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  crowdin:
+    name: Sync Qt translations
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload source strings
+        if: ${{ inputs.mode == 'upload-sources' }}
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: true
+          upload_translations: false
+          download_translations: false
+          config: crowdin.yml
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload existing translation baseline
+        if: ${{ inputs.mode == 'upload-translations' }}
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: false
+          upload_translations: true
+          download_translations: false
+          auto_approve_imported: true
+          config: crowdin.yml
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download translated files
+        if: ${{ inputs.mode == 'download-translations' }}
+        uses: crowdin/github-action@v2
+        with:
+          upload_sources: false
+          upload_translations: false
+          download_translations: true
+          localization_branch_name: l10n/crowdin
+          create_pull_request: true
+          pull_request_title: "Update Crowdin translations"
+          pull_request_body: "Downloaded latest Qt TS translations from the APK Icon Editor Reborn Crowdin project."
+          config: crowdin.yml
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
