@@ -1,781 +1,1223 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS>
+<!DOCTYPE TS []>
 <TS version="2.1" language="nl" sourcelanguage="en">
-<context>
-    <name>MainWindow</name>
+  <context>
+    <name>About</name>
     <message>
-        <source>FAQ</source>
-        <translation>FAQ</translation>
+      <location filename="../../src/dialogs/about.cpp" line="+96" />
+      <source>About</source>
+      <translation>Over</translation>
     </message>
     <message>
-        <source>Logs</source>
-        <translation>Logs</translation>
+      <location line="+24" />
+      <source>Visit Website</source>
+      <translation>Website bezoeken</translation>
     </message>
     <message>
-        <source>Reset Settings</source>
-        <translation>Instellingen terugzetten</translation>
+      <location line="-6" />
+      <source>License</source>
+      <translation>Licentie</translation>
     </message>
     <message>
-        <source>&amp;File</source>
-        <translation>&amp;Bestand</translation>
+      <location line="-12" />
+      <source>Commit: %1</source>
+      <translation>%1 is up-to-date.</translation>
     </message>
     <message>
-        <source>&amp;Help</source>
-        <translation>&amp;Hulp</translation>
+      <location line="+8" />
+      <source>Built on: %1</source>
+      <translation>Gebruikt door Android-themapictogrammen; niet gebruikt voor het normale voorbeeld.</translation>
     </message>
     <message>
-        <source>&amp;Icon</source>
-        <translation>&amp;Pictogram</translation>
+      <location line="+2" />
+      <source>Reborn author</source>
+      <translation>Kan geen releaseversie vinden in het updateantwoord.</translation>
     </message>
     <message>
-        <source>&amp;View</source>
-        <translation>&amp;View</translation>
+      <location line="+1" />
+      <source>Original app author</source>
+      <translation>Rond applicatiepictogram</translation>
     </message>
     <message>
-        <source>Resize Icon</source>
-        <translation>Pictogram herschalen</translation>
+      <location line="+8" />
+      <source>Report a Bug</source>
+      <translation>Een bug rapporteren</translation>
     </message>
     <message>
-        <source>E&amp;xit</source>
-        <translation>&amp;Afsluiten</translation>
+      <location line="+2" />
+      <source>Version History</source>
+      <translation>Versiegeschiedenis</translation>
     </message>
     <message>
-        <source>Icons</source>
-        <translation>Pictogrammen</translation>
+      <location line="+4" />
+      <source>Authors</source>
+      <translation>Auteurs</translation>
     </message>
     <message>
-        <source>Open Log Directory</source>
-        <translation>Open de log map</translation>
+      <location line="-5" />
+      <source>Join our translation team on Crowdin.</source>
+      <translation>Doe mee met ons vertaalteam op Crowdin.</translation>
     </message>
     <message>
-        <source>APK has been modified. Discard changes?</source>
-        <translation>De APK is aangepast. Wilt u de wijzigingen verwerpen?</translation>
+      <location line="-2" />
+      <source>Visit our official website.</source>
+      <translation>Bezoek onze officiР В РІР‚СљР вЂ™Р’В«le website.</translation>
     </message>
     <message>
-        <source>Visit Website</source>
-        <translation>Website bezoeken</translation>
+      <location line="+2" />
+      <source>Help Translate</source>
+      <translation>Helpen bij de vertaling</translation>
     </message>
     <message>
-        <source>Associate .APK</source>
-        <translation>.APK-bstanden associëren</translation>
+      <location line="+1" />
+      <source>List of changes made to the project.</source>
+      <translation>Lijst van gedane projectwijzigingen.</translation>
     </message>
     <message>
-        <source>Version Code</source>
-        <translation>Versiecode</translation>
+      <source>Built on: %1 - %2</source>
+      <translation type="vanished">Gebouwd op: %1 - %2</translation>
     </message>
     <message>
-        <source>Version Name</source>
-        <translation>Versienaam</translation>
+      <location line="-2" />
+      <source>Found a bug? Let us know so we can fix it!</source>
+      <translation>Heeft u een bug gevonden? Laat het ons weten zodat wij hem kunnen oplossen!</translation>
     </message>
     <message>
-        <source>&amp;Export (Pack) APK</source>
-        <translation>APK &amp;exporteren (inpakken)</translation>
+      <source>Author: %1</source>
+      <translation type="vanished">Auteur: %1</translation>
     </message>
+  </context>
+  <context>
+    <name>Apk</name>
     <message>
-        <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation>This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+      <location filename="../../src/apk/apk.h" line="+32" />
+      <source>%1 Error</source>
+      <translation>%1 Fout</translation>
     </message>
     <message>
-        <source>&amp;Resize Icon</source>
-        <translation>Pictogram &amp;herschalen</translation>
+      <location line="+6" />
+      <location filename="../../src/dialogs/about.cpp" line="-47" />
+      <location line="+1" />
+      <source>Download</source>
+      <translation>Downloaden</translation>
     </message>
     <message>
-        <source>Could not find APK:
-%1</source>
-        <translation>De APK kon niet worden gevonden:
-%1</translation>
+      <location line="-4" />
+      <source>"Apktool" requires Java Runtime Environment.</source>
+      <translation>"Apktool" vereist een Java Runtime Environment.</translation>
     </message>
     <message>
-        <source>Preview Background &amp;Color</source>
-        <translation>Voorbeeld van achtergrond&amp;kleur</translation>
+      <location line="+5" />
+      <source>(check the PATH variable if JRE is already installed)</source>
+      <translation>(controleer het PATH-variabel als JRE al is geР В РІР‚СљР В РІР‚РЋnstalleerd)</translation>
     </message>
     <message>
-        <source>Key Manager</source>
-        <translation>Sleutelbeheerder</translation>
+      <location line="-6" />
+      <source>Error starting &lt;b&gt;%1&lt;/b&gt;</source>
+      <translation>Er is een fout opgetreden bij het starten van &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
-    <message>
-        <source>Apply to All</source>
-        <translation>Op alles toepassen</translation>
-    </message>
-    <message>
-        <source>Auto-check for Updates</source>
-        <translation>Automatisch controleren op updates</translation>
-    </message>
-    <message>
-        <source>Uploading</source>
-        <translation>Bezig met uploaden</translation>
-    </message>
-    <message>
-        <source>Enter the alias password:</source>
-        <translation>Vul het alias-wachtwoord in:</translation>
-    </message>
-    <message>
-        <source>Upload to %1</source>
-        <translation>Geüpload naar %1</translation>
-    </message>
-    <message>
-        <source>No Recent Files</source>
-        <translation>Geen recente bestanden</translation>
-    </message>
-    <message>
-        <source>Apply the current icon to all sizes?</source>
-        <translation>Wilt u het huidige pictogram toepassen op alles groottes?</translation>
-    </message>
-    <message>
-        <source>Report a Bug</source>
-        <translation>Een bug rapporteren</translation>
-    </message>
-    <message>
-        <source>Open Log File</source>
-        <translation>Open het log bestand</translation>
-    </message>
-    <message>
-        <source>Revert &amp;Original</source>
-        <translation>O&amp;rigineel herstellen</translation>
-    </message>
-    <message>
-        <source>Scale to &amp;Fit</source>
-        <translation>&amp;Schalen om te passen</translation>
-    </message>
-    <message>
-        <source>Donate</source>
-        <translation>Doe een donatie</translation>
-    </message>
-    <message>
-        <source>Explore APK &amp;Contents</source>
-        <translation>Blader door de &amp;inhoud van de APK</translation>
-    </message>
-    <message>
-        <source>Enter the KeyStore password:</source>
-        <translation>Vul het KeyStore-wachtwoord in:</translation>
-    </message>
-    <message>
-        <source>Reset?</source>
-        <translation>Terugzetten?</translation>
-    </message>
-    <message>
-        <source>Update</source>
-        <translation>Updaten</translation>
-    </message>
-    <message>
-        <source>Enable Upload to Cloud Storages</source>
-        <translation>Uploaden naar cloudopslag inschakelen</translation>
-    </message>
-    <message>
-        <source>File not found</source>
-        <translation>Het bestand kon niet worden gevonden</translation>
-    </message>
-    <message>
-        <source>&amp;Repacking</source>
-        <translation>&amp;Herinpakken</translation>
-    </message>
-    <message>
-        <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
-    </message>
-    <message>
-        <source>Open APK</source>
-        <translation>APK openen</translation>
-    </message>
-    <message>
-        <source>&amp;Open APK</source>
-        <translation>APK &amp;openen</translation>
-    </message>
-    <message>
-        <source>%1 v%2 is available.
-Download?</source>
-        <translation>%1 v%2 is beschikbaar.
-Wilt u deze downloaden?</translation>
-    </message>
-    <message>
-        <source>Properties</source>
-        <translation>Eigenschappen</translation>
-    </message>
-    <message>
-        <source>Translations</source>
-        <translation>Translations</translation>
-    </message>
-    <message>
-        <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
-    </message>
-    <message>
-        <source>Can&apos;t Load Icon</source>
-        <translation>Het pictogram kan niet worden geladen</translation>
-    </message>
-    <message>
-        <source>Pack APK</source>
-        <translation>APK inpakken</translation>
-    </message>
-    <message>
-        <source>&amp;Recent APKs</source>
-        <translation>&amp;Recente APK&apos;s</translation>
-    </message>
-    <message>
-        <source>Discard Changes?</source>
-        <translation>Wijzigingen verwerpen?</translation>
-    </message>
-    <message>
-        <source>&amp;Language</source>
-        <translation>&amp;Taal</translation>
-    </message>
-    <message>
-        <source>Language</source>
-        <translation>Taal</translation>
-    </message>
-    <message>
-        <source>Manifest</source>
-        <translation>Manifest</translation>
-    </message>
-    <message>
-        <source>&amp;Clear List</source>
-        <translation>Lijst &amp;wissen</translation>
-    </message>
-    <message>
-        <source>Icon you are trying to load is off-size.
-Resize automatically?</source>
-        <translation>Het pictogram dat u probeert te laden is buiten de gestelde proporties.
-Wilt u hem automatisch herschalen?</translation>
-    </message>
-    <message>
-        <source>Allow access to %1 in your browser and paste the provided code here:</source>
-        <translation>Sta de toegang tot %1 toe in uw webbrowser en kopieer en plak de opgegeven code hier:</translation>
-    </message>
-    <message>
-        <source>Resize?</source>
-        <translation>Herschalen?</translation>
-    </message>
-    <message>
-        <source>Icon Missing</source>
-        <translation>Het pictogram ontbreekt</translation>
-    </message>
-    <message>
-        <source>Application Name</source>
-        <translation>Applicatienaam</translation>
-    </message>
-    <message>
-        <source>You are trying to load invalid or unsupported icon.</source>
-        <translation>U probeert een ongelding of niet-ondersteund pictogram te laden.</translation>
-    </message>
-    <message>
-        <source>Import Icon</source>
-        <translation>Pictogram importeren</translation>
-    </message>
-    <message>
-        <source>About Qt</source>
-        <translation>Over Qt</translation>
-    </message>
-    <message>
-        <source>About %1</source>
-        <translation>Over %1</translation>
-    </message>
-    <message>
-        <source>Authorization</source>
-        <translation>Authorisatie</translation>
-    </message>
-    <message>
-        <source>Processing</source>
-        <translation>Bezig met verwerken</translation>
-    </message>
-    <message>
-        <source>Enter the alias:</source>
-        <translation>Vul de alias in:</translation>
-    </message>
-    <message>
-        <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
-    </message>
-    <message>
-        <source>Device:</source>
-        <translation>Apparaat:</translation>
-    </message>
-    <message>
-        <source>This APK does not support current DPI.</source>
-        <translation>Deze APK ondersteunt de huidige DPI niet.</translation>
-    </message>
-    <message>
-        <source>Supported Formats</source>
-        <translation>Ondersteunde formaten</translation>
-    </message>
-    <message>
-        <source>CLICK HERE
-(or drag APK and icons)</source>
-        <translation>KLIK HIER
-(of sleep de APK en pictogrammen hierheen)</translation>
-    </message>
-    <message>
-        <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
-    </message>
-    <message>
-        <source>Help Translate</source>
-        <translation>Helpen bij de vertaling</translation>
-    </message>
-    <message>
-        <source>Save Icon</source>
-        <translation>Pictogram opslaan</translation>
-    </message>
-    <message>
-        <source>&amp;Save Icon</source>
-        <translation>Pictogram &amp;opslaan</translation>
-    </message>
-    <message>
-        <source>&amp;Settings</source>
-        <translation>&amp;Instellingen</translation>
-    </message>
-    <message>
-        <source>E&amp;ffects</source>
-        <translation>&amp;Effecten</translation>
-    </message>
-    <message>
-        <source>Apply the current application name to all translations?</source>
-        <translation>Wilt u de huidige applicatienaam toepassen op alle vertalingen?</translation>
-    </message>
-    <message>
-        <source>Check for &amp;Updates</source>
-        <translation>Controleren op &amp;updates</translation>
-    </message>
-    <message>
-        <source>All Files</source>
-        <translation>Alle bestanden</translation>
-    </message>
-    <message>
-        <source>Reset settings to default?</source>
-        <translation>Alle instellingen naar hun standaardwaarden terugzetten?</translation>
-    </message>
-    <message>
-        <source>Replace &amp;Icon</source>
-        <translation>Pictogram &amp;vervangen</translation>
-    </message>
-</context>
-<context>
-    <name>Cloud</name>
-    <message>
-        <source>MiB</source>
-        <translation>MiB</translation>
-    </message>
-    <message>
-        <source>Upload Error</source>
-        <translation>Uploadfout</translation>
-    </message>
-    <message>
-        <source>Error uploading APK to %1.</source>
-        <translation>Er is een fout opgetreden bij het uploaden van de APK naar %1.</translation>
-    </message>
-    <message>
-        <source>Code: %1</source>
-        <translation>Code: %1</translation>
-    </message>
-    <message>
-        <source>Timeout expired. Check your Internet connection.</source>
-        <translation>De timeout is vervallen. Controleer uw internetverbinding.</translation>
-    </message>
-    <message>
-        <source>Reading local file...</source>
-        <translation>Bezig met lezen van lokaal bestand...</translation>
-    </message>
-    <message>
-        <source>Finishing upload. Please wait...</source>
-        <translation>Bezig met afronden van de upload. Even geduld...</translation>
-    </message>
-    <message>
-        <source>Could not open local file.</source>
-        <translation>Het lokale bestand kon niet worden geopend.</translation>
-    </message>
-    <message>
-        <source>Check the code you entered.</source>
-        <translation>Controleer de ingevulde code.</translation>
-    </message>
-    <message>
-        <source>Checking if you are logged in...</source>
-        <translation>Bezig met controleren of u ingelogd bent...</translation>
-    </message>
-    <message>
-        <source>Uploaded: %1</source>
-        <translation>Geüpload: %1</translation>
-    </message>
-</context>
-<context>
+  </context>
+  <context>
     <name>Apk::Packer</name>
     <message>
-        <source>Optimizing APK...</source>
-        <translation>Bezig met optimaliseren van de APK...</translation>
+      <location filename="../../src/apk/apkpacker.cpp" line="+417" />
+      <source>Optimizing APK...</source>
+      <translation>Bezig met optimaliseren van de APK...</translation>
     </message>
     <message>
-        <source>Signing APK requires Java Runtime Environment.</source>
-        <translation>Het signeren van een APK vereist een Java Runtime Environment.</translation>
+      <location line="+79" />
+      <source>Signing APK requires Java Runtime Environment.</source>
+      <translation>Het signeren van een APK vereist een Java Runtime Environment.</translation>
     </message>
     <message>
-        <source>Packing APK...</source>
-        <translation>Bezig met inpakken van de APK...</translation>
+      <location line="-439" />
+      <source>Packing APK...</source>
+      <translation>Bezig met inpakken van de APK...</translation>
     </message>
     <message>
-        <source>APK successfully packed!</source>
-        <translation>De APK is succesvol ingepakt!</translation>
+      <location line="+420" />
+      <location line="+4" />
+      <source>APK successfully packed!</source>
+      <translation>De APK is succesvol ingepakt!</translation>
     </message>
     <message>
-        <source>Saving PNG icons...</source>
-        <translation>Bezig met opslaan van PNG-pictogrammen...</translation>
+      <location line="-444" />
+      <source>Saving PNG icons...</source>
+      <translation>Bezig met opslaan van PNG-pictogrammen...</translation>
     </message>
     <message>
-        <source>APK is &lt;b&gt;not optimized&lt;/b&gt;;</source>
-        <translation>De APK is &lt;b&gt;niet geoptimaliseerd&lt;/b&gt;;</translation>
+      <location line="+454" />
+      <source>APK is &lt;b&gt;not optimized&lt;/b&gt;;</source>
+      <translation>De APK is &lt;b&gt;niet geoptimaliseerd&lt;/b&gt;;</translation>
     </message>
     <message>
-        <source>APK packed with following warnings:</source>
-        <translation>De APK is succesvol ingepakt maar wel met de volgende waarschuwingen:</translation>
+      <location line="-8" />
+      <source>APK packed with following warnings:</source>
+      <translation>De APK is succesvol ingepakt maar wel met de volgende waarschuwingen:</translation>
     </message>
     <message>
-        <source>Could not create output APK file.</source>
-        <translation>Het APK-bestand kon niet worden gemaakt.</translation>
+      <location line="-12" />
+      <source>Could not create output APK file.</source>
+      <translation>Het APK-bestand kon niet worden gemaakt.</translation>
     </message>
     <message>
-        <source>APK is &lt;b&gt;not signed&lt;/b&gt;;</source>
-        <translation>De APK is &lt;b&gt;niet gesigneerd&lt;/b&gt;;</translation>
+      <location line="+15" />
+      <source>APK is &lt;b&gt;not signed&lt;/b&gt;;</source>
+      <translation>De APK is &lt;b&gt;niet gesigneerd&lt;/b&gt;;</translation>
     </message>
     <message>
-        <source>Signing APK...</source>
-        <translation>Bezig met signeren van de APK...</translation>
+      <location line="-293" />
+      <source>Signing APK...</source>
+      <translation>Bezig met signeren van de APK...</translation>
     </message>
     <message>
-        <source>Saving string resources...</source>
-        <translation>Bezig met opslaan van de string-bronnen...</translation>
+      <location line="-145" />
+      <source>Saving string resources...</source>
+      <translation>Bezig met opslaan van de string-bronnen...</translation>
     </message>
-</context>
-<context>
+  </context>
+  <context>
+    <name>Apk::Unpacker</name>
+    <message>
+      <location filename="../../src/apk/apkunpacker.cpp" line="+261" />
+      <location filename="../../src/dialogs/mainwindow.cpp" line="+1133" />
+      <source>Unpacking APK...</source>
+      <translation>Bezig met uitpakken van de APK...</translation>
+    </message>
+    <message>
+      <location line="+16" />
+      <source>Checking split APK resources...</source>
+      <translation>Vector/XML-voorgrond</translation>
+    </message>
+    <message>
+      <location line="+5" />
+      <source>APK successfully loaded</source>
+      <translation>De APK is succesvol geladen</translation>
+    </message>
+    <message>
+      <location line="-6" />
+      <source>Reading AndroidManifest.xml...</source>
+      <translation>Bezig met lezen van AndroidManifest.xml...</translation>
+    </message>
+  </context>
+  <context>
+    <name>Authors</name>
+    <message>
+      <location filename="../../src/dialogs/authors.cpp" line="+48" />
+      <source>Special Thanks</source>
+      <translation>Speciale dank</translation>
+    </message>
+    <message>
+      <source>Donators</source>
+      <translation type="vanished">Donateurs</translation>
+    </message>
+    <message>
+      <location line="-32" />
+      <location line="+27" />
+      <source>Authors</source>
+      <translation>Auteurs</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Translators</source>
+      <translation>Vertalers</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Support APK Icon Editor Reborn</source>
+      <translation>Split-APK-bronnen</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Original APK Icon Editor Donators</source>
+      <translation>Voorbeeldbron:</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Testers</source>
+      <translation>Testgebruikers</translation>
+    </message>
+    <message>
+      <location line="-4" />
+      <source>Contributors</source>
+      <translation>Medewerkers</translation>
+    </message>
+  </context>
+  <context>
+    <name>Cloud</name>
+    <message>
+      <location filename="../../src/core/cloud.cpp" line="+134" />
+      <source>MiB</source>
+      <translation>Mebibyte</translation>
+    </message>
+    <message>
+      <location line="-19" />
+      <location line="+31" />
+      <location line="+49" />
+      <source>Upload Error</source>
+      <translation>Uploadfout</translation>
+    </message>
+    <message>
+      <location line="-88" />
+      <location line="+38" />
+      <source>Error uploading APK to %1.</source>
+      <translation>Er is een fout opgetreden bij het uploaden van de APK naar %1.</translation>
+    </message>
+    <message>
+      <location line="-32" />
+      <source>Code: %1</source>
+      <translation>Codewaarde: %1</translation>
+    </message>
+    <message>
+      <location line="+33" />
+      <source>Timeout expired. Check your Internet connection.</source>
+      <translation>De timeout is vervallen. Controleer uw internetverbinding.</translation>
+    </message>
+    <message>
+      <location line="+40" />
+      <source>Reading local file...</source>
+      <translation>Bezig met lezen van lokaal bestand...</translation>
+    </message>
+    <message>
+      <location line="-49" />
+      <source>Finishing upload. Please wait...</source>
+      <translation>Bezig met afronden van de upload. Even geduld...</translation>
+    </message>
+    <message>
+      <location line="+58" />
+      <source>Could not open local file.</source>
+      <translation>Het lokale bestand kon niet worden geopend.</translation>
+    </message>
+    <message>
+      <location line="-118" />
+      <source>Check the code you entered.</source>
+      <translation>Controleer de ingevulde code.</translation>
+    </message>
+    <message>
+      <location line="+130" />
+      <source>Checking if you are logged in...</source>
+      <translation>Bezig met controleren of u ingelogd bent...</translation>
+    </message>
+    <message>
+      <location line="-77" />
+      <source>Uploaded: %1</source>
+      <translation>GeР В РІР‚СљР РЋР’Вpload: %1</translation>
+    </message>
+  </context>
+  <context>
     <name>EffectsDialog</name>
     <message>
-        <source>Blur</source>
-        <translation>Vervaging</translation>
+      <location filename="../../src/dialogs/effectsdialog.cpp" line="+106" />
+      <source>Blur</source>
+      <translation>Vervaging</translation>
     </message>
     <message>
-        <source>Flip Horizontal</source>
-        <translation>Horizontaal spiegelen</translation>
+      <location line="-5" />
+      <source>Flip Horizontal</source>
+      <translation>Horizontaal spiegelen</translation>
     </message>
     <message>
-        <source>Flip Vertical</source>
-        <translation>Verticaal spiegelen</translation>
+      <location line="+1" />
+      <source>Flip Vertical</source>
+      <translation>Verticaal spiegelen</translation>
     </message>
     <message>
-        <source>Select Color</source>
-        <translation>Kleur selecteren</translation>
+      <location line="+5" />
+      <source>Select Color</source>
+      <translation>Kleur selecteren</translation>
     </message>
     <message>
-        <source>Rotation</source>
-        <translation>Draaiing</translation>
+      <location line="-7" />
+      <source>Rotation</source>
+      <translation>Draaiing</translation>
     </message>
     <message>
-        <source>Rounded</source>
-        <translation>Ronde hoeken</translation>
+      <location line="+5" />
+      <source>Rounded</source>
+      <translation>Ronde hoeken</translation>
     </message>
     <message>
-        <source>Effects</source>
-        <translation>Effecten</translation>
+      <location line="-6" />
+      <source>Effects</source>
+      <translation>Effecten</translation>
     </message>
     <message>
-        <source>Intensity:</source>
-        <translation>Intensiteit:</translation>
+      <location line="+5" />
+      <source>Intensity:</source>
+      <translation>Intensiteit:</translation>
     </message>
     <message>
-        <source>Color Overlay</source>
-        <translation>Kleuroverlapping</translation>
+      <location line="-1" />
+      <source>Color Overlay</source>
+      <translation>Kleuroverlapping</translation>
     </message>
-</context>
-<context>
+  </context>
+  <context>
+    <name>FileBox</name>
+    <message>
+      <location filename="../../src/widgets/filebox.cpp" line="+61" />
+      <source>All Files</source>
+      <translation>Alle bestanden</translation>
+    </message>
+  </context>
+  <context>
+    <name>Icon</name>
+    <message>
+      <location filename="../../src/apk/icon.cpp" line="+244" />
+      <source>Application icon</source>
+      <translation>Dit adaptieve pictogram gebruikt bronnen uit split-APK-bestanden. Split-APK-bronnen worden alleen voor voorbeeld ondersteund; het vervangen en opnieuw verpakken van split-APK-sets wordt nog niet ondersteund.</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Application roundIcon</source>
+      <translation>Applicatiepictogram</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Launcher activity icon</source>
+      <translation>Rond launcher-activiteit-aliaspictogram</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Launcher activity roundIcon</source>
+      <translation>Dit is een adaptief XML-pictogram. Pictogram vervangen werkt alleen de voorgrondlaag bij; de achtergrondlaag uit de APK blijft behouden.</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Launcher activity-alias icon</source>
+      <translation>Kan niet controleren op updates.</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Launcher activity-alias roundIcon</source>
+      <translation>Launcher-pictogram</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Launcher icon</source>
+      <translation>Launcher-vermelding:</translation>
+    </message>
+    <message>
+      <location line="+24" />
+      <source>TV Banner</source>
+      <translation>TV-banner</translation>
+    </message>
+    <message>
+      <location line="+8" />
+      <source>Bitmap icon</source>
+      <translation>Terugschrijven:</translation>
+    </message>
+    <message>
+      <location line="+0" />
+      <location line="+6" />
+      <source>Launcher entry:</source>
+      <translation>Alleen gebruikt voor voorbeeld; opnieuw verpakken van split-APK's wordt nog niet ondersteund.</translation>
+    </message>
+    <message>
+      <location line="-2" />
+      <source>Adaptive XML icon</source>
+      <translation>Nieuwste versie: %1</translation>
+    </message>
+    <message>
+      <location line="+4" />
+      <source>XML:</source>
+      <translation>APK Icon Editor Reborn ondersteunen</translation>
+    </message>
+    <message>
+      <location line="+3" />
+      <source>Preview source:</source>
+      <translation>Modus: alleen voorgrond vervangen</translation>
+    </message>
+    <message>
+      <location line="+7" />
+      <source>Split APK resources:</source>
+      <translation>Gebouwd op: %1</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Used for preview only; split APK repacking is not supported yet.</source>
+      <translation>Updateserver retourneerde HTTP %1.</translation>
+    </message>
+    <message>
+      <location line="+9" />
+      <source>Loaded read-only; this icon resolves from base APK resources.</source>
+      <translation>inline laag</translation>
+    </message>
+    <message>
+      <location line="+4" />
+      <source>Foreground:</source>
+      <translation>Vector/XML-monochroomlaag</translation>
+    </message>
+    <message>
+      <location line="+0" />
+      <source>inline XML/vector layer</source>
+      <translation>Split-APK-bronnen controleren...</translation>
+    </message>
+    <message>
+      <location line="+4" />
+      <source>Vector/XML foreground</source>
+      <translation>Doel: aangepaste bitmap-voorgrond</translation>
+    </message>
+    <message>
+      <location line="+3" />
+      <source>Background:</source>
+      <translation>Achtergrond:</translation>
+    </message>
+    <message>
+      <location line="+6" />
+      <location line="+12" />
+      <source>Not resolved</source>
+      <translation>Commit: %1</translation>
+    </message>
+    <message>
+      <location line="-8" />
+      <source>Monochrome:</source>
+      <translation>Alleen-lezen geladen; dit pictogram wordt uit bronnen van de basis-APK opgelost.</translation>
+    </message>
+    <message>
+      <location line="+0" />
+      <source>inline layer</source>
+      <translation>XML:</translation>
+    </message>
+    <message>
+      <location line="+6" />
+      <source>Vector/XML monochrome layer</source>
+      <translation>Launcher-activiteitspictogram</translation>
+    </message>
+    <message>
+      <location line="+4" />
+      <source>Used by Android themed icons; not used for the normal preview.</source>
+      <translation>Launcher-activiteit-aliaspictogram</translation>
+    </message>
+    <message>
+      <location line="+3" />
+      <source>Write-back:</source>
+      <translation>inline XML/vectorlaag</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Mode: foreground-only replacement</source>
+      <translation>Split-APK-bronnen:</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Target: existing bitmap foreground</source>
+      <translation>Bitmap-pictogram</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Target: custom bitmap foreground</source>
+      <translation>Er is geen releaseversie gevonden.</translation>
+    </message>
+  </context>
+  <context>
+    <name>InputDialog</name>
+    <message>
+      <location filename="../../src/dialogs/dialogs.cpp" line="+81" />
+      <source>Paste</source>
+      <translation>Plakken</translation>
+    </message>
+  </context>
+  <context>
     <name>KeyCreator</name>
     <message>
-        <source>State or Province</source>
-        <translation>Staat of provincie</translation>
+      <location filename="../../src/dialogs/keymanager.cpp" line="+241" />
+      <source>State or Province</source>
+      <translation>Staat of provincie</translation>
     </message>
     <message>
-        <source>Password (KeyStore)</source>
-        <translation>Wachtwoord (KeyStore)</translation>
+      <location line="-10" />
+      <source>Password (KeyStore)</source>
+      <translation>Wachtwoord (KeyStore)</translation>
     </message>
     <message>
-        <source>Alias</source>
-        <translation>Alias</translation>
+      <location line="+2" />
+      <source>Alias</source>
+      <translation>Aliasnaam</translation>
     </message>
     <message>
-        <source>%1: invalid parameters</source>
-        <translation>%1: ongeldige parameters</translation>
+      <location line="+99" />
+      <source>%1: invalid parameters</source>
+      <translation>%1: ongeldige parameters</translation>
     </message>
     <message>
-        <source>First and Last Name</source>
-        <translation>Voor- en achternaam</translation>
+      <location line="-95" />
+      <source>First and Last Name</source>
+      <translation>Voor- en achternaam</translation>
     </message>
     <message>
-        <source>Enter alias name.</source>
-        <translation>Vul een aliasnaam in.</translation>
+      <location line="+43" />
+      <source>Enter alias name.</source>
+      <translation>Vul een aliasnaam in.</translation>
     </message>
     <message>
-        <source>Organizational Unit</source>
-        <translation>Organisatie-afdeling</translation>
+      <location line="-42" />
+      <source>Organizational Unit</source>
+      <translation>Organisatie-afdeling</translation>
     </message>
     <message>
-        <source>Validity (Years)</source>
-        <translation>Geldigheid (Jaren)</translation>
+      <location line="-2" />
+      <source>Validity (Years)</source>
+      <translation>Geldigheid (Jaren)</translation>
     </message>
     <message>
-        <source>Passwords do not match.</source>
-        <translation>De wachtwoorden komen niet overeen.</translation>
+      <location line="+37" />
+      <location line="+14" />
+      <source>Passwords do not match.</source>
+      <translation>De wachtwoorden komen niet overeen.</translation>
     </message>
     <message>
-        <source>Confirm Password</source>
-        <translation>Wachtwoord bevestigen</translation>
+      <location line="-55" />
+      <location line="+3" />
+      <source>Confirm Password</source>
+      <translation>Wachtwoord bevestigen</translation>
     </message>
     <message>
-        <source>Organization</source>
-        <translation>Organisatie</translation>
+      <location line="+4" />
+      <source>Organization</source>
+      <translation>Organisatie</translation>
     </message>
     <message>
-        <source>Password (Alias)</source>
-        <translation>Wachtwoord (Alias)</translation>
+      <location line="-5" />
+      <source>Password (Alias)</source>
+      <translation>Wachtwoord (Alias)</translation>
     </message>
     <message>
-        <source>Password must be at least 6 characters.</source>
-        <translation>Het wachtwoord moet ten minste 6 tekens bevatten.</translation>
+      <location line="+32" />
+      <location line="+28" />
+      <source>Password must be at least 6 characters.</source>
+      <translation>Het wachtwoord moet ten minste 6 tekens bevatten.</translation>
     </message>
     <message>
-        <source>KeyStore successfully created/updated!</source>
-        <translation>KeyStore succesvol gecreëerd/bijgewerkt!</translation>
+      <location line="+50" />
+      <source>KeyStore successfully created/updated!</source>
+      <translation>KeyStore succesvol gecreР В РІР‚СљР вЂ™Р’В«erd/bijgewerkt!</translation>
     </message>
     <message>
-        <source>Country Code</source>
-        <translation>Landnummer</translation>
+      <location line="-102" />
+      <source>Country Code</source>
+      <translation>Landnummer</translation>
     </message>
     <message>
-        <source>Error starting %1.
+      <location line="+95" />
+      <source>Error starting %1.
 Check your JDK installation and PATH environment variable.</source>
-        <translation>Er is een fout opgetreden bij het starten van %1.
+      <translation>Er is een fout opgetreden bij het starten van %1.
 Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     </message>
     <message>
-        <source>City or Locality</source>
-        <translation>Stad of lokale benaming</translation>
+      <location line="-97" />
+      <source>City or Locality</source>
+      <translation>Stad of lokale benaming</translation>
     </message>
-</context>
-<context>
-    <name>About</name>
-    <message>
-        <source>About</source>
-        <translation>Over</translation>
-    </message>
-    <message>
-        <source>Visit Website</source>
-        <translation>Website bezoeken</translation>
-    </message>
-    <message>
-        <source>License</source>
-        <translation>Licentie</translation>
-    </message>
-    <message>
-        <source>Report a Bug</source>
-        <translation>Een bug rapporteren</translation>
-    </message>
-    <message>
-        <source>Version History</source>
-        <translation>Versiegeschiedenis</translation>
-    </message>
-    <message>
-        <source>Authors</source>
-        <translation>Auteurs</translation>
-    </message>
-    <message>
-        <source>Join our translation team on Crowdin.</source>
-        <translation>Doe mee met ons vertaalteam op Crowdin.</translation>
-    </message>
-    <message>
-        <source>Visit our official website.</source>
-        <translation>Bezoek onze officiële website.</translation>
-    </message>
-    <message>
-        <source>Help Translate</source>
-        <translation>Helpen bij de vertaling</translation>
-    </message>
-    <message>
-        <source>List of changes made to the project.</source>
-        <translation>Lijst van gedane projectwijzigingen.</translation>
-    </message>
-    <message>
-        <source>Built on: %1 - %2</source>
-        <translation>Gebouwd op: %1 - %2</translation>
-    </message>
-    <message>
-        <source>Found a bug? Let us know so we can fix it!</source>
-        <translation>Heeft u een bug gevonden? Laat het ons weten zodat wij hem kunnen oplossen!</translation>
-    </message>
-    <message>
-        <source>Author: %1</source>
-        <translation>Auteur: %1</translation>
-    </message>
-</context>
-<context>
+  </context>
+  <context>
     <name>KeyManager</name>
     <message>
-        <source>Alias</source>
-        <translation>Alias</translation>
+      <location line="-141" />
+      <source>Alias</source>
+      <translation>Aliasnaam</translation>
     </message>
     <message>
-        <source>Key Manager</source>
-        <translation>Sleutelbeheerder</translation>
+      <location line="-4" />
+      <source>Key Manager</source>
+      <translation>Sleutelbeheerder</translation>
     </message>
     <message>
-        <source>KeyStore Password</source>
-        <translation>KeyStore-wachtwoord</translation>
+      <location line="+6" />
+      <source>KeyStore Password</source>
+      <translation>KeyStore-wachtwoord</translation>
     </message>
     <message>
-        <source>Alias Password</source>
-        <translation>Alias-wachtwoord</translation>
+      <location line="-1" />
+      <source>Alias Password</source>
+      <translation>Alias-wachtwoord</translation>
     </message>
     <message>
-        <source>KeyStore</source>
-        <translation>KeyStore</translation>
+      <location line="-3" />
+      <source>KeyStore</source>
+      <translation>Sleutelopslag</translation>
     </message>
     <message>
-        <source>Requires JDK</source>
-        <translation>Vereist JDK</translation>
+      <location line="-1" />
+      <source>Requires JDK</source>
+      <translation>Vereist JDK</translation>
     </message>
     <message>
-        <source>Create &amp;New KeyStore or Alias</source>
-        <translation>Creëer &amp;nieuwe KeyStore of alias</translation>
+      <location line="+2" />
+      <source>Create &amp;New KeyStore or Alias</source>
+      <translation>CreР В РІР‚СљР вЂ™Р’В«er &amp;nieuwe KeyStore of alias</translation>
     </message>
-</context>
-<context>
-    <name>InputDialog</name>
+  </context>
+  <context>
+    <name>MainWindow</name>
     <message>
-        <source>Paste</source>
-        <translation>Plakken</translation>
-    </message>
-</context>
-<context>
-    <name>ToolDialog</name>
-    <message>
-        <source>Decompile %1</source>
-        <translation>%1 decompileren</translation>
+      <location filename="../../src/dialogs/mainwindow.cpp" line="-434" />
+      <location line="+550" />
+      <location line="+18" />
+      <source>FAQ</source>
+      <translation>Veelgestelde vragen</translation>
     </message>
     <message>
-        <source>Optimize APK</source>
-        <translation>APK optimaliseren</translation>
+      <location line="-564" />
+      <source>Logs</source>
+      <translation>Logboeken</translation>
     </message>
     <message>
-        <source>Repacking</source>
-        <translation>Bezig met herinpakken</translation>
+      <location line="-5" />
+      <source>Reset Settings</source>
+      <translation>Instellingen terugzetten</translation>
     </message>
     <message>
-        <source>Temporary Directory</source>
-        <translation>Tijdelijke map</translation>
+      <location line="-31" />
+      <source>&amp;File</source>
+      <translation>&amp;Bestand</translation>
     </message>
     <message>
-        <source>Sign APK</source>
-        <translation>APK signeren</translation>
-    </message>
-</context>
-<context>
-    <name>Authors</name>
-    <message>
-        <source>Special Thanks</source>
-        <translation>Speciale dank</translation>
+      <location line="+4" />
+      <source>&amp;Help</source>
+      <translation>&amp;Hulp</translation>
     </message>
     <message>
-        <source>Donators</source>
-        <translation>Donateurs</translation>
+      <location line="-3" />
+      <source>&amp;Icon</source>
+      <translation>&amp;Pictogram</translation>
     </message>
     <message>
-        <source>Authors</source>
-        <translation>Auteurs</translation>
+      <location line="+1" />
+      <source>&amp;View</source>
+      <translation>&amp;Beeld</translation>
     </message>
     <message>
-        <source>Translators</source>
-        <translation>Vertalers</translation>
+      <location line="+360" />
+      <source>Resize Icon</source>
+      <translation>Pictogram herschalen</translation>
     </message>
     <message>
-        <source>Testers</source>
-        <translation>Testers</translation>
+      <location line="-352" />
+      <source>E&amp;xit</source>
+      <translation>&amp;Afsluiten</translation>
     </message>
     <message>
-        <source>Contributors</source>
-        <translation>Medewerkers</translation>
-    </message>
-</context>
-<context>
-    <name>Apk</name>
-    <message>
-        <source>%1 Error</source>
-        <translation>%1 Fout</translation>
+      <location line="-20" />
+      <source>Icons</source>
+      <translation>Pictogrammen</translation>
     </message>
     <message>
-        <source>Download</source>
-        <translation>Downloaden</translation>
+      <location line="+48" />
+      <source>Open Log Directory</source>
+      <translation>Open de log map</translation>
     </message>
     <message>
-        <source>&quot;Apktool&quot; requires Java Runtime Environment.</source>
-        <translation>&quot;Apktool&quot; vereist een Java Runtime Environment.</translation>
+      <location line="+211" />
+      <source>Split APK Resources</source>
+      <translation>Doel: bestaande bitmap-voorgrond</translation>
     </message>
     <message>
-        <source>(check the PATH variable if JRE is already installed)</source>
-        <translation>(controleer het PATH-variabel als JRE al is geïnstalleerd)</translation>
+      <location line="+1" />
+      <source>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</source>
+      <translation>Niet opgelost</translation>
     </message>
     <message>
-        <source>Error starting &lt;b&gt;%1&lt;/b&gt;</source>
-        <translation>Er is een fout opgetreden bij het starten van &lt;b&gt;%1&lt;/b&gt;</translation>
-    </message>
-</context>
-<context>
-    <name>Apk::Unpacker</name>
-    <message>
-        <source>Unpacking APK...</source>
-        <translation>Bezig met uitpakken van de APK...</translation>
+      <location line="+22" />
+      <source>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</source>
+      <translation>Reborn-auteur</translation>
     </message>
     <message>
-        <source>APK successfully loaded</source>
-        <translation>De APK is succesvol geladen</translation>
+      <location line="+4" />
+      <source>Adaptive Icon Replacement</source>
+      <translation>Adaptief pictogram vervangen</translation>
     </message>
     <message>
-        <source>Reading AndroidManifest.xml...</source>
-        <translation>Bezig met lezen van AndroidManifest.xml...</translation>
+      <location line="+306" />
+      <source>Could not find FAQ file:
+%1</source>
+      <translation>Monochroom:</translation>
     </message>
-</context>
-<context>
-    <name>Icon</name>
     <message>
-        <source>TV Banner</source>
-        <translation>TV Banner</translation>
+      <location line="+18" />
+      <source>Could not open FAQ file:
+%1</source>
+      <translation>Rond launcher-activiteitspictogram</translation>
     </message>
-</context>
-<context>
+    <message>
+      <location line="+60" />
+      <source>Could not check for updates.</source>
+      <translation>Voorgrond:</translation>
+    </message>
+    <message>
+      <location line="+5" />
+      <source>No release version was found.</source>
+      <translation>FAQ-bestand kon niet worden geopend:
+%1</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>%1 is up to date.</source>
+      <translation>Donateurs van de originele APK Icon Editor</translation>
+    </message>
+    <message>
+      <location line="+0" />
+      <source>Latest version: %1</source>
+      <translation>FAQ-bestand niet gevonden:
+%1</translation>
+    </message>
+    <message>
+      <location line="+70" />
+      <source>APK has been modified. Discard changes?</source>
+      <translation>De APK is aangepast. Wilt u de wijzigingen verwerpen?</translation>
+    </message>
+    <message>
+      <location line="-704" />
+      <source>Visit Website</source>
+      <translation>Website bezoeken</translation>
+    </message>
+    <message>
+      <location line="-3" />
+      <source>Associate .APK</source>
+      <translation>.APK-bstanden associР В РІР‚СљР вЂ™Р’В«ren</translation>
+    </message>
+    <message>
+      <location filename="../../src/apk/manifestmodel.cpp" line="+54" />
+      <source>Version Code</source>
+      <translation>Versiecode</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>Version Name</source>
+      <translation>Versienaam</translation>
+    </message>
+    <message>
+      <location filename="../../src/dialogs/mainwindow.cpp" line="-24" />
+      <source>&amp;Export (Pack) APK</source>
+      <translation>APK &amp;exporteren (inpakken)</translation>
+    </message>
+    <message>
+      <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
+      <translation type="vanished">Dit is een experimentele functie. Correcte werking is niet gegarandeerd, gebruik voorzichtig.</translation>
+    </message>
+    <message>
+      <location line="+11" />
+      <source>&amp;Resize Icon</source>
+      <translation>Pictogram &amp;herschalen</translation>
+    </message>
+    <message>
+      <location line="+439" />
+      <source>Could not find APK:
+%1</source>
+      <translation>De APK kon niet worden gevonden:
+%1</translation>
+    </message>
+    <message>
+      <location line="-432" />
+      <source>Preview Background &amp;Color</source>
+      <translation>Voorbeeld van achtergrond&amp;kleur</translation>
+    </message>
+    <message>
+      <location line="+2" />
+      <source>Key Manager</source>
+      <translation>Sleutelbeheerder</translation>
+    </message>
+    <message>
+      <location line="-32" />
+      <location line="+26" />
+      <source>Apply to All</source>
+      <translation>Op alles toepassen</translation>
+    </message>
+    <message>
+      <location line="+9" />
+      <source>Auto-check for Updates</source>
+      <translation>Automatisch controleren op updates</translation>
+    </message>
+    <message>
+      <location line="+15" />
+      <source>Uploading</source>
+      <translation>Bezig met uploaden</translation>
+    </message>
+    <message>
+      <location line="+461" />
+      <source>Enter the alias password:</source>
+      <translation>Vul het alias-wachtwoord in:</translation>
+    </message>
+    <message>
+      <location line="-510" />
+      <location line="+1" />
+      <location line="+1" />
+      <source>Upload to %1</source>
+      <translation>GeР В РІР‚СљР РЋР’Вpload naar %1</translation>
+    </message>
+    <message>
+      <location line="+15" />
+      <source>No Recent Files</source>
+      <translation>Geen recente bestanden</translation>
+    </message>
+    <message>
+      <location line="+77" />
+      <source>Apply the current icon to all sizes?</source>
+      <translation>Wilt u het huidige pictogram toepassen op alles groottes?</translation>
+    </message>
+    <message>
+      <location line="-55" />
+      <source>Report a Bug</source>
+      <translation>Een bug rapporteren</translation>
+    </message>
+    <message>
+      <location line="+3" />
+      <source>Open Log File</source>
+      <translation>Open het log bestand</translation>
+    </message>
+    <message>
+      <location line="-19" />
+      <source>Revert &amp;Original</source>
+      <translation>O&amp;rigineel herstellen</translation>
+    </message>
+    <message>
+      <location line="-2" />
+      <source>Scale to &amp;Fit</source>
+      <translation>&amp;Schalen om te passen</translation>
+    </message>
+    <message>
+      <location line="+19" />
+      <location line="+7" />
+      <source>Donate</source>
+      <translation>Doe een donatie</translation>
+    </message>
+    <message>
+      <location line="-34" />
+      <source>Explore APK &amp;Contents</source>
+      <translation>Blader door de &amp;inhoud van de APK</translation>
+    </message>
+    <message>
+      <location line="+491" />
+      <source>Enter the KeyStore password:</source>
+      <translation>Vul het KeyStore-wachtwoord in:</translation>
+    </message>
+    <message>
+      <location line="-554" />
+      <source>Reset?</source>
+      <translation>Terugzetten?</translation>
+    </message>
+    <message>
+      <location line="+689" />
+      <location line="+26" />
+      <location line="+5" />
+      <location line="+2" />
+      <source>Update</source>
+      <translation>Updaten</translation>
+    </message>
+    <message>
+      <location line="-669" />
+      <source>Enable Upload to Cloud Storages</source>
+      <translation>Uploaden naar cloudopslag inschakelen</translation>
+    </message>
+    <message>
+      <location line="+458" />
+      <source>File not found</source>
+      <translation>Het bestand kon niet worden gevonden</translation>
+    </message>
+    <message>
+      <location line="-431" />
+      <source>&amp;Repacking</source>
+      <translation>&amp;Herinpakken</translation>
+    </message>
+    <message>
+      <location line="-16" />
+      <source>&amp;Close APK</source>
+      <translation>APK &amp;sluiten</translation>
+    </message>
+    <message>
+      <location line="+438" />
+      <source>Open APK</source>
+      <translation>APK openen</translation>
+    </message>
+    <message>
+      <location line="-442" />
+      <source>&amp;Open APK</source>
+      <translation>APK &amp;openen</translation>
+    </message>
+    <message>
+      <location line="+630" />
+      <source>%1 v%2 is available.
+Download?</source>
+      <translation>%1 v%2 is beschikbaar.
+Wilt u deze downloaden?</translation>
+    </message>
+    <message>
+      <location line="-643" />
+      <source>Properties</source>
+      <translation>Eigenschappen</translation>
+    </message>
+    <message>
+      <location line="-1" />
+      <source>Translations</source>
+      <translation>Vertalingen</translation>
+    </message>
+    <message>
+      <location line="+736" />
+      <source>Are you sure you want to delete this icon?</source>
+      <translation>Weet u zeker dat u dit pictogram wilt verwijderen?</translation>
+    </message>
+    <message>
+      <location line="-460" />
+      <location line="+49" />
+      <source>Can't Load Icon</source>
+      <translation>Het pictogram kan niet worden geladen</translation>
+    </message>
+    <message>
+      <location line="-317" />
+      <location line="+484" />
+      <source>Pack APK</source>
+      <translation>APK inpakken</translation>
+    </message>
+    <message>
+      <location line="-476" />
+      <source>&amp;Recent APKs</source>
+      <translation>&amp;Recente APK's</translation>
+    </message>
+    <message>
+      <location line="+729" />
+      <source>Discard Changes?</source>
+      <translation>Wijzigingen verwerpen?</translation>
+    </message>
+    <message>
+      <location line="-709" />
+      <source>&amp;Language</source>
+      <translation>&amp;Taal</translation>
+    </message>
+    <message>
+      <location filename="../../src/apk/titlesmodel.cpp" line="+117" />
+      <source>Language</source>
+      <translation>Taal</translation>
+    </message>
+    <message>
+      <source>Manifest</source>
+      <translation type="vanished">Manifestbestand</translation>
+    </message>
+    <message>
+      <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
+      <source>&amp;Clear List</source>
+      <translation>Lijst &amp;wissen</translation>
+    </message>
+    <message>
+      <location line="+286" />
+      <source>Icon you are trying to load is off-size.
+Resize automatically?</source>
+      <translation>Het pictogram dat u probeert te laden is buiten de gestelde proporties.
+Wilt u hem automatisch herschalen?</translation>
+    </message>
+    <message>
+      <location line="+378" />
+      <source>Allow access to %1 in your browser and paste the provided code here:</source>
+      <translation>Sta de toegang tot %1 toe in uw webbrowser en kopieer en plak de opgegeven code hier:</translation>
+    </message>
+    <message>
+      <location line="-379" />
+      <source>Resize?</source>
+      <translation>Herschalen?</translation>
+    </message>
+    <message>
+      <source>Icon Missing</source>
+      <translation type="vanished">Het pictogram ontbreekt</translation>
+    </message>
+    <message>
+      <location filename="../../src/apk/manifestmodel.cpp" line="+3" />
+      <location filename="../../src/apk/titlesmodel.cpp" line="-1" />
+      <source>Application Name</source>
+      <translation>Applicatienaam</translation>
+    </message>
+    <message>
+      <location filename="../../src/dialogs/mainwindow.cpp" line="-29" />
+      <location line="+49" />
+      <source>You are trying to load invalid or unsupported icon.</source>
+      <translation>U probeert een ongelding of niet-ondersteund pictogram te laden.</translation>
+    </message>
+    <message>
+      <location line="-57" />
+      <source>Import Icon</source>
+      <translation>Pictogram importeren</translation>
+    </message>
+    <message>
+      <location line="-219" />
+      <source>About Qt</source>
+      <translation>Over Qt</translation>
+    </message>
+    <message>
+      <location line="+1" />
+      <source>About %1</source>
+      <translation>Over %1</translation>
+    </message>
+    <message>
+      <location line="+635" />
+      <source>Authorization</source>
+      <translation>Authorisatie</translation>
+    </message>
+    <message>
+      <location line="-633" />
+      <source>Processing</source>
+      <translation>Bezig met verwerken</translation>
+    </message>
+    <message>
+      <location line="+459" />
+      <source>Enter the alias:</source>
+      <translation>Vul de alias in:</translation>
+    </message>
+    <message>
+      <location line="-481" />
+      <location line="+1" />
+      <source>&amp;Add Icon</source>
+      <translation>Pictogram &amp;toevoegen</translation>
+    </message>
+    <message>
+      <location line="-29" />
+      <source>Device:</source>
+      <translation>Apparaat:</translation>
+    </message>
+    <message>
+      <source>This APK does not support current DPI.</source>
+      <translation type="vanished">Deze APK ondersteunt de huidige DPI niet.</translation>
+    </message>
+    <message>
+      <location filename="../../src/core/globals.cpp" line="+48" />
+      <source>Supported Formats</source>
+      <translation>Ondersteunde formaten</translation>
+    </message>
+    <message>
+      <location filename="../../src/dialogs/mainwindow.cpp" line="-4" />
+      <source>CLICK HERE
+(or drag APK and icons)</source>
+      <translation>KLIK HIER
+(of sleep de APK en pictogrammen hierheen)</translation>
+    </message>
+    <message>
+      <location line="+26" />
+      <source>Remove Icon</source>
+      <translation>Pictogram verwijderen</translation>
+    </message>
+    <message>
+      <location line="+13" />
+      <source>Help Translate</source>
+      <translation>Helpen bij de vertaling</translation>
+    </message>
+    <message>
+      <location line="+304" />
+      <source>Save Icon</source>
+      <translation>Pictogram opslaan</translation>
+    </message>
+    <message>
+      <location line="-318" />
+      <source>&amp;Save Icon</source>
+      <translation>Pictogram &amp;opslaan</translation>
+    </message>
+    <message>
+      <location line="-11" />
+      <source>&amp;Settings</source>
+      <translation>&amp;Instellingen</translation>
+    </message>
+    <message>
+      <location line="+16" />
+      <source>E&amp;ffects</source>
+      <translation>&amp;Effecten</translation>
+    </message>
+    <message>
+      <location line="+81" />
+      <source>Apply the current application name to all translations?</source>
+      <translation>Wilt u de huidige applicatienaam toepassen op alle vertalingen?</translation>
+    </message>
+    <message>
+      <location line="-61" />
+      <source>Check for &amp;Updates</source>
+      <translation>Controleren op &amp;updates</translation>
+    </message>
+    <message>
+      <location filename="../../src/core/globals.cpp" line="+2" />
+      <location filename="../../src/dialogs/mainwindow.cpp" line="+408" />
+      <source>All Files</source>
+      <translation>Alle bestanden</translation>
+    </message>
+    <message>
+      <location filename="../../src/dialogs/mainwindow.cpp" line="-502" />
+      <source>Reset settings to default?</source>
+      <translation>Alle instellingen naar hun standaardwaarden terugzetten?</translation>
+    </message>
+    <message>
+      <location line="+68" />
+      <source>Replace &amp;Icon</source>
+      <translation>Pictogram &amp;vervangen</translation>
+    </message>
+  </context>
+  <context>
     <name>ManifestModel</name>
     <message>
-        <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+      <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
+      <source>Minimum SDK</source>
+      <translation>Minimum-SDK</translation>
     </message>
     <message>
-        <source>Target SDK</source>
-        <translation>Target SDK</translation>
+      <location line="+1" />
+      <source>Target SDK</source>
+      <translation>Doel-SDK</translation>
     </message>
-</context>
-<context>
+  </context>
+  <context>
     <name>ResizeDialog</name>
     <message>
-        <source>Width:</source>
-        <translation>Breedte:</translation>
+      <location filename="../../src/dialogs/dialogs.cpp" line="+132" />
+      <source>Width:</source>
+      <translation>Breedte:</translation>
     </message>
     <message>
-        <source>Height:</source>
-        <translation>Hoogte:</translation>
+      <location line="+1" />
+      <source>Height:</source>
+      <translation>Hoogte:</translation>
     </message>
-</context>
-<context>
+  </context>
+  <context>
     <name>TitlesModel</name>
     <message>
-        <source>Resource</source>
-        <translation>Resource</translation>
+      <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
+      <source>Resource</source>
+      <translation>Bron</translation>
     </message>
-</context>
-<context>
-    <name>FileBox</name>
+  </context>
+  <context>
+    <name>ToolDialog</name>
     <message>
-        <source>All Files</source>
-        <translation>Alle bestanden</translation>
+      <location filename="../../src/dialogs/tooldialog.cpp" line="+81" />
+      <source>Decompile %1</source>
+      <translation>%1 decompileren</translation>
     </message>
-</context>
+    <message>
+      <location line="+2" />
+      <source>Optimize APK</source>
+      <translation>APK optimaliseren</translation>
+    </message>
+    <message>
+      <location line="-4" />
+      <source>Repacking</source>
+      <translation>Bezig met herinpakken</translation>
+    </message>
+    <message>
+      <location line="+5" />
+      <source>Temporary Directory</source>
+      <translation>Tijdelijke map</translation>
+    </message>
+    <message>
+      <location line="-2" />
+      <source>Sign APK</source>
+      <translation>APK signeren</translation>
+    </message>
+  </context>
+  <context>
+    <name>UpdateWorker</name>
+    <message>
+      <location filename="../../src/core/updater.cpp" line="+95" />
+      <source>Could not find release version in the update response.</source>
+      <translation>Auteur van de originele app</translation>
+    </message>
+    <message>
+      <location line="+4" />
+      <source>Update server returned HTTP %1.</source>
+      <translation>Adaptief XML-pictogram</translation>
+    </message>
+  </context>
 </TS>
