@@ -314,6 +314,34 @@ QPixmap AdaptiveIcon::renderDrawableElement(const ResourceResolver &resolver, co
         return QPixmap::fromImage(canvas);
     }
 
+    if (tag == "bitmap") {
+        const ResourceRef ref(srcAttr(node));
+        if (!ref.isValid()) {
+            return QPixmap();
+        }
+
+        QPixmap pixmap;
+        const ResourceResolver::Value value = resolveLayer(resolver, ref, type, size, &pixmap);
+        if (pixmap.isNull() && value.isBitmap) {
+            pixmap = QPixmap(value.filePath);
+        } else if (pixmap.isNull() && value.color.isValid()) {
+            QImage fill(size, QImage::Format_ARGB32_Premultiplied);
+            fill.fill(value.color);
+            pixmap = QPixmap::fromImage(fill);
+        }
+        if (pixmap.isNull()) {
+            return pixmap;
+        }
+
+        QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
+        canvas.fill(Qt::transparent);
+        QPainter painter(&canvas);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.drawPixmap(canvas.rect(), pixmap);
+        painter.end();
+        return QPixmap::fromImage(canvas);
+    }
+
     if (tag == "layer-list") {
         QImage canvas(size, QImage::Format_ARGB32_Premultiplied);
         canvas.fill(Qt::transparent);
@@ -425,6 +453,25 @@ QString AdaptiveIcon::drawableAttr(const QDomElement &node)
         for (int i = 0; i < attrs.count(); ++i) {
             const QDomAttr attr = attrs.item(i).toAttr();
             if (attr.name().section(':', -1) == "drawable") {
+                value = attr.value();
+                break;
+            }
+        }
+    }
+    return value.trimmed();
+}
+
+QString AdaptiveIcon::srcAttr(const QDomElement &node)
+{
+    QString value = node.attribute("android:src");
+    if (value.isEmpty()) {
+        value = node.attribute("src");
+    }
+    if (value.isEmpty()) {
+        const QDomNamedNodeMap attrs = node.attributes();
+        for (int i = 0; i < attrs.count(); ++i) {
+            const QDomAttr attr = attrs.item(i).toAttr();
+            if (attr.name().section(':', -1) == "src") {
                 value = attr.value();
                 break;
             }

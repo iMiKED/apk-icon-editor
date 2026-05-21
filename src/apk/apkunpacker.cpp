@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QDomDocument>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QRegularExpression>
 #include <QDebug>
@@ -62,7 +63,72 @@ static bool isTruthyManifestValue(const QString &value)
     return normalized == "true" || normalized == "1";
 }
 
-static bool manifestRequestsSplitResources(const QString &manifestPath)
+static QStringList xmlResourcePaths(const QString &baseContentsPath, const QString &resourceRef)
+{
+    const QString prefix = "@xml/";
+    if (!resourceRef.startsWith(prefix)) {
+        return QStringList();
+    }
+
+    const QString name = resourceRef.mid(prefix.length()).trimmed();
+    if (name.isEmpty() || name.contains('/')) {
+        return QStringList();
+    }
+
+    QStringList result;
+    const QString resPath = QDir::cleanPath(baseContentsPath + "/res");
+    QDirIterator it(resPath, QStringList() << (name + ".xml"), QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        it.next();
+        const QString dirName = QFileInfo(it.fileInfo().dir().path()).fileName();
+        if (dirName == "xml" || dirName.startsWith("xml-")) {
+            result << QDir::cleanPath(it.filePath());
+        }
+    }
+    result.removeDuplicates();
+    return result;
+}
+
+static bool splitsXmlDeclaresNamedSplits(const QString &xmlPath)
+{
+    QFile file(xmlPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        return false;
+    }
+
+    QDomDocument doc;
+    if (!doc.setContent(file.readAll())) {
+        return false;
+    }
+
+    const QDomNodeList entries = doc.elementsByTagName("entry");
+    for (int i = 0; i < entries.count(); ++i) {
+        const QDomElement entry = entries.at(i).toElement();
+        if (!attributeValue(entry, "split").trimmed().isEmpty()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static bool splitsMetadataDeclaresNamedSplits(const QString &baseContentsPath, const QString &resourceRef)
+{
+    const QStringList paths = xmlResourcePaths(baseContentsPath, resourceRef);
+    if (paths.isEmpty()) {
+        return false;
+    }
+
+    foreach (const QString &path, paths) {
+        if (splitsXmlDeclaresNamedSplits(path)) {
+            return true;
+        }
+    }
+
+    qDebug().noquote() << "Split APK metadata ignored: split entries are empty in" << QDir::toNativeSeparators(paths.first());
+    return false;
+}
+
+static bool manifestRequestsSplitResources(const QString &manifestPath, const QString &baseContentsPath)
 {
     QFile file(manifestPath);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -101,9 +167,15 @@ static bool manifestRequestsSplitResources(const QString &manifestPath)
         if (name == "com.android.vending.splits.required" && isTruthyManifestValue(attributeValue(meta, "value"))) {
             return true;
         }
-        if (name == "com.android.vending.splits"
-            && (!attributeValue(meta, "resource").isEmpty() || !attributeValue(meta, "value").isEmpty())) {
-            return true;
+        if (name == "com.android.vending.splits") {
+            const QString resource = attributeValue(meta, "resource");
+            if (!resource.isEmpty()) {
+                if (splitsMetadataDeclaresNamedSplits(baseContentsPath, resource)) {
+                    return true;
+                }
+            } else if (!attributeValue(meta, "value").isEmpty()) {
+                return true;
+            }
         }
     }
 
@@ -172,7 +244,7 @@ static QStringList unpackCompatibleSplits(const QString &baseApkPath, const QStr
         return result;
     }
 
-    if (!manifestRequestsSplitResources(QDir::cleanPath(baseContentsPath + "/AndroidManifest.xml"))) {
+    if (!manifestRequestsSplitResources(QDir::cleanPath(baseContentsPath + "/AndroidManifest.xml"), baseContentsPath)) {
         qDebug().noquote() << "Split APK check skipped: base manifest does not declare split resource metadata.";
         return result;
     }
