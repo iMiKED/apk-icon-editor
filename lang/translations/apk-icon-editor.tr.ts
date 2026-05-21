@@ -21,22 +21,22 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Commit kimliği: %1</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Built on: %1</source>
-        <translation>Built on: %1</translation>
+        <translation>Derleme tarihi: %1</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Reborn author</source>
-        <translation>Reborn author</translation>
+        <translation>Reborn yazarı</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original app author</source>
-        <translation>Original app author</translation>
+        <translation>Orijinal uygulama yazarı</translation>
     </message>
     <message>
         <location line="+8" />
@@ -187,7 +187,7 @@
     <message>
         <location line="+16" />
         <source>Checking split APK resources...</source>
-        <translation>Checking split APK resources...</translation>
+        <translation>Bölünmüş APK kaynakları denetleniyor...</translation>
     </message>
     <message>
         <location line="+5" />
@@ -225,12 +225,12 @@
     <message>
         <location line="+2" />
         <source>Support APK Icon Editor Reborn</source>
-        <translation>Support APK Icon Editor Reborn</translation>
+        <translation>APK Icon Editor Reborn'u destekle</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original APK Icon Editor Donators</source>
-        <translation>Original APK Icon Editor Donators</translation>
+        <translation>Orijinal APK Icon Editor bağışçıları</translation>
     </message>
     <message>
         <location line="+2" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB (mebibayt)</translation>
     </message>
     <message>
         <location line="-19" />
@@ -365,149 +365,149 @@
     <message>
         <location filename="../../src/apk/icon.cpp" line="+244" />
         <source>Application icon</source>
-        <translation>Application icon</translation>
+        <translation>Uygulama simgesi</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Application roundIcon</source>
-        <translation>Application roundIcon</translation>
+        <translation>Uygulama yuvarlak simgesi</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity icon</source>
-        <translation>Launcher activity icon</translation>
+        <translation>Başlatıcı etkinliği simgesi</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity roundIcon</source>
-        <translation>Launcher activity roundIcon</translation>
+        <translation>Başlatıcı etkinliği yuvarlak simgesi</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias icon</source>
-        <translation>Launcher activity-alias icon</translation>
+        <translation>Başlatıcı etkinlik takma adı simgesi</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias roundIcon</source>
-        <translation>Launcher activity-alias roundIcon</translation>
+        <translation>Başlatıcı etkinlik takma adı yuvarlak simgesi</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Launcher icon</source>
-        <translation>Launcher icon</translation>
+        <translation>Başlatıcı simgesi</translation>
     </message>
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>TV afişi</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Bitmap icon</source>
-        <translation>Bitmap icon</translation>
+        <translation>Bitmap simgesi</translation>
     </message>
     <message>
         <location line="+0" />
         <location line="+6" />
         <source>Launcher entry:</source>
-        <translation>Launcher entry:</translation>
+        <translation>Başlatıcı girdisi:</translation>
     </message>
     <message>
         <location line="-2" />
         <source>Adaptive XML icon</source>
-        <translation>Adaptive XML icon</translation>
+        <translation>Uyarlanabilir XML simgesi</translation>
     </message>
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>XML dosyasi:</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Preview source:</source>
-        <translation>Preview source:</translation>
+        <translation>Önizleme kaynağı:</translation>
     </message>
     <message>
         <location line="+7" />
         <source>Split APK resources:</source>
-        <translation>Split APK resources:</translation>
+        <translation>Bölünmüş APK kaynakları:</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Used for preview only; split APK repacking is not supported yet.</source>
-        <translation>Used for preview only; split APK repacking is not supported yet.</translation>
+        <translation>Yalnızca önizleme için kullanılır; bölünmüş APK yeniden paketleme henüz desteklenmiyor.</translation>
     </message>
     <message>
         <location line="+9" />
         <source>Loaded read-only; this icon resolves from base APK resources.</source>
-        <translation>Loaded read-only; this icon resolves from base APK resources.</translation>
+        <translation>Salt okunur yüklendi; bu simge temel APK kaynaklarından çözülür.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Foreground:</source>
-        <translation>Foreground:</translation>
+        <translation>Ön plan:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline XML/vector layer</source>
-        <translation>inline XML/vector layer</translation>
+        <translation>satır içi XML/vektör katmanı</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Vector/XML foreground</source>
-        <translation>Vector/XML foreground</translation>
+        <translation>Vektör/XML ön plan</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Background:</source>
-        <translation>Background:</translation>
+        <translation>Arka plan:</translation>
     </message>
     <message>
         <location line="+6" />
         <location line="+12" />
         <source>Not resolved</source>
-        <translation>Not resolved</translation>
+        <translation>Çözülemedi</translation>
     </message>
     <message>
         <location line="-8" />
         <source>Monochrome:</source>
-        <translation>Monochrome:</translation>
+        <translation>Tek renk:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline layer</source>
-        <translation>inline layer</translation>
+        <translation>satır içi katman</translation>
     </message>
     <message>
         <location line="+6" />
         <source>Vector/XML monochrome layer</source>
-        <translation>Vector/XML monochrome layer</translation>
+        <translation>Vektör/XML tek renk katmanı</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Used by Android themed icons; not used for the normal preview.</source>
-        <translation>Used by Android themed icons; not used for the normal preview.</translation>
+        <translation>Android temalı simgeler tarafından kullanılır; normal önizlemede kullanılmaz.</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Write-back:</source>
-        <translation>Write-back:</translation>
+        <translation>Geri yazma:</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Mode: foreground-only replacement</source>
-        <translation>Mode: foreground-only replacement</translation>
+        <translation>Mod: yalnızca ön planı değiştirme</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: existing bitmap foreground</source>
-        <translation>Target: existing bitmap foreground</translation>
+        <translation>Hedef: mevcut bitmap ön planı</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: custom bitmap foreground</source>
-        <translation>Target: custom bitmap foreground</translation>
+        <translation>Hedef: özel bitmap ön planı</translation>
     </message>
 </context>
 <context>
@@ -636,7 +636,7 @@ JDK kurulumunuzu ve konumunu kontrol edin.</translation>
     <message>
         <location line="-3" />
         <source>KeyStore</source>
-        <translation>KeyStore</translation>
+        <translation>Anahtar deposu</translation>
     </message>
     <message>
         <location line="-1" />
@@ -711,56 +711,56 @@ JDK kurulumunuzu ve konumunu kontrol edin.</translation>
     <message>
         <location line="+211" />
         <source>Split APK Resources</source>
-        <translation>Split APK Resources</translation>
+        <translation>Bölünmüş APK kaynakları</translation>
     </message>
     <message>
         <location line="+1" />
         <source>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</source>
-        <translation>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</translation>
+        <translation>Bu uyarlanabilir simge bölünmüş APK dosyalarındaki kaynakları kullanır. Bölünmüş APK kaynakları yalnızca önizleme için desteklenir; bölünmüş APK setlerini değiştirme ve yeniden paketleme henüz desteklenmiyor.</translation>
     </message>
     <message>
         <location line="+22" />
         <source>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</source>
-        <translation>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</translation>
+        <translation>Bu bir uyarlanabilir XML simgesidir. Simgeyi Değiştir yalnızca ön plan katmanını günceller; APK içindeki arka plan katmanı korunur.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Adaptive Icon Replacement</source>
-        <translation>Adaptive Icon Replacement</translation>
+        <translation>Uyarlanabilir simge değiştirme</translation>
     </message>
     <message>
         <location line="+306" />
         <source>Could not find FAQ file:
 %1</source>
-        <translation>Could not find FAQ file:
+        <translation>SSS dosyasi bulunamadi:
 %1</translation>
     </message>
     <message>
         <location line="+18" />
         <source>Could not open FAQ file:
 %1</source>
-        <translation>Could not open FAQ file:
+        <translation>SSS dosyasi acilamadi:
 %1</translation>
     </message>
     <message>
         <location line="+60" />
         <source>Could not check for updates.</source>
-        <translation>Could not check for updates.</translation>
+        <translation>Güncellemeler denetlenemedi.</translation>
     </message>
     <message>
         <location line="+5" />
         <source>No release version was found.</source>
-        <translation>No release version was found.</translation>
+        <translation>Sürüm bulunamadı.</translation>
     </message>
     <message>
         <location line="+2" />
         <source>%1 is up to date.</source>
-        <translation>%1 is up to date.</translation>
+        <translation>%1 güncel.</translation>
     </message>
     <message>
         <location line="+0" />
         <source>Latest version: %1</source>
-        <translation>Latest version: %1</translation>
+        <translation>En son sürüm: %1</translation>
     </message>
     <message>
         <location line="+70" />
@@ -794,7 +794,7 @@ JDK kurulumunuzu ve konumunu kontrol edin.</translation>
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>Bu deneysel bir işlevdir. Doğru çalışması garanti edilmez; dikkatli kullanın.</translation>
     </message>
     <message>
         <location line="+11" />
@@ -923,7 +923,7 @@ JDK kurulumunuzu ve konumunu kontrol edin.</translation>
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>APK'yi &amp;kapat</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Download?</source>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>Çeviriler</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>Bu simgeyi silmek istediğinizden emin misiniz?</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Download?</source>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Bildirim dosyası</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Otomatik olarak boyutlandırılsın mı?</translation>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>Simge &amp;ekle</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1091,7 +1091,7 @@ Otomatik olarak boyutlandırılsın mı?</translation>
     <message>
         <location line="+26" />
         <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
+        <translation>Simgeyi kaldır</translation>
     </message>
     <message>
         <location line="+13" />
@@ -1150,12 +1150,12 @@ Otomatik olarak boyutlandırılsın mı?</translation>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>En düşük SDK</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>Hedef SDK</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Otomatik olarak boyutlandırılsın mı?</translation>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>Kaynak</translation>
     </message>
 </context>
 <context>
@@ -1212,12 +1212,12 @@ Otomatik olarak boyutlandırılsın mı?</translation>
     <message>
         <location filename="../../src/core/updater.cpp" line="+95" />
         <source>Could not find release version in the update response.</source>
-        <translation>Could not find release version in the update response.</translation>
+        <translation>Güncelleme yanıtında sürüm bulunamadı.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Update server returned HTTP %1.</source>
-        <translation>Update server returned HTTP %1.</translation>
+        <translation>Güncelleme sunucusu HTTP %1 döndürdü.</translation>
     </message>
 </context>
 </TS>

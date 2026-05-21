@@ -21,22 +21,22 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Revisao: %1</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Built on: %1</source>
-        <translation>Built on: %1</translation>
+        <translation>Compilado em: %1</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Reborn author</source>
-        <translation>Reborn author</translation>
+        <translation>Autor do Reborn</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original app author</source>
-        <translation>Original app author</translation>
+        <translation>Autor original do aplicativo</translation>
     </message>
     <message>
         <location line="+8" />
@@ -187,7 +187,7 @@
     <message>
         <location line="+16" />
         <source>Checking split APK resources...</source>
-        <translation>Checking split APK resources...</translation>
+        <translation>Verificando recursos de APKs divididos...</translation>
     </message>
     <message>
         <location line="+5" />
@@ -205,11 +205,11 @@
     <message>
         <location filename="../../src/dialogs/authors.cpp" line="+48" />
         <source>Special Thanks</source>
-        <translation>Special Thanks</translation>
+        <translation>Agradecimentos especiais</translation>
     </message>
     <message>
         <source>Donators</source>
-        <translation type="vanished">Donators</translation>
+        <translation>Doadores</translation>
     </message>
     <message>
         <location line="-32" />
@@ -225,17 +225,17 @@
     <message>
         <location line="+2" />
         <source>Support APK Icon Editor Reborn</source>
-        <translation>Support APK Icon Editor Reborn</translation>
+        <translation>Apoie o APK Icon Editor Reborn</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original APK Icon Editor Donators</source>
-        <translation>Original APK Icon Editor Donators</translation>
+        <translation>Doadores do APK Icon Editor original</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Testers</source>
-        <translation>Testers</translation>
+        <translation>Testadores</translation>
     </message>
     <message>
         <location line="-4" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB (mebibyte)</translation>
     </message>
     <message>
         <location line="-19" />
@@ -314,12 +314,12 @@
     <message>
         <location line="-5" />
         <source>Flip Horizontal</source>
-        <translation>Flip Horizontal</translation>
+        <translation>Virar horizontalmente</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Flip Vertical</source>
-        <translation>Flip Vertical</translation>
+        <translation>Virar verticalmente</translation>
     </message>
     <message>
         <location line="+5" />
@@ -365,149 +365,149 @@
     <message>
         <location filename="../../src/apk/icon.cpp" line="+244" />
         <source>Application icon</source>
-        <translation>Application icon</translation>
+        <translation>Ícone do aplicativo</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Application roundIcon</source>
-        <translation>Application roundIcon</translation>
+        <translation>Ícone redondo do aplicativo</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity icon</source>
-        <translation>Launcher activity icon</translation>
+        <translation>Ícone da atividade do launcher</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity roundIcon</source>
-        <translation>Launcher activity roundIcon</translation>
+        <translation>Ícone redondo da atividade do launcher</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias icon</source>
-        <translation>Launcher activity-alias icon</translation>
+        <translation>Ícone do alias da atividade do launcher</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias roundIcon</source>
-        <translation>Launcher activity-alias roundIcon</translation>
+        <translation>Ícone redondo do alias da atividade do launcher</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Launcher icon</source>
-        <translation>Launcher icon</translation>
+        <translation>Ícone do launcher</translation>
     </message>
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>Banner de TV</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Bitmap icon</source>
-        <translation>Bitmap icon</translation>
+        <translation>Ícone bitmap</translation>
     </message>
     <message>
         <location line="+0" />
         <location line="+6" />
         <source>Launcher entry:</source>
-        <translation>Launcher entry:</translation>
+        <translation>Entrada do launcher:</translation>
     </message>
     <message>
         <location line="-2" />
         <source>Adaptive XML icon</source>
-        <translation>Adaptive XML icon</translation>
+        <translation>Icone XML adaptativo</translation>
     </message>
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>Arquivo XML:</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Preview source:</source>
-        <translation>Preview source:</translation>
+        <translation>Origem da pré-visualização:</translation>
     </message>
     <message>
         <location line="+7" />
         <source>Split APK resources:</source>
-        <translation>Split APK resources:</translation>
+        <translation>Recursos de APKs divididos:</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Used for preview only; split APK repacking is not supported yet.</source>
-        <translation>Used for preview only; split APK repacking is not supported yet.</translation>
+        <translation>Usado apenas para pré-visualização; o reempacotamento de APKs divididos ainda não é suportado.</translation>
     </message>
     <message>
         <location line="+9" />
         <source>Loaded read-only; this icon resolves from base APK resources.</source>
-        <translation>Loaded read-only; this icon resolves from base APK resources.</translation>
+        <translation>Carregado somente leitura; este ícone é resolvido a partir dos recursos do APK base.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Foreground:</source>
-        <translation>Foreground:</translation>
+        <translation>Primeiro plano:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline XML/vector layer</source>
-        <translation>inline XML/vector layer</translation>
+        <translation>camada XML/vetorial embutida</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Vector/XML foreground</source>
-        <translation>Vector/XML foreground</translation>
+        <translation>Primeiro plano vetorial/XML</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Background:</source>
-        <translation>Background:</translation>
+        <translation>Fundo:</translation>
     </message>
     <message>
         <location line="+6" />
         <location line="+12" />
         <source>Not resolved</source>
-        <translation>Not resolved</translation>
+        <translation>Não resolvido</translation>
     </message>
     <message>
         <location line="-8" />
         <source>Monochrome:</source>
-        <translation>Monochrome:</translation>
+        <translation>Monocromático:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline layer</source>
-        <translation>inline layer</translation>
+        <translation>camada embutida</translation>
     </message>
     <message>
         <location line="+6" />
         <source>Vector/XML monochrome layer</source>
-        <translation>Vector/XML monochrome layer</translation>
+        <translation>Camada monocromatica vetorial/XML</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Used by Android themed icons; not used for the normal preview.</source>
-        <translation>Used by Android themed icons; not used for the normal preview.</translation>
+        <translation>Usado pelos ícones temáticos do Android; não é usado na pré-visualização normal.</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Write-back:</source>
-        <translation>Write-back:</translation>
+        <translation>Gravação de volta:</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Mode: foreground-only replacement</source>
-        <translation>Mode: foreground-only replacement</translation>
+        <translation>Modo: substituir apenas o primeiro plano</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: existing bitmap foreground</source>
-        <translation>Target: existing bitmap foreground</translation>
+        <translation>Destino: primeiro plano bitmap existente</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: custom bitmap foreground</source>
-        <translation>Target: custom bitmap foreground</translation>
+        <translation>Destino: primeiro plano bitmap personalizado</translation>
     </message>
 </context>
 <context>
@@ -636,7 +636,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     <message>
         <location line="-3" />
         <source>KeyStore</source>
-        <translation>KeyStore</translation>
+        <translation>Armazenamento de chaves</translation>
     </message>
     <message>
         <location line="-1" />
@@ -686,7 +686,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     <message>
         <location line="+1" />
         <source>&amp;View</source>
-        <translation>&amp;View</translation>
+        <translation>&amp;Ver</translation>
     </message>
     <message>
         <location line="+360" />
@@ -706,61 +706,61 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     <message>
         <location line="+48" />
         <source>Open Log Directory</source>
-        <translation>Open Log Directory</translation>
+        <translation>Abrir pasta de logs</translation>
     </message>
     <message>
         <location line="+211" />
         <source>Split APK Resources</source>
-        <translation>Split APK Resources</translation>
+        <translation>Recursos de APKs divididos</translation>
     </message>
     <message>
         <location line="+1" />
         <source>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</source>
-        <translation>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</translation>
+        <translation>Este icone adaptativo usa recursos de arquivos APK divididos. Recursos de APKs divididos sao suportados apenas para pre-visualizacao; substituir e reempacotar conjuntos de APKs divididos ainda nao e suportado.</translation>
     </message>
     <message>
         <location line="+22" />
         <source>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</source>
-        <translation>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</translation>
+        <translation>Este e um icone XML adaptativo. Substituir icone atualizara apenas a camada de primeiro plano; a camada de fundo do APK sera preservada.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Adaptive Icon Replacement</source>
-        <translation>Adaptive Icon Replacement</translation>
+        <translation>Substituição de ícone adaptativo</translation>
     </message>
     <message>
         <location line="+306" />
         <source>Could not find FAQ file:
 %1</source>
-        <translation>Could not find FAQ file:
+        <translation>Nao foi possivel encontrar o arquivo de FAQ:
 %1</translation>
     </message>
     <message>
         <location line="+18" />
         <source>Could not open FAQ file:
 %1</source>
-        <translation>Could not open FAQ file:
+        <translation>Nao foi possivel abrir o arquivo de FAQ:
 %1</translation>
     </message>
     <message>
         <location line="+60" />
         <source>Could not check for updates.</source>
-        <translation>Could not check for updates.</translation>
+        <translation>Não foi possível verificar atualizações.</translation>
     </message>
     <message>
         <location line="+5" />
         <source>No release version was found.</source>
-        <translation>No release version was found.</translation>
+        <translation>Nenhuma versão de lançamento foi encontrada.</translation>
     </message>
     <message>
         <location line="+2" />
         <source>%1 is up to date.</source>
-        <translation>%1 is up to date.</translation>
+        <translation>%1 está atualizado.</translation>
     </message>
     <message>
         <location line="+0" />
         <source>Latest version: %1</source>
-        <translation>Latest version: %1</translation>
+        <translation>Versão mais recente: %1</translation>
     </message>
     <message>
         <location line="+70" />
@@ -794,7 +794,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>Esta é uma função experimental. O funcionamento correto não é garantido; use com cautela.</translation>
     </message>
     <message>
         <location line="+11" />
@@ -854,7 +854,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     <message>
         <location line="+77" />
         <source>Apply the current icon to all sizes?</source>
-        <translation>Apply the current icon to all sizes?</translation>
+        <translation>Aplicar o ícone atual a todos os tamanhos?</translation>
     </message>
     <message>
         <location line="-55" />
@@ -864,7 +864,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     <message>
         <location line="+3" />
         <source>Open Log File</source>
-        <translation>Open Log File</translation>
+        <translation>Abrir arquivo de log</translation>
     </message>
     <message>
         <location line="-19" />
@@ -880,7 +880,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
         <location line="+19" />
         <location line="+7" />
         <source>Donate</source>
-        <translation>Donate</translation>
+        <translation>Doar</translation>
     </message>
     <message>
         <location line="-34" />
@@ -923,7 +923,7 @@ Verifique a sua instalação JDK e o PATH variável.</translation>
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>&amp;Fechar APK</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Baixar?</translation>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>Traduções</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>Tem certeza de que deseja excluir este ícone?</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Baixar?</translation>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Manifesto</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Redimensionar automaticamente?</translation>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>&amp;Adicionar ícone</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1091,7 +1091,7 @@ Redimensionar automaticamente?</translation>
     <message>
         <location line="+26" />
         <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
+        <translation>Remover ícone</translation>
     </message>
     <message>
         <location line="+13" />
@@ -1150,12 +1150,12 @@ Redimensionar automaticamente?</translation>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>SDK mínimo</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>SDK de destino</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Redimensionar automaticamente?</translation>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>Recurso</translation>
     </message>
 </context>
 <context>
@@ -1199,7 +1199,7 @@ Redimensionar automaticamente?</translation>
     <message>
         <location line="+5" />
         <source>Temporary Directory</source>
-        <translation>Temporary Directory</translation>
+        <translation>Pasta temporaria</translation>
     </message>
     <message>
         <location line="-2" />
@@ -1212,12 +1212,12 @@ Redimensionar automaticamente?</translation>
     <message>
         <location filename="../../src/core/updater.cpp" line="+95" />
         <source>Could not find release version in the update response.</source>
-        <translation>Could not find release version in the update response.</translation>
+        <translation>Não foi possível encontrar a versão de lançamento na resposta de atualização.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Update server returned HTTP %1.</source>
-        <translation>Update server returned HTTP %1.</translation>
+        <translation>O servidor de atualização retornou HTTP %1.</translation>
     </message>
 </context>
 </TS>

@@ -21,22 +21,22 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>提交: %1</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Built on: %1</source>
-        <translation>Built on: %1</translation>
+        <translation>构建时间: %1</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Reborn author</source>
-        <translation>Reborn author</translation>
+        <translation>Reborn 作者</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original app author</source>
-        <translation>Original app author</translation>
+        <translation>原应用作者</translation>
     </message>
     <message>
         <location line="+8" />
@@ -187,7 +187,7 @@
     <message>
         <location line="+16" />
         <source>Checking split APK resources...</source>
-        <translation>Checking split APK resources...</translation>
+        <translation>正在检查拆分 APK 资源...</translation>
     </message>
     <message>
         <location line="+5" />
@@ -205,42 +205,42 @@
     <message>
         <location filename="../../src/dialogs/authors.cpp" line="+48" />
         <source>Special Thanks</source>
-        <translation>Special Thanks</translation>
+        <translation>特别感谢</translation>
     </message>
     <message>
         <source>Donators</source>
-        <translation type="vanished">Donators</translation>
+        <translation>捐赠者</translation>
     </message>
     <message>
         <location line="-32" />
         <location line="+27" />
         <source>Authors</source>
-        <translation>Authors</translation>
+        <translation>作者</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Translators</source>
-        <translation>Translators</translation>
+        <translation>翻译者</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Support APK Icon Editor Reborn</source>
-        <translation>Support APK Icon Editor Reborn</translation>
+        <translation>支持 APK Icon Editor Reborn</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original APK Icon Editor Donators</source>
-        <translation>Original APK Icon Editor Donators</translation>
+        <translation>原 APK Icon Editor 捐赠者</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Testers</source>
-        <translation>Testers</translation>
+        <translation>测试者</translation>
     </message>
     <message>
         <location line="-4" />
         <source>Contributors</source>
-        <translation>Contributors</translation>
+        <translation>贡献者</translation>
     </message>
 </context>
 <context>
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB（兆二进制字节）</translation>
     </message>
     <message>
         <location line="-19" />
@@ -365,149 +365,149 @@
     <message>
         <location filename="../../src/apk/icon.cpp" line="+244" />
         <source>Application icon</source>
-        <translation>Application icon</translation>
+        <translation>应用图标</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Application roundIcon</source>
-        <translation>Application roundIcon</translation>
+        <translation>应用圆形图标</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity icon</source>
-        <translation>Launcher activity icon</translation>
+        <translation>启动器 Activity 图标</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity roundIcon</source>
-        <translation>Launcher activity roundIcon</translation>
+        <translation>启动器 Activity 圆形图标</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias icon</source>
-        <translation>Launcher activity-alias icon</translation>
+        <translation>启动器 Activity 别名图标</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias roundIcon</source>
-        <translation>Launcher activity-alias roundIcon</translation>
+        <translation>启动器 Activity 别名圆形图标</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Launcher icon</source>
-        <translation>Launcher icon</translation>
+        <translation>启动器图标</translation>
     </message>
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>电视横幅</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Bitmap icon</source>
-        <translation>Bitmap icon</translation>
+        <translation>位图图标</translation>
     </message>
     <message>
         <location line="+0" />
         <location line="+6" />
         <source>Launcher entry:</source>
-        <translation>Launcher entry:</translation>
+        <translation>启动器入口:</translation>
     </message>
     <message>
         <location line="-2" />
         <source>Adaptive XML icon</source>
-        <translation>Adaptive XML icon</translation>
+        <translation>自适应 XML 图标</translation>
     </message>
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>XML 文件:</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Preview source:</source>
-        <translation>Preview source:</translation>
+        <translation>预览来源:</translation>
     </message>
     <message>
         <location line="+7" />
         <source>Split APK resources:</source>
-        <translation>Split APK resources:</translation>
+        <translation>拆分 APK 资源:</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Used for preview only; split APK repacking is not supported yet.</source>
-        <translation>Used for preview only; split APK repacking is not supported yet.</translation>
+        <translation>仅用于预览；暂不支持重新打包拆分 APK。</translation>
     </message>
     <message>
         <location line="+9" />
         <source>Loaded read-only; this icon resolves from base APK resources.</source>
-        <translation>Loaded read-only; this icon resolves from base APK resources.</translation>
+        <translation>已以只读方式加载；此图标从基础 APK 资源解析。</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Foreground:</source>
-        <translation>Foreground:</translation>
+        <translation>前景:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline XML/vector layer</source>
-        <translation>inline XML/vector layer</translation>
+        <translation>内联 XML/矢量层</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Vector/XML foreground</source>
-        <translation>Vector/XML foreground</translation>
+        <translation>矢量/XML 前景</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Background:</source>
-        <translation>Background:</translation>
+        <translation>背景:</translation>
     </message>
     <message>
         <location line="+6" />
         <location line="+12" />
         <source>Not resolved</source>
-        <translation>Not resolved</translation>
+        <translation>未解析</translation>
     </message>
     <message>
         <location line="-8" />
         <source>Monochrome:</source>
-        <translation>Monochrome:</translation>
+        <translation>单色:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline layer</source>
-        <translation>inline layer</translation>
+        <translation>内联层</translation>
     </message>
     <message>
         <location line="+6" />
         <source>Vector/XML monochrome layer</source>
-        <translation>Vector/XML monochrome layer</translation>
+        <translation>矢量/XML 单色层</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Used by Android themed icons; not used for the normal preview.</source>
-        <translation>Used by Android themed icons; not used for the normal preview.</translation>
+        <translation>由 Android 主题图标使用；普通预览不使用。</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Write-back:</source>
-        <translation>Write-back:</translation>
+        <translation>写回:</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Mode: foreground-only replacement</source>
-        <translation>Mode: foreground-only replacement</translation>
+        <translation>模式: 仅替换前景</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: existing bitmap foreground</source>
-        <translation>Target: existing bitmap foreground</translation>
+        <translation>目标: 现有位图前景</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: custom bitmap foreground</source>
-        <translation>Target: custom bitmap foreground</translation>
+        <translation>目标: 自定义位图前景</translation>
     </message>
 </context>
 <context>
@@ -636,7 +636,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="-3" />
         <source>KeyStore</source>
-        <translation>KeyStore</translation>
+        <translation>密钥库</translation>
     </message>
     <message>
         <location line="-1" />
@@ -686,7 +686,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="+1" />
         <source>&amp;View</source>
-        <translation>&amp;View</translation>
+        <translation>查看(&amp;V)</translation>
     </message>
     <message>
         <location line="+360" />
@@ -711,56 +711,56 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="+211" />
         <source>Split APK Resources</source>
-        <translation>Split APK Resources</translation>
+        <translation>拆分 APK 资源</translation>
     </message>
     <message>
         <location line="+1" />
         <source>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</source>
-        <translation>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</translation>
+        <translation>此自适应图标使用拆分 APK 文件中的资源。拆分 APK 资源目前仅支持预览；暂不支持替换并重新打包拆分 APK 集。</translation>
     </message>
     <message>
         <location line="+22" />
         <source>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</source>
-        <translation>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</translation>
+        <translation>这是自适应 XML 图标。替换图标只会更新前景层；APK 中的背景层会被保留。</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Adaptive Icon Replacement</source>
-        <translation>Adaptive Icon Replacement</translation>
+        <translation>自适应图标替换</translation>
     </message>
     <message>
         <location line="+306" />
         <source>Could not find FAQ file:
 %1</source>
-        <translation>Could not find FAQ file:
+        <translation>找不到 FAQ 文件:
 %1</translation>
     </message>
     <message>
         <location line="+18" />
         <source>Could not open FAQ file:
 %1</source>
-        <translation>Could not open FAQ file:
+        <translation>无法打开 FAQ 文件:
 %1</translation>
     </message>
     <message>
         <location line="+60" />
         <source>Could not check for updates.</source>
-        <translation>Could not check for updates.</translation>
+        <translation>无法检查更新。</translation>
     </message>
     <message>
         <location line="+5" />
         <source>No release version was found.</source>
-        <translation>No release version was found.</translation>
+        <translation>未找到发布版本。</translation>
     </message>
     <message>
         <location line="+2" />
         <source>%1 is up to date.</source>
-        <translation>%1 is up to date.</translation>
+        <translation>%1 已是最新版本。</translation>
     </message>
     <message>
         <location line="+0" />
         <source>Latest version: %1</source>
-        <translation>Latest version: %1</translation>
+        <translation>最新版本: %1</translation>
     </message>
     <message>
         <location line="+70" />
@@ -794,7 +794,7 @@ Check your JDK installation and PATH environment variable.</source>
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>这是实验性功能。不能保证正常工作，请谨慎使用。</translation>
     </message>
     <message>
         <location line="+11" />
@@ -923,7 +923,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>关闭 APK(&amp;C)</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Download?</source>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>翻译</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>确定要删除此图标吗？</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Download?</source>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>清单</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Resize automatically?</source>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>添加图标(&amp;A)</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1091,7 +1091,7 @@ Resize automatically?</source>
     <message>
         <location line="+26" />
         <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
+        <translation>移除图标</translation>
     </message>
     <message>
         <location line="+13" />
@@ -1150,12 +1150,12 @@ Resize automatically?</source>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>最低 SDK</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>目标 SDK</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Resize automatically?</source>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>资源</translation>
     </message>
 </context>
 <context>
@@ -1212,12 +1212,12 @@ Resize automatically?</source>
     <message>
         <location filename="../../src/core/updater.cpp" line="+95" />
         <source>Could not find release version in the update response.</source>
-        <translation>Could not find release version in the update response.</translation>
+        <translation>无法在更新响应中找到发布版本。</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Update server returned HTTP %1.</source>
-        <translation>Update server returned HTTP %1.</translation>
+        <translation>更新服务器返回 HTTP %1。</translation>
     </message>
 </context>
 </TS>
