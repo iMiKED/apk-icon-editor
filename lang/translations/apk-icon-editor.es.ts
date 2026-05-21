@@ -21,7 +21,7 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Revisión: %1</translation>
     </message>
     <message>
         <location line="+8" />
@@ -209,7 +209,7 @@
     </message>
     <message>
         <source>Donators</source>
-        <translation type="vanished">Donators</translation>
+        <translation>Donantes</translation>
     </message>
     <message>
         <location line="-32" />
@@ -235,12 +235,12 @@
     <message>
         <location line="+2" />
         <source>Testers</source>
-        <translation>Testers</translation>
+        <translation>Probadores</translation>
     </message>
     <message>
         <location line="-4" />
         <source>Contributors</source>
-        <translation>Contributors</translation>
+        <translation>Colaboradores</translation>
     </message>
 </context>
 <context>
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB (mebibyte)</translation>
     </message>
     <message>
         <location line="-19" />
@@ -400,7 +400,7 @@
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>Banner de TV</translation>
     </message>
     <message>
         <location line="+8" />
@@ -421,7 +421,7 @@
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>Archivo XML:</translation>
     </message>
     <message>
         <location line="+3" />
@@ -533,7 +533,7 @@
     <message>
         <location line="+2" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Seudónimo</translation>
     </message>
     <message>
         <location line="+99" />
@@ -616,7 +616,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
     <message>
         <location line="-141" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Seudónimo</translation>
     </message>
     <message>
         <location line="-4" />
@@ -656,12 +656,12 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
         <location line="+550" />
         <location line="+18" />
         <source>FAQ</source>
-        <translation>FAQ</translation>
+        <translation>Preguntas frecuentes</translation>
     </message>
     <message>
         <location line="-564" />
         <source>Logs</source>
-        <translation>Logs</translation>
+        <translation>Registros</translation>
     </message>
     <message>
         <location line="-5" />
@@ -686,7 +686,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
     <message>
         <location line="+1" />
         <source>&amp;View</source>
-        <translation>&amp;View</translation>
+        <translation>&amp;Ver</translation>
     </message>
     <message>
         <location line="+360" />
@@ -706,7 +706,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
     <message>
         <location line="+48" />
         <source>Open Log Directory</source>
-        <translation>Open Log Directory</translation>
+        <translation>Abrir carpeta de registros</translation>
     </message>
     <message>
         <location line="+211" />
@@ -794,7 +794,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>Esta es una función experimental. No se garantiza su correcto funcionamiento; úsela con precaución.</translation>
     </message>
     <message>
         <location line="+11" />
@@ -864,7 +864,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
     <message>
         <location line="+3" />
         <source>Open Log File</source>
-        <translation>Open Log File</translation>
+        <translation>Abrir archivo de registro</translation>
     </message>
     <message>
         <location line="-19" />
@@ -880,7 +880,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
         <location line="+19" />
         <location line="+7" />
         <source>Donate</source>
-        <translation>Donate</translation>
+        <translation>Donar</translation>
     </message>
     <message>
         <location line="-34" />
@@ -923,7 +923,7 @@ Compruebe la instalación de JDK y variable de entorno PATH.</translation>
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>&amp;Cerrar APK</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Download?</source>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>Traducciones</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>¿Seguro que desea eliminar este icono?</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Download?</source>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Manifiesto</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Resize automatically?</source>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>&amp;Añadir icono</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1091,7 +1091,7 @@ Resize automatically?</source>
     <message>
         <location line="+26" />
         <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
+        <translation>Eliminar icono</translation>
     </message>
     <message>
         <location line="+13" />
@@ -1150,12 +1150,12 @@ Resize automatically?</source>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>SDK mínimo</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>SDK de destino</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Resize automatically?</source>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>Recurso</translation>
     </message>
 </context>
 <context>
@@ -1199,7 +1199,7 @@ Resize automatically?</source>
     <message>
         <location line="+5" />
         <source>Temporary Directory</source>
-        <translation>Temporary Directory</translation>
+        <translation>Carpeta temporal</translation>
     </message>
     <message>
         <location line="-2" />

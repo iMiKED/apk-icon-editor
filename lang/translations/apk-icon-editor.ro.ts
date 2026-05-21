@@ -21,22 +21,22 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Revizie: %1</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Built on: %1</source>
-        <translation>Built on: %1</translation>
+        <translation>Compilat la: %1</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Reborn author</source>
-        <translation>Reborn author</translation>
+        <translation>Autor Reborn</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original app author</source>
-        <translation>Original app author</translation>
+        <translation>Autorul aplicației originale</translation>
     </message>
     <message>
         <location line="+8" />
@@ -187,7 +187,7 @@
     <message>
         <location line="+16" />
         <source>Checking split APK resources...</source>
-        <translation>Checking split APK resources...</translation>
+        <translation>Se verifică resursele APK divizate...</translation>
     </message>
     <message>
         <location line="+5" />
@@ -225,12 +225,12 @@
     <message>
         <location line="+2" />
         <source>Support APK Icon Editor Reborn</source>
-        <translation>Support APK Icon Editor Reborn</translation>
+        <translation>Susține APK Icon Editor Reborn</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original APK Icon Editor Donators</source>
-        <translation>Original APK Icon Editor Donators</translation>
+        <translation>Donatorii APK Icon Editor original</translation>
     </message>
     <message>
         <location line="+2" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB (mebibyte)</translation>
     </message>
     <message>
         <location line="-19" />
@@ -365,37 +365,37 @@
     <message>
         <location filename="../../src/apk/icon.cpp" line="+244" />
         <source>Application icon</source>
-        <translation>Application icon</translation>
+        <translation>Pictograma aplicației</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Application roundIcon</source>
-        <translation>Application roundIcon</translation>
+        <translation>Pictograma rotundă a aplicației</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity icon</source>
-        <translation>Launcher activity icon</translation>
+        <translation>Pictograma activității de lansare</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity roundIcon</source>
-        <translation>Launcher activity roundIcon</translation>
+        <translation>Pictograma rotundă a activității de lansare</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias icon</source>
-        <translation>Launcher activity-alias icon</translation>
+        <translation>Pictograma aliasului activității de lansare</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias roundIcon</source>
-        <translation>Launcher activity-alias roundIcon</translation>
+        <translation>Pictograma rotundă a aliasului activității de lansare</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Launcher icon</source>
-        <translation>Launcher icon</translation>
+        <translation>Pictograma lansatorului</translation>
     </message>
     <message>
         <location line="+24" />
@@ -405,109 +405,109 @@
     <message>
         <location line="+8" />
         <source>Bitmap icon</source>
-        <translation>Bitmap icon</translation>
+        <translation>Pictogramă bitmap</translation>
     </message>
     <message>
         <location line="+0" />
         <location line="+6" />
         <source>Launcher entry:</source>
-        <translation>Launcher entry:</translation>
+        <translation>Intrare lansator:</translation>
     </message>
     <message>
         <location line="-2" />
         <source>Adaptive XML icon</source>
-        <translation>Adaptive XML icon</translation>
+        <translation>Pictogramă XML adaptivă</translation>
     </message>
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>Fișier XML:</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Preview source:</source>
-        <translation>Preview source:</translation>
+        <translation>Sursa previzualizării:</translation>
     </message>
     <message>
         <location line="+7" />
         <source>Split APK resources:</source>
-        <translation>Split APK resources:</translation>
+        <translation>Resurse APK divizate:</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Used for preview only; split APK repacking is not supported yet.</source>
-        <translation>Used for preview only; split APK repacking is not supported yet.</translation>
+        <translation>Folosit numai pentru previzualizare; reîmpachetarea APK-urilor divizate nu este încă acceptată.</translation>
     </message>
     <message>
         <location line="+9" />
         <source>Loaded read-only; this icon resolves from base APK resources.</source>
-        <translation>Loaded read-only; this icon resolves from base APK resources.</translation>
+        <translation>Încărcat doar pentru citire; această pictogramă este rezolvată din resursele APK-ului de bază.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Foreground:</source>
-        <translation>Foreground:</translation>
+        <translation>Prim-plan:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline XML/vector layer</source>
-        <translation>inline XML/vector layer</translation>
+        <translation>strat XML/vectorial inline</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Vector/XML foreground</source>
-        <translation>Vector/XML foreground</translation>
+        <translation>Prim-plan vectorial/XML</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Background:</source>
-        <translation>Background:</translation>
+        <translation>Fundal:</translation>
     </message>
     <message>
         <location line="+6" />
         <location line="+12" />
         <source>Not resolved</source>
-        <translation>Not resolved</translation>
+        <translation>Nerezolvat</translation>
     </message>
     <message>
         <location line="-8" />
         <source>Monochrome:</source>
-        <translation>Monochrome:</translation>
+        <translation>Monocrom:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline layer</source>
-        <translation>inline layer</translation>
+        <translation>strat inline</translation>
     </message>
     <message>
         <location line="+6" />
         <source>Vector/XML monochrome layer</source>
-        <translation>Vector/XML monochrome layer</translation>
+        <translation>Strat monocrom vectorial/XML</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Used by Android themed icons; not used for the normal preview.</source>
-        <translation>Used by Android themed icons; not used for the normal preview.</translation>
+        <translation>Folosit de pictogramele tematice Android; nu este folosit pentru previzualizarea normală.</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Write-back:</source>
-        <translation>Write-back:</translation>
+        <translation>Scriere înapoi:</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Mode: foreground-only replacement</source>
-        <translation>Mode: foreground-only replacement</translation>
+        <translation>Mod: înlocuire doar a prim-planului</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: existing bitmap foreground</source>
-        <translation>Target: existing bitmap foreground</translation>
+        <translation>Țintă: prim-plan bitmap existent</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: custom bitmap foreground</source>
-        <translation>Target: custom bitmap foreground</translation>
+        <translation>Țintă: prim-plan bitmap personalizat</translation>
     </message>
 </context>
 <context>
@@ -711,56 +711,56 @@ Verificati variabila de instalare si mediul de CALE pentru JDK.</translation>
     <message>
         <location line="+211" />
         <source>Split APK Resources</source>
-        <translation>Split APK Resources</translation>
+        <translation>Resurse APK divizate</translation>
     </message>
     <message>
         <location line="+1" />
         <source>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</source>
-        <translation>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</translation>
+        <translation>Această pictogramă adaptivă folosește resurse din fișiere APK divizate. Resursele APK divizate sunt acceptate doar pentru previzualizare; înlocuirea și reîmpachetarea seturilor APK divizate nu sunt încă acceptate.</translation>
     </message>
     <message>
         <location line="+22" />
         <source>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</source>
-        <translation>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</translation>
+        <translation>Aceasta este o pictogramă XML adaptivă. Înlocuirea pictogramei va actualiza doar stratul de prim-plan; stratul de fundal din APK va fi păstrat.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Adaptive Icon Replacement</source>
-        <translation>Adaptive Icon Replacement</translation>
+        <translation>Înlocuire pictogramă adaptivă</translation>
     </message>
     <message>
         <location line="+306" />
         <source>Could not find FAQ file:
 %1</source>
-        <translation>Could not find FAQ file:
+        <translation>Nu s-a putut găsi fișierul FAQ:
 %1</translation>
     </message>
     <message>
         <location line="+18" />
         <source>Could not open FAQ file:
 %1</source>
-        <translation>Could not open FAQ file:
+        <translation>Nu s-a putut deschide fișierul FAQ:
 %1</translation>
     </message>
     <message>
         <location line="+60" />
         <source>Could not check for updates.</source>
-        <translation>Could not check for updates.</translation>
+        <translation>Nu s-a putut verifica existența actualizărilor.</translation>
     </message>
     <message>
         <location line="+5" />
         <source>No release version was found.</source>
-        <translation>No release version was found.</translation>
+        <translation>Nu a fost găsită nicio versiune de lansare.</translation>
     </message>
     <message>
         <location line="+2" />
         <source>%1 is up to date.</source>
-        <translation>%1 is up to date.</translation>
+        <translation>%1 este la zi.</translation>
     </message>
     <message>
         <location line="+0" />
         <source>Latest version: %1</source>
-        <translation>Latest version: %1</translation>
+        <translation>Cea mai recentă versiune: %1</translation>
     </message>
     <message>
         <location line="+70" />
@@ -991,7 +991,7 @@ Descarcati?</translation>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Fișier manifest</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1212,12 +1212,12 @@ Redimensionati automat?</translation>
     <message>
         <location filename="../../src/core/updater.cpp" line="+95" />
         <source>Could not find release version in the update response.</source>
-        <translation>Could not find release version in the update response.</translation>
+        <translation>Nu s-a putut găsi versiunea de lansare în răspunsul de actualizare.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Update server returned HTTP %1.</source>
-        <translation>Update server returned HTTP %1.</translation>
+        <translation>Serverul de actualizare a returnat HTTP %1.</translation>
     </message>
 </context>
 </TS>
