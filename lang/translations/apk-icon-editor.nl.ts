@@ -21,22 +21,22 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Revisie: %1</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Built on: %1</source>
-        <translation>Built on: %1</translation>
+        <translation>Gebouwd op: %1</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Reborn author</source>
-        <translation>Reborn author</translation>
+        <translation>Reborn-auteur</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original app author</source>
-        <translation>Original app author</translation>
+        <translation>Auteur van de originele app</translation>
     </message>
     <message>
         <location line="+8" />
@@ -187,7 +187,7 @@
     <message>
         <location line="+16" />
         <source>Checking split APK resources...</source>
-        <translation>Checking split APK resources...</translation>
+        <translation>Split-APK-bronnen controleren...</translation>
     </message>
     <message>
         <location line="+5" />
@@ -225,17 +225,17 @@
     <message>
         <location line="+2" />
         <source>Support APK Icon Editor Reborn</source>
-        <translation>Support APK Icon Editor Reborn</translation>
+        <translation>APK Icon Editor Reborn ondersteunen</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Original APK Icon Editor Donators</source>
-        <translation>Original APK Icon Editor Donators</translation>
+        <translation>Donateurs van de originele APK Icon Editor</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Testers</source>
-        <translation>Testers</translation>
+        <translation>Testgebruikers</translation>
     </message>
     <message>
         <location line="-4" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>Mebibyte</translation>
     </message>
     <message>
         <location line="-19" />
@@ -266,7 +266,7 @@
     <message>
         <location line="-32" />
         <source>Code: %1</source>
-        <translation>Code: %1</translation>
+        <translation>Codewaarde: %1</translation>
     </message>
     <message>
         <location line="+33" />
@@ -365,149 +365,149 @@
     <message>
         <location filename="../../src/apk/icon.cpp" line="+244" />
         <source>Application icon</source>
-        <translation>Application icon</translation>
+        <translation>Applicatiepictogram</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Application roundIcon</source>
-        <translation>Application roundIcon</translation>
+        <translation>Rond applicatiepictogram</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity icon</source>
-        <translation>Launcher activity icon</translation>
+        <translation>Launcher-activiteitspictogram</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity roundIcon</source>
-        <translation>Launcher activity roundIcon</translation>
+        <translation>Rond launcher-activiteitspictogram</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias icon</source>
-        <translation>Launcher activity-alias icon</translation>
+        <translation>Launcher-activiteit-aliaspictogram</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Launcher activity-alias roundIcon</source>
-        <translation>Launcher activity-alias roundIcon</translation>
+        <translation>Rond launcher-activiteit-aliaspictogram</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Launcher icon</source>
-        <translation>Launcher icon</translation>
+        <translation>Launcher-pictogram</translation>
     </message>
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>TV-banner</translation>
     </message>
     <message>
         <location line="+8" />
         <source>Bitmap icon</source>
-        <translation>Bitmap icon</translation>
+        <translation>Bitmap-pictogram</translation>
     </message>
     <message>
         <location line="+0" />
         <location line="+6" />
         <source>Launcher entry:</source>
-        <translation>Launcher entry:</translation>
+        <translation>Launcher-vermelding:</translation>
     </message>
     <message>
         <location line="-2" />
         <source>Adaptive XML icon</source>
-        <translation>Adaptive XML icon</translation>
+        <translation>Adaptief XML-pictogram</translation>
     </message>
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>XML-bestand:</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Preview source:</source>
-        <translation>Preview source:</translation>
+        <translation>Voorbeeldbron:</translation>
     </message>
     <message>
         <location line="+7" />
         <source>Split APK resources:</source>
-        <translation>Split APK resources:</translation>
+        <translation>Split-APK-bronnen:</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Used for preview only; split APK repacking is not supported yet.</source>
-        <translation>Used for preview only; split APK repacking is not supported yet.</translation>
+        <translation>Alleen gebruikt voor voorbeeld; opnieuw verpakken van split-APK's wordt nog niet ondersteund.</translation>
     </message>
     <message>
         <location line="+9" />
         <source>Loaded read-only; this icon resolves from base APK resources.</source>
-        <translation>Loaded read-only; this icon resolves from base APK resources.</translation>
+        <translation>Alleen-lezen geladen; dit pictogram wordt uit bronnen van de basis-APK opgelost.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Foreground:</source>
-        <translation>Foreground:</translation>
+        <translation>Voorgrond:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline XML/vector layer</source>
-        <translation>inline XML/vector layer</translation>
+        <translation>inline XML/vectorlaag</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Vector/XML foreground</source>
-        <translation>Vector/XML foreground</translation>
+        <translation>Vector/XML-voorgrond</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Background:</source>
-        <translation>Background:</translation>
+        <translation>Achtergrond:</translation>
     </message>
     <message>
         <location line="+6" />
         <location line="+12" />
         <source>Not resolved</source>
-        <translation>Not resolved</translation>
+        <translation>Niet opgelost</translation>
     </message>
     <message>
         <location line="-8" />
         <source>Monochrome:</source>
-        <translation>Monochrome:</translation>
+        <translation>Monochroom:</translation>
     </message>
     <message>
         <location line="+0" />
         <source>inline layer</source>
-        <translation>inline layer</translation>
+        <translation>inline laag</translation>
     </message>
     <message>
         <location line="+6" />
         <source>Vector/XML monochrome layer</source>
-        <translation>Vector/XML monochrome layer</translation>
+        <translation>Vector/XML-monochroomlaag</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Used by Android themed icons; not used for the normal preview.</source>
-        <translation>Used by Android themed icons; not used for the normal preview.</translation>
+        <translation>Gebruikt door Android-themapictogrammen; niet gebruikt voor het normale voorbeeld.</translation>
     </message>
     <message>
         <location line="+3" />
         <source>Write-back:</source>
-        <translation>Write-back:</translation>
+        <translation>Terugschrijven:</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Mode: foreground-only replacement</source>
-        <translation>Mode: foreground-only replacement</translation>
+        <translation>Modus: alleen voorgrond vervangen</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: existing bitmap foreground</source>
-        <translation>Target: existing bitmap foreground</translation>
+        <translation>Doel: bestaande bitmap-voorgrond</translation>
     </message>
     <message>
         <location line="+2" />
         <source>Target: custom bitmap foreground</source>
-        <translation>Target: custom bitmap foreground</translation>
+        <translation>Doel: aangepaste bitmap-voorgrond</translation>
     </message>
 </context>
 <context>
@@ -533,7 +533,7 @@
     <message>
         <location line="+2" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Aliasnaam</translation>
     </message>
     <message>
         <location line="+99" />
@@ -616,7 +616,7 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     <message>
         <location line="-141" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Aliasnaam</translation>
     </message>
     <message>
         <location line="-4" />
@@ -636,7 +636,7 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     <message>
         <location line="-3" />
         <source>KeyStore</source>
-        <translation>KeyStore</translation>
+        <translation>Sleutelopslag</translation>
     </message>
     <message>
         <location line="-1" />
@@ -656,12 +656,12 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
         <location line="+550" />
         <location line="+18" />
         <source>FAQ</source>
-        <translation>FAQ</translation>
+        <translation>Veelgestelde vragen</translation>
     </message>
     <message>
         <location line="-564" />
         <source>Logs</source>
-        <translation>Logs</translation>
+        <translation>Logboeken</translation>
     </message>
     <message>
         <location line="-5" />
@@ -686,7 +686,7 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     <message>
         <location line="+1" />
         <source>&amp;View</source>
-        <translation>&amp;View</translation>
+        <translation>&amp;Beeld</translation>
     </message>
     <message>
         <location line="+360" />
@@ -711,56 +711,56 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     <message>
         <location line="+211" />
         <source>Split APK Resources</source>
-        <translation>Split APK Resources</translation>
+        <translation>Split-APK-bronnen</translation>
     </message>
     <message>
         <location line="+1" />
         <source>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</source>
-        <translation>This adaptive icon uses resources from split APK files. Split APK resources are supported for preview only; replacing and repacking split APK sets is not supported yet.</translation>
+        <translation>Dit adaptieve pictogram gebruikt bronnen uit split-APK-bestanden. Split-APK-bronnen worden alleen voor voorbeeld ondersteund; het vervangen en opnieuw verpakken van split-APK-sets wordt nog niet ondersteund.</translation>
     </message>
     <message>
         <location line="+22" />
         <source>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</source>
-        <translation>This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.</translation>
+        <translation>Dit is een adaptief XML-pictogram. Pictogram vervangen werkt alleen de voorgrondlaag bij; de achtergrondlaag uit de APK blijft behouden.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Adaptive Icon Replacement</source>
-        <translation>Adaptive Icon Replacement</translation>
+        <translation>Adaptief pictogram vervangen</translation>
     </message>
     <message>
         <location line="+306" />
         <source>Could not find FAQ file:
 %1</source>
-        <translation>Could not find FAQ file:
+        <translation>FAQ-bestand niet gevonden:
 %1</translation>
     </message>
     <message>
         <location line="+18" />
         <source>Could not open FAQ file:
 %1</source>
-        <translation>Could not open FAQ file:
+        <translation>FAQ-bestand kon niet worden geopend:
 %1</translation>
     </message>
     <message>
         <location line="+60" />
         <source>Could not check for updates.</source>
-        <translation>Could not check for updates.</translation>
+        <translation>Kan niet controleren op updates.</translation>
     </message>
     <message>
         <location line="+5" />
         <source>No release version was found.</source>
-        <translation>No release version was found.</translation>
+        <translation>Er is geen releaseversie gevonden.</translation>
     </message>
     <message>
         <location line="+2" />
         <source>%1 is up to date.</source>
-        <translation>%1 is up to date.</translation>
+        <translation>%1 is up-to-date.</translation>
     </message>
     <message>
         <location line="+0" />
         <source>Latest version: %1</source>
-        <translation>Latest version: %1</translation>
+        <translation>Nieuwste versie: %1</translation>
     </message>
     <message>
         <location line="+70" />
@@ -794,7 +794,7 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>Dit is een experimentele functie. Correcte werking is niet gegarandeerd, gebruik voorzichtig.</translation>
     </message>
     <message>
         <location line="+11" />
@@ -923,7 +923,7 @@ Controleer uw JDK-installatie en uw PATH-omgevingsvariabel.</translation>
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>APK &amp;sluiten</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Wilt u deze downloaden?</translation>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>Vertalingen</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>Weet u zeker dat u dit pictogram wilt verwijderen?</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Wilt u deze downloaden?</translation>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Manifestbestand</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Wilt u hem automatisch herschalen?</translation>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>Pictogram &amp;toevoegen</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1091,7 +1091,7 @@ Wilt u hem automatisch herschalen?</translation>
     <message>
         <location line="+26" />
         <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
+        <translation>Pictogram verwijderen</translation>
     </message>
     <message>
         <location line="+13" />
@@ -1150,12 +1150,12 @@ Wilt u hem automatisch herschalen?</translation>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>Minimum-SDK</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>Doel-SDK</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Wilt u hem automatisch herschalen?</translation>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>Bron</translation>
     </message>
 </context>
 <context>
@@ -1212,12 +1212,12 @@ Wilt u hem automatisch herschalen?</translation>
     <message>
         <location filename="../../src/core/updater.cpp" line="+95" />
         <source>Could not find release version in the update response.</source>
-        <translation>Could not find release version in the update response.</translation>
+        <translation>Kan geen releaseversie vinden in het updateantwoord.</translation>
     </message>
     <message>
         <location line="+4" />
         <source>Update server returned HTTP %1.</source>
-        <translation>Update server returned HTTP %1.</translation>
+        <translation>Updateserver retourneerde HTTP %1.</translation>
     </message>
 </context>
 </TS>
