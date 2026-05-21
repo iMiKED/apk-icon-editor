@@ -21,7 +21,7 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Commit-ID: %1</translation>
     </message>
     <message>
         <location line="+8" />
@@ -99,7 +99,7 @@
         <location filename="../../src/dialogs/about.cpp" line="-47" />
         <location line="+1" />
         <source>Download</source>
-        <translation>Download</translation>
+        <translation>Herunterladen</translation>
     </message>
     <message>
         <location line="-4" />
@@ -209,7 +209,7 @@
     </message>
     <message>
         <source>Donators</source>
-        <translation type="vanished">Donators</translation>
+        <translation>Spender</translation>
     </message>
     <message>
         <location line="-32" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB (Mebibyte)</translation>
     </message>
     <message>
         <location line="-19" />
@@ -266,7 +266,7 @@
     <message>
         <location line="-32" />
         <source>Code: %1</source>
-        <translation>Code: %1</translation>
+        <translation>Code-Nr.: %1</translation>
     </message>
     <message>
         <location line="+33" />
@@ -400,7 +400,7 @@
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>TV-Banner</translation>
     </message>
     <message>
         <location line="+8" />
@@ -421,7 +421,7 @@
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>XML-Datei:</translation>
     </message>
     <message>
         <location line="+3" />
@@ -533,7 +533,7 @@
     <message>
         <location line="+2" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Aliasname</translation>
     </message>
     <message>
         <location line="+99" />
@@ -616,12 +616,12 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     <message>
         <location line="-141" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Aliasname</translation>
     </message>
     <message>
         <location line="-4" />
         <source>Key Manager</source>
-        <translation>Key Manager</translation>
+        <translation>Schlüsselverwaltung</translation>
     </message>
     <message>
         <location line="+6" />
@@ -636,7 +636,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     <message>
         <location line="-3" />
         <source>KeyStore</source>
-        <translation>KeyStore</translation>
+        <translation>Schlüsselspeicher</translation>
     </message>
     <message>
         <location line="-1" />
@@ -656,12 +656,12 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
         <location line="+550" />
         <location line="+18" />
         <source>FAQ</source>
-        <translation>FAQ</translation>
+        <translation>Häufige Fragen</translation>
     </message>
     <message>
         <location line="-564" />
         <source>Logs</source>
-        <translation>Logs</translation>
+        <translation>Protokolle</translation>
     </message>
     <message>
         <location line="-5" />
@@ -681,7 +681,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     <message>
         <location line="-3" />
         <source>&amp;Icon</source>
-        <translation>&amp;Icon</translation>
+        <translation>&amp;Symbol</translation>
     </message>
     <message>
         <location line="+1" />
@@ -701,7 +701,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     <message>
         <location line="-20" />
         <source>Icons</source>
-        <translation>Icons</translation>
+        <translation>Symbole</translation>
     </message>
     <message>
         <location line="+48" />
@@ -794,7 +794,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>Dies ist eine experimentelle Funktion. Die korrekte Funktion ist nicht garantiert; verwenden Sie sie mit Vorsicht.</translation>
     </message>
     <message>
         <location line="+11" />
@@ -816,7 +816,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     <message>
         <location line="+2" />
         <source>Key Manager</source>
-        <translation>Key Manager</translation>
+        <translation>Schlüsselverwaltung</translation>
     </message>
     <message>
         <location line="-32" />
@@ -903,7 +903,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
         <location line="+5" />
         <location line="+2" />
         <source>Update</source>
-        <translation>Update</translation>
+        <translation>Aktualisieren</translation>
     </message>
     <message>
         <location line="-669" />
@@ -923,7 +923,7 @@ Prüfen Sie die JDK-Installation und die Umgebungsvariablen PATH.</translation>
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>APK &amp;schließen</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Herunterladen?</translation>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>Übersetzungen</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>Möchten Sie dieses Symbol wirklich löschen?</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Herunterladen?</translation>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Manifestdatei</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Soll die Größe automatisch angepasst werden?</translation>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>Symbol &amp;hinzufügen</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1150,12 +1150,12 @@ Soll die Größe automatisch angepasst werden?</translation>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>Minimales SDK</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>Ziel-SDK</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Soll die Größe automatisch angepasst werden?</translation>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>Ressource</translation>
     </message>
 </context>
 <context>

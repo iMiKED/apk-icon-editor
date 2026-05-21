@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>Mio</translation>
     </message>
     <message>
         <location line="-19" />
@@ -329,7 +329,7 @@
     <message>
         <location line="-7" />
         <source>Rotation</source>
-        <translation>Rotation</translation>
+        <translation>Pivotement</translation>
     </message>
     <message>
         <location line="+5" />
@@ -400,7 +400,7 @@
     <message>
         <location line="+24" />
         <source>TV Banner</source>
-        <translation>TV Banner</translation>
+        <translation>Bannière TV</translation>
     </message>
     <message>
         <location line="+8" />
@@ -656,12 +656,12 @@ Vérifiez votre installation du SDK et votre variable d'environnement PATH.</tra
         <location line="+550" />
         <location line="+18" />
         <source>FAQ</source>
-        <translation>FAQ</translation>
+        <translation>Foire aux questions</translation>
     </message>
     <message>
         <location line="-564" />
         <source>Logs</source>
-        <translation>Logs</translation>
+        <translation>Journaux</translation>
     </message>
     <message>
         <location line="-5" />
@@ -686,7 +686,7 @@ Vérifiez votre installation du SDK et votre variable d'environnement PATH.</tra
     <message>
         <location line="+1" />
         <source>&amp;View</source>
-        <translation>&amp;View</translation>
+        <translation>&amp;Affichage</translation>
     </message>
     <message>
         <location line="+360" />
@@ -794,7 +794,7 @@ Vérifiez votre installation du SDK et votre variable d'environnement PATH.</tra
     </message>
     <message>
         <source>This is an experimental function. Proper work is not guaranteed, use with caution.</source>
-        <translation type="vanished">This is an experimental function. Proper work is not guaranteed, use with caution.</translation>
+        <translation>Cette fonction est expérimentale. Son bon fonctionnement n'est pas garanti ; utilisez-la avec prudence.</translation>
     </message>
     <message>
         <location line="+11" />
@@ -923,7 +923,7 @@ Vérifiez votre installation du SDK et votre variable d'environnement PATH.</tra
     <message>
         <location line="-16" />
         <source>&amp;Close APK</source>
-        <translation>&amp;Close APK</translation>
+        <translation>&amp;Fermer l'APK</translation>
     </message>
     <message>
         <location line="+438" />
@@ -950,12 +950,12 @@ Télécharger ?</translation>
     <message>
         <location line="-1" />
         <source>Translations</source>
-        <translation>Translations</translation>
+        <translation>Traductions</translation>
     </message>
     <message>
         <location line="+736" />
         <source>Are you sure you want to delete this icon?</source>
-        <translation>Are you sure you want to delete this icon?</translation>
+        <translation>Voulez-vous vraiment supprimer cette icône ?</translation>
     </message>
     <message>
         <location line="-460" />
@@ -991,7 +991,7 @@ Télécharger ?</translation>
     </message>
     <message>
         <source>Manifest</source>
-        <translation type="vanished">Manifest</translation>
+        <translation>Manifeste</translation>
     </message>
     <message>
         <location filename="../../src/dialogs/mainwindow.cpp" line="-16" />
@@ -1065,7 +1065,7 @@ Redimensionner automatiquement ?</translation>
         <location line="-481" />
         <location line="+1" />
         <source>&amp;Add Icon</source>
-        <translation>&amp;Add Icon</translation>
+        <translation>&amp;Ajouter une icône</translation>
     </message>
     <message>
         <location line="-29" />
@@ -1091,7 +1091,7 @@ Redimensionner automatiquement ?</translation>
     <message>
         <location line="+26" />
         <source>Remove Icon</source>
-        <translation>Remove Icon</translation>
+        <translation>Supprimer l'icône</translation>
     </message>
     <message>
         <location line="+13" />
@@ -1150,12 +1150,12 @@ Redimensionner automatiquement ?</translation>
     <message>
         <location filename="../../src/apk/manifestmodel.cpp" line="-2" />
         <source>Minimum SDK</source>
-        <translation>Minimum SDK</translation>
+        <translation>SDK minimal</translation>
     </message>
     <message>
         <location line="+1" />
         <source>Target SDK</source>
-        <translation>Target SDK</translation>
+        <translation>SDK cible</translation>
     </message>
 </context>
 <context>
@@ -1176,7 +1176,7 @@ Redimensionner automatiquement ?</translation>
     <message>
         <location filename="../../src/apk/titlesmodel.cpp" line="+2" />
         <source>Resource</source>
-        <translation>Resource</translation>
+        <translation>Ressource</translation>
     </message>
 </context>
 <context>

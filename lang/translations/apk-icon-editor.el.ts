@@ -21,7 +21,7 @@
     <message>
         <location line="-12" />
         <source>Commit: %1</source>
-        <translation>Commit: %1</translation>
+        <translation>Αναθεώρηση: %1</translation>
     </message>
     <message>
         <location line="+8" />
@@ -248,7 +248,7 @@
     <message>
         <location filename="../../src/core/cloud.cpp" line="+134" />
         <source>MiB</source>
-        <translation>MiB</translation>
+        <translation>MiB (μεμπιμπάιτ)</translation>
     </message>
     <message>
         <location line="-19" />
@@ -421,7 +421,7 @@
     <message>
         <location line="+4" />
         <source>XML:</source>
-        <translation>XML:</translation>
+        <translation>Αρχείο XML:</translation>
     </message>
     <message>
         <location line="+3" />
@@ -616,12 +616,12 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="-141" />
         <source>Alias</source>
-        <translation>Alias</translation>
+        <translation>Ψευδώνυμο</translation>
     </message>
     <message>
         <location line="-4" />
         <source>Key Manager</source>
-        <translation>Διαχειριστής κλειδιών</translation>
+        <translation>Διαχείριση κλειδιών</translation>
     </message>
     <message>
         <location line="+6" />
@@ -636,7 +636,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="-3" />
         <source>KeyStore</source>
-        <translation>KeyStore</translation>
+        <translation>Αποθήκη κλειδιών</translation>
     </message>
     <message>
         <location line="-1" />
@@ -816,7 +816,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="+2" />
         <source>Key Manager</source>
-        <translation>Key Manager</translation>
+        <translation>Διαχείριση κλειδιών</translation>
     </message>
     <message>
         <location line="-32" />
