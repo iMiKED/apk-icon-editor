@@ -187,6 +187,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location line="+2"/>
+        <source>Building icon list...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location line="+5"/>
         <source>APK successfully loaded</source>
         <translation type="unfinished"></translation>
@@ -704,6 +709,31 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
         <location line="+1"/>
         <source>Icon size preset:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Building icon list...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Adaptive Icon Preview Shape</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No Mask</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Circle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rounded Square</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Squircle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

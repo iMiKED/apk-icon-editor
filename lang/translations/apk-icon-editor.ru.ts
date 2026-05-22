@@ -190,6 +190,11 @@
         <translation>Проверка ресурсов split APK...</translation>
     </message>
     <message>
+        <location line="+2" />
+        <source>Building icon list...</source>
+        <translation>Построение списка значков...</translation>
+    </message>
+    <message>
         <location line="+5" />
         <source>APK successfully loaded</source>
         <translation>APK успешно загружен</translation>
@@ -1071,6 +1076,31 @@ Resize automatically?</source>
         <location line="-29" />
         <source>Icon size preset:</source>
         <translation>Предустановка размера значка:</translation>
+    </message>
+    <message>
+        <location line="+1" />
+        <source>Building icon list...</source>
+        <translation>Построение списка значков...</translation>
+    </message>
+    <message>
+        <source>Adaptive Icon Preview Shape</source>
+        <translation>Форма предпросмотра адаптивной иконки</translation>
+    </message>
+    <message>
+        <source>No Mask</source>
+        <translation>Без маски</translation>
+    </message>
+    <message>
+        <source>Circle</source>
+        <translation>Круг</translation>
+    </message>
+    <message>
+        <source>Rounded Square</source>
+        <translation>Скруглённый квадрат</translation>
+    </message>
+    <message>
+        <source>Squircle</source>
+        <translation>Сквиркл</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>

@@ -114,6 +114,7 @@ void MainWindow::init_gui()
     menuFile = new QMenu(this);
     menuIcon = new QMenu(this);
     menuView = new QMenu(this);
+    menuPreviewShape = new QMenu(this);
     menuSett = new QMenu(this);
     menuHelp = new QMenu(this);
     btnDonate = new QToolButton(this);
@@ -148,6 +149,17 @@ void MainWindow::init_gui()
     actIconBackground = new QAction(this);
     actViewActivities = new QAction(this);
     actViewActivities->setCheckable(true);
+    previewShapeActions = new QActionGroup(this);
+    previewShapeActions->setExclusive(true);
+    actPreviewShapeNone = new QAction(previewShapeActions);
+    actPreviewShapeCircle = new QAction(previewShapeActions);
+    actPreviewShapeRoundedSquare = new QAction(previewShapeActions);
+    actPreviewShapeSquircle = new QAction(previewShapeActions);
+    foreach (QAction *action, previewShapeActions->actions()) {
+        action->setCheckable(true);
+        menuPreviewShape->addAction(action);
+    }
+    actPreviewShapeNone->setChecked(true);
     actPacking = new QAction(this);
     actKeys = new QAction(this);
     menuLang = new QMenu(this);
@@ -181,6 +193,7 @@ void MainWindow::init_gui()
     menuIcon->addSeparator();
     menuIcon->addAction(actIconBackground);
     menuView->addAction(actViewActivities);
+    menuView->addMenu(menuPreviewShape);
     menuSett->addAction(actPacking);
     menuSett->addAction(actKeys);
     menuSett->addSeparator();
@@ -296,6 +309,20 @@ void MainWindow::init_gui()
     listIcons->setModel(iconsProxy);
     setCurrentIcon(QModelIndex());
 
+    QWidget *iconsLoading = new QWidget(this);
+    QVBoxLayout *layoutIconsLoading = new QVBoxLayout(iconsLoading);
+    layoutIconsLoading->addStretch();
+    iconsLoadingIndicator = new BusyIndicator(this);
+    iconsLoadingLabel = new QLabel(this);
+    iconsLoadingLabel->setAlignment(Qt::AlignCenter);
+    layoutIconsLoading->addWidget(iconsLoadingIndicator, 0, Qt::AlignHCenter);
+    layoutIconsLoading->addWidget(iconsLoadingLabel);
+    layoutIconsLoading->addStretch();
+
+    iconsStack = new QStackedWidget(this);
+    iconsStack->addWidget(listIcons);
+    iconsStack->addWidget(iconsLoading);
+
     actAddIconLdpi = new QAction(this);
     actAddIconMdpi = new QAction(this);
     actAddIconHdpi = new QAction(this);
@@ -370,7 +397,7 @@ void MainWindow::init_gui()
     layoutIconsButtons->setSpacing(2);
 
     layoutIcons->addLayout(layoutDevices);
-    layoutIcons->addWidget(listIcons);
+    layoutIcons->addWidget(iconsStack);
     layoutIcons->addLayout(layoutIconsButtons);
     layoutIcons->setContentsMargins(4, 4, 4, 4);
     layoutIcons->setSpacing(6);
@@ -506,6 +533,10 @@ void MainWindow::init_slots()
     connect(actIconClone, SIGNAL(triggered()), this, SLOT(cloneIcons()));
     connect(actIconBackground, SIGNAL(triggered()), this, SLOT(setPreviewColor()));
     connect(actViewActivities, &QAction::toggled, iconsProxy, &IconsProxy::setShowActivities);
+    connect(actPreviewShapeNone, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeNone); });
+    connect(actPreviewShapeCircle, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeCircle); });
+    connect(actPreviewShapeRoundedSquare, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeRoundedSquare); });
+    connect(actPreviewShapeSquircle, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeSquircle); });
     connect(actPacking, SIGNAL(triggered()), toolDialog, SLOT(open()));
     connect(actKeys, SIGNAL(triggered()), keyManager, SLOT(open()));
     connect(actAssoc, SIGNAL(triggered()), this, SLOT(associate()));
@@ -662,6 +693,7 @@ void MainWindow::setLanguage(QString lang)
     tabs->setTabText(1, tr("Translations"));
     tabs->setTabText(2, tr("Properties")); // tr("Details")
     devicesLabel->setText(tr("Icon size preset:"));
+    iconsLoadingLabel->setText(tr("Building icon list..."));
     btnApplyAppName->setText(tr("Apply to All"));
     checkDropbox->setText(tr("Upload to %1").arg(dropbox->getTitle()));
     checkGDrive->setText(tr("Upload to %1").arg(gdrive->getTitle()));
@@ -692,6 +724,11 @@ void MainWindow::setLanguage(QString lang)
     menuIconAdd->setTitle(tr("&Add Icon"));
     btnAddIcon->setToolTip(tr("&Add Icon").remove('&'));
     actViewActivities->setText("Android Activities");
+    menuPreviewShape->setTitle(tr("Adaptive Icon Preview Shape"));
+    actPreviewShapeNone->setText(tr("No Mask"));
+    actPreviewShapeCircle->setText(tr("Circle"));
+    actPreviewShapeRoundedSquare->setText(tr("Rounded Square"));
+    actPreviewShapeSquircle->setText(tr("Squircle"));
     actIconBackground->setText(tr("Preview Background &Color"));
     actPacking->setText(tr("&Repacking"));
     actKeys->setText(tr("Key Manager"));
@@ -830,6 +867,17 @@ void MainWindow::setActiveApk(QString filename)
     recent_add(filename);
 }
 
+void MainWindow::setIconsLoading(bool loading)
+{
+    iconsStack->setCurrentWidget(loading ? iconsStack->widget(1) : listIcons);
+    devices->setEnabled(!loading);
+    if (loading) {
+        menuIconAdd->setEnabled(false);
+        btnAddIcon->setEnabled(false);
+        setCurrentIcon(QModelIndex());
+    }
+}
+
 void MainWindow::enableUpload(bool enable)
 {
     checkDropbox->setVisible(enable);
@@ -879,7 +927,6 @@ void MainWindow::apk_packed(Apk::File *apk, bool isSuccess, QString text, QStrin
 void MainWindow::apk_unpacked(Apk::File *apk)
 {
     this->apk = apk;
-    loadingDialog->accept();
     setActiveApk(apk->getFilePath());
 
     // Set models:
@@ -889,6 +936,7 @@ void MainWindow::apk_unpacked(Apk::File *apk)
     tableTitles->setModel(&apk->titlesModel);
     tableTitles->resizeColumnsToContents();
     listIcons->setCurrentIndex(listIcons->model()->index(0, 0));
+    setIconsLoading(false);
     connect(&apk->manifestModel, &ManifestModel::dataChanged, [=]() { setWindowModified(true); });
     connect(&apk->titlesModel, &TitlesModel::dataChanged, [=]() { setWindowModified(true); });
 
@@ -902,8 +950,10 @@ void MainWindow::apk_unpacked(Apk::File *apk)
     actApkClose->setEnabled(true);
     iconActions->setEnabled(true);
     menuIconAdd->setEnabled(true);
+    btnAddIcon->setEnabled(true);
     btnPack->setEnabled(true);
 
+    loadingDialog->accept();
     setWindowModified(false);
 }
 
@@ -1141,6 +1191,8 @@ bool MainWindow::apk_open(QString filename)
     const QString apktool = Settings::get_apktool();
     const bool smali = Settings::get_smali();
     apk_close();
+    setIconsLoading(true);
+    tabIcons->setEnabled(true);
     apkManager->unpack(filename, destination, apktool, smali);
 
     return true;
@@ -1223,6 +1275,7 @@ void MainWindow::apk_close()
     iconActions->setEnabled(false);
     menuIconAdd->setEnabled(false);
     btnPack->setEnabled(false);
+    setIconsLoading(false);
 }
 
 void MainWindow::associate() const

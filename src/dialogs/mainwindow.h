@@ -9,6 +9,7 @@
 #include <QMainWindow>
 #include <QSplitter>
 #include <QListView>
+#include <QStackedWidget>
 #include <QTableView>
 #include <QComboBox>
 #include <QMessageBox>
@@ -17,6 +18,7 @@
 #include <QCloseEvent>
 #include "about.h"
 #include "apkmanager.h"
+#include "busyindicator.h"
 #include "cloud.h"
 #include "dialogs.h"
 #include "drawarea.h"
@@ -190,6 +192,7 @@ private:
     void checkReqs();      ///< Checks Java and Apktool versions.
     bool resetApktool();   ///< Removes the Apktool "1.apk" framework file.
     void setInitialSize(); ///< Sets the initial sizes for the window and splitter.
+    void setIconsLoading(bool loading); ///< Shows or hides the icon list loading state.
     bool confirmExit();    ///< Displays the exit confirmation dialog.
 
     /// Uploads the specified file to a cloud service.
@@ -209,6 +212,9 @@ private:
     // MVC:
 
     QListView *listIcons;
+    QStackedWidget *iconsStack;
+    QLabel *iconsLoadingLabel;
+    BusyIndicator *iconsLoadingIndicator;
     QTableView *tableManifest;
     QTableView *tableTitles;
 
@@ -247,6 +253,7 @@ private:
     QMenu *menuIcon;
     QMenu *menuIconAdd;
     QMenu *menuView;
+    QMenu *menuPreviewShape;
     QMenu *menuSett;
     QMenu *menuHelp;
     QMenu *menuRecent;
@@ -282,6 +289,11 @@ private:
     QAction *actAddIconXxxhdpi;
     QAction *actAddIconTv;
     QAction *actViewActivities;
+    QActionGroup *previewShapeActions;
+    QAction *actPreviewShapeNone;
+    QAction *actPreviewShapeCircle;
+    QAction *actPreviewShapeRoundedSquare;
+    QAction *actPreviewShapeSquircle;
     QAction *actPacking;
     QAction *actKeys;
     QAction *actTranslate;

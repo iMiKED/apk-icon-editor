@@ -348,6 +348,8 @@ void Unpacker::unpack(QString filepath, QString destination, QString apktoolPath
                 emit loading(70, tr("Reading AndroidManifest.xml..."));
                 emit loading(72, tr("Checking split APK resources..."));
                 const QStringList splitContentsPaths = unpackCompatibleSplits(filepath, destination, apktoolPath, frameworks);
+                emit loading(84, tr("Building icon list..."));
+                QApplication::processEvents();
                 Apk::File *apk = new Apk::File(destination, splitContentsPaths);
                 apk->setFilePath(filepath);
                 qDebug() << "Done.\n";

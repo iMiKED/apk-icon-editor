@@ -18,6 +18,13 @@ class DrawArea : public QLabel {
     Q_OBJECT
 
 public:
+    enum PreviewShape {
+        PreviewShapeNone,
+        PreviewShapeCircle,
+        PreviewShapeRoundedSquare,
+        PreviewShapeSquircle
+    };
+
     explicit DrawArea(QWidget *parent = 0);
 
     /// Draws the specified \c icon in the preview area.
@@ -36,6 +43,9 @@ public:
     /// If the \c color differs from the default one, grid dots are not painted.
     void setBackground(QColor color) { if (color != QColor::Invalid) background = color; }
 
+    /// Clips adaptive icon previews to the specified launcher shape.
+    void setPreviewShape(PreviewShape shape) { previewShape = shape; repaint(); }
+
     /// Returns the current icon.
     Icon *getIcon() const { return icon; }
 
@@ -51,6 +61,7 @@ private:
     Icon *icon;        ///< Currently previewed icon.
     QColor background; ///< Preview area background color.
     QSize bounds;      ///< Size of the template border.
+    PreviewShape previewShape; ///< Optional adaptive icon preview clipping shape.
 
     /// Enables or disables the mouse hover widget styling.
     void setAllowHover(bool allow);
