@@ -1,6 +1,139 @@
 #include "devicemodel.h"
+#include "globals.h"
+#include <QDebug>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <climits>
 
 DeviceModel::DeviceModel(QObject *parent) : QAbstractListModel(parent)
+{
+    if (!loadSharedConfig()) {
+        addFallbackDevices();
+    }
+}
+
+DeviceModel::~DeviceModel()
+{
+    qDeleteAll(devices);
+}
+
+bool DeviceModel::loadSharedConfig()
+{
+    const QString configPath = QDir::cleanPath(Path::Data::shared() + "devices.json");
+    QFile input(configPath);
+    if (!input.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning().noquote() << "Device presets config not found, using built-in fallback:" << Path::display(configPath);
+        return false;
+    }
+
+    QJsonParseError error;
+    const QJsonDocument doc = QJsonDocument::fromJson(input.readAll(), &error);
+    if (error.error != QJsonParseError::NoError || !doc.isArray()) {
+        qWarning().noquote() << "Device presets config is invalid, using built-in fallback:"
+                             << Path::display(configPath) << error.errorString();
+        return false;
+    }
+
+    const QJsonArray entries = doc.array();
+    for (const QJsonValue &entry : entries) {
+        if (entry.isObject() && !addJsonDevice(entry.toObject())) {
+            qWarning().noquote() << "Skipping invalid device preset from" << Path::display(configPath);
+        }
+    }
+
+    if (devices.isEmpty()) {
+        qWarning().noquote() << "Device presets config has no valid entries, using built-in fallback:" << Path::display(configPath);
+        return false;
+    }
+
+    qDebug().noquote() << QString("Loaded %1 device presets from %2").arg(devices.count()).arg(Path::display(configPath));
+    return true;
+}
+
+bool DeviceModel::addJsonDevice(const QJsonObject &object)
+{
+    const QString title = object.value("title").toString().trimmed();
+    const QJsonObject sizes = object.value("sizes").toObject();
+    const QJsonObject banner = object.value("banner").toObject();
+    const QStringList densityKeys = QStringList() << "ldpi" << "mdpi" << "hdpi" << "xhdpi" << "xxhdpi" << "xxxhdpi";
+    QList<short> densitySizes;
+
+    foreach (const QString &key, densityKeys) {
+        const int size = sizes.value(key).toInt();
+        if (size <= 0 || size > SHRT_MAX) {
+            return false;
+        }
+        densitySizes << static_cast<short>(size);
+    }
+
+    const int bannerWidth = banner.value("width").toInt();
+    const int bannerHeight = banner.value("height").toInt();
+    if (title.isEmpty() || bannerWidth <= 0 || bannerHeight <= 0) {
+        return false;
+    }
+
+    Device *device = new Device(title,
+                                iconFromConfig(object.value("icon").toString()),
+                                densitySizes.at(0),
+                                densitySizes.at(1),
+                                densitySizes.at(2),
+                                densitySizes.at(3),
+                                densitySizes.at(4),
+                                densitySizes.at(5),
+                                QSize(bannerWidth, bannerHeight));
+
+    const QJsonObject hints = object.value("hints").toObject();
+    const QMap<QString, Icon::Type> hintTypes = {
+        { "ldpi", Icon::Ldpi },
+        { "mdpi", Icon::Mdpi },
+        { "hdpi", Icon::Hdpi },
+        { "xhdpi", Icon::Xhdpi },
+        { "xxhdpi", Icon::Xxhdpi },
+        { "xxxhdpi", Icon::Xxxhdpi },
+        { "tvBanner", Icon::TvBanner }
+    };
+    for (auto it = hintTypes.constBegin(); it != hintTypes.constEnd(); ++it) {
+        const QString hint = hints.value(it.key()).toString().trimmed();
+        if (!hint.isEmpty()) {
+            device->setHint(it.value(), hint);
+        }
+    }
+
+    add(device);
+    return true;
+}
+
+QIcon DeviceModel::iconFromConfig(const QString &path) const
+{
+    const QString clean = QDir::cleanPath(QDir::fromNativeSeparators(path.trimmed()));
+    if (clean.isEmpty()) {
+        return QIcon();
+    }
+
+    if (clean.startsWith(":/")) {
+        return QIcon(clean);
+    }
+
+    const QString sharedPath = QDir::cleanPath(Path::Data::shared() + clean);
+    if (QFileInfo::exists(sharedPath)) {
+        return QIcon(sharedPath);
+    }
+
+    const QString resourcePath = ":/" + clean;
+    if (QFile::exists(resourcePath)) {
+        qDebug().noquote() << "Device preset icon uses built-in fallback:" << resourcePath;
+        return QIcon(resourcePath);
+    }
+
+    qWarning().noquote() << "Device preset icon not found:" << Path::display(sharedPath);
+    return QIcon();
+}
+
+void DeviceModel::addFallbackDevices()
 {
     const QIcon iconAndroid(":/gfx/devices/android.png");
     const QIcon iconBlackberry(":/gfx/devices/blackberry.png");
@@ -9,6 +142,7 @@ DeviceModel::DeviceModel(QObject *parent) : QAbstractListModel(parent)
     const QSize tvBannerSize(320, 180);
 
     Device *android = new Device("Android Default", iconAndroid, 36, 48, 72, 96, 144, 192, tvBannerSize);
+    Device *androidTv = new Device("Android TV / Leanback", iconAndroid, 36, 48, 72, 96, 144, 192, tvBannerSize);
     Device *bb_q10 = new Device("BlackBerry Q10", iconBlackberry, 90, 90, 90, 90, 90, 90, tvBannerSize); // Q10, Q5, Q10
     Device *bb_z10 = new Device("BlackBerry Z10", iconBlackberry, 110, 110, 110, 110, 110, 110, tvBannerSize);
     Device *bb_z30 = new Device("BlackBerry Z30", iconBlackberry, 96, 96, 96, 96, 96, 96, tvBannerSize); // Z30, Z3, Z30
@@ -33,6 +167,7 @@ DeviceModel::DeviceModel(QObject *parent) : QAbstractListModel(parent)
     kindle8->setHint(Icon::Xhdpi, "Kindle Fire HDX Carousel");
 
     add(android);
+    add(androidTv);
     add(bb_q10);
     add(bb_z10);
     add(bb_z30);
@@ -45,11 +180,6 @@ DeviceModel::DeviceModel(QObject *parent) : QAbstractListModel(parent)
     add(kindle6);
     add(kindle7);
     add(kindle8);
-}
-
-DeviceModel::~DeviceModel()
-{
-    qDeleteAll(devices);
 }
 
 void DeviceModel::add(Device *device)

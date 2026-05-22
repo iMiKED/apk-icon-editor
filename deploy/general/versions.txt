@@ -1,5 +1,9 @@
 # Version History
 
+## 3.0.0-beta4
+* Moved the Device size preset list to a shared cross-platform devices.json config with external device icon assets.
+* Added an Android TV / Leanback device preset and kept built-in device presets as a fallback when the shared config is missing or invalid.
+
 ## 3.0.0-beta3
 * Added resource table alias resolution from resources.arsc for adaptive XML icons.
 * Fixed adaptive icon rendering for APKs whose launcher foreground is a resources.arsc alias, such as Snapseed.

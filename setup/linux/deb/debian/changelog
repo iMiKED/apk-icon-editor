@@ -1,3 +1,9 @@
+apk-icon-editor-reborn (3.0.0~beta4-1) unstable; urgency=low
+
+  * Continue beta work with configurable device presets and localization updates.
+
+ -- iMiKED <M-I-B@yandex.ru>  Fri, 22 May 2026 01:30:00 +0700
+
 apk-icon-editor-reborn (3.0.0~beta3-1) unstable; urgency=low
 
   * Rename application and binary package to APK Icon Editor Reborn.

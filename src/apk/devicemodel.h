@@ -3,6 +3,7 @@
 
 #include "device.h"
 #include <QAbstractListModel>
+#include <QJsonObject>
 
 class DeviceModel : public QAbstractListModel
 {
@@ -19,6 +20,11 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
 
 private:
+    bool loadSharedConfig();
+    bool addJsonDevice(const QJsonObject &object);
+    void addFallbackDevices();
+    QIcon iconFromConfig(const QString &path) const;
+
     QList<Device *> devices;
 };
 
