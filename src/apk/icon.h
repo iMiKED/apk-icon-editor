@@ -40,6 +40,7 @@ public:
         Ldpi,
         Mdpi,
         Hdpi,
+        Tvdpi,
         Xhdpi,
         Xxhdpi,
         Xxxhdpi,

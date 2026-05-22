@@ -703,7 +703,7 @@ Check your JDK installation and PATH environment variable.</source>
     </message>
     <message>
         <location line="+1"/>
-        <source>Device:</source>
+        <source>Icon size preset:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

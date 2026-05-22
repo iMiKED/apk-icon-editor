@@ -33,13 +33,17 @@ public:
 
     QString getIconTitle(const Icon &icon) const;    ///< Returns the icon title for the device.
     StandardSize getIconSize(Icon::Type type) const; ///< Returns the standard icon size for the device.
+    StandardSize getIconSize(const Icon &icon) const; ///< Returns a size using icon qualifiers when needed.
 
+    void setIconSize(Icon::Type type, const QSize &size);
+    void setTvBannerSize(const QString &density, const QSize &size);
     void setHint(Icon::Type type, const QString &hint);
 
 private:
     QString title;                        ///< Device title.
     QIcon thumbnail;                      ///< Device thumbnail icon.
     QMap<Icon::Type, StandardSize> sizes; ///< List of sizes for a single device.
+    QMap<QString, StandardSize> tvBannerSizes; ///< TV banner sizes by density qualifier.
 };
 
 #endif // DEVICES_H

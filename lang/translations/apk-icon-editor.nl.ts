@@ -1069,8 +1069,8 @@ Wilt u hem automatisch herschalen?</translation>
     </message>
     <message>
         <location line="-29" />
-        <source>Device:</source>
-        <translation>Apparaat:</translation>
+        <source>Icon size preset:</source>
+        <translation>Voorinstelling pictogramgrootte:</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>

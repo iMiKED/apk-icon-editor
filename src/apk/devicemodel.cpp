@@ -23,34 +23,45 @@ DeviceModel::~DeviceModel()
 
 bool DeviceModel::loadSharedConfig()
 {
-    const QString configPath = QDir::cleanPath(Path::Data::shared() + "devices.json");
+    const QString configPath = QDir::cleanPath(Path::Data::shared() + "icon-size-presets.json");
     QFile input(configPath);
     if (!input.open(QFile::ReadOnly | QFile::Text)) {
-        qWarning().noquote() << "Device presets config not found, using built-in fallback:" << Path::display(configPath);
+        qWarning().noquote() << "Icon size presets config not found, using built-in fallback:" << Path::display(configPath);
         return false;
     }
 
     QJsonParseError error;
     const QJsonDocument doc = QJsonDocument::fromJson(input.readAll(), &error);
-    if (error.error != QJsonParseError::NoError || !doc.isArray()) {
-        qWarning().noquote() << "Device presets config is invalid, using built-in fallback:"
+    if (error.error != QJsonParseError::NoError || (!doc.isArray() && !doc.isObject())) {
+        qWarning().noquote() << "Icon size presets config is invalid, using built-in fallback:"
                              << Path::display(configPath) << error.errorString();
         return false;
     }
 
-    const QJsonArray entries = doc.array();
+    QJsonArray entries;
+    int legacyCount = 0;
+    if (doc.isArray()) {
+        entries = doc.array();
+    } else {
+        const QJsonObject root = doc.object();
+        entries = root.value("presets").toArray();
+        legacyCount = root.value("legacy").toArray().count();
+    }
     for (const QJsonValue &entry : entries) {
         if (entry.isObject() && !addJsonDevice(entry.toObject())) {
-            qWarning().noquote() << "Skipping invalid device preset from" << Path::display(configPath);
+            qWarning().noquote() << "Skipping invalid icon size preset from" << Path::display(configPath);
         }
     }
 
     if (devices.isEmpty()) {
-        qWarning().noquote() << "Device presets config has no valid entries, using built-in fallback:" << Path::display(configPath);
+        qWarning().noquote() << "Icon size presets config has no valid active entries, using built-in fallback:" << Path::display(configPath);
         return false;
     }
 
-    qDebug().noquote() << QString("Loaded %1 device presets from %2").arg(devices.count()).arg(Path::display(configPath));
+    qDebug().noquote() << QString("Loaded %1 icon size presets from %2; %3 legacy presets kept in config")
+                          .arg(devices.count())
+                          .arg(Path::display(configPath))
+                          .arg(legacyCount);
     return true;
 }
 
@@ -58,8 +69,7 @@ bool DeviceModel::addJsonDevice(const QJsonObject &object)
 {
     const QString title = object.value("title").toString().trimmed();
     const QJsonObject sizes = object.value("sizes").toObject();
-    const QJsonObject banner = object.value("banner").toObject();
-    const QStringList densityKeys = QStringList() << "ldpi" << "mdpi" << "hdpi" << "xhdpi" << "xxhdpi" << "xxxhdpi";
+    const QStringList densityKeys = QStringList() << "ldpi" << "mdpi" << "hdpi" << "tvdpi" << "xhdpi" << "xxhdpi" << "xxxhdpi";
     QList<short> densitySizes;
 
     foreach (const QString &key, densityKeys) {
@@ -70,27 +80,45 @@ bool DeviceModel::addJsonDevice(const QJsonObject &object)
         densitySizes << static_cast<short>(size);
     }
 
-    const int bannerWidth = banner.value("width").toInt();
-    const int bannerHeight = banner.value("height").toInt();
-    if (title.isEmpty() || bannerWidth <= 0 || bannerHeight <= 0) {
+    if (title.isEmpty()) {
         return false;
     }
 
+    const QJsonObject defaultBanner = object.value("banner").toObject();
+    const QSize defaultBannerSize(defaultBanner.value("width").toInt(), defaultBanner.value("height").toInt());
+    const QSize bannerFallback = defaultBannerSize.isValid() ? defaultBannerSize : QSize(320, 180);
     Device *device = new Device(title,
                                 iconFromConfig(object.value("icon").toString()),
                                 densitySizes.at(0),
                                 densitySizes.at(1),
                                 densitySizes.at(2),
-                                densitySizes.at(3),
                                 densitySizes.at(4),
                                 densitySizes.at(5),
-                                QSize(bannerWidth, bannerHeight));
+                                densitySizes.at(6),
+                                bannerFallback);
+    device->setIconSize(Icon::Tvdpi, QSize(densitySizes.at(3), densitySizes.at(3)));
+
+    bool hasBannerSize = defaultBannerSize.isValid();
+    const QJsonObject banners = object.value("banners").toObject();
+    foreach (const QString &key, densityKeys) {
+        const QJsonObject banner = banners.value(key).toObject();
+        const QSize size(banner.value("width").toInt(), banner.value("height").toInt());
+        if (size.isValid()) {
+            device->setTvBannerSize(key, size);
+            hasBannerSize = true;
+        }
+    }
+    if (!hasBannerSize) {
+        delete device;
+        return false;
+    }
 
     const QJsonObject hints = object.value("hints").toObject();
     const QMap<QString, Icon::Type> hintTypes = {
         { "ldpi", Icon::Ldpi },
         { "mdpi", Icon::Mdpi },
         { "hdpi", Icon::Hdpi },
+        { "tvdpi", Icon::Tvdpi },
         { "xhdpi", Icon::Xhdpi },
         { "xxhdpi", Icon::Xxhdpi },
         { "xxxhdpi", Icon::Xxxhdpi },
@@ -125,61 +153,33 @@ QIcon DeviceModel::iconFromConfig(const QString &path) const
 
     const QString resourcePath = ":/" + clean;
     if (QFile::exists(resourcePath)) {
-        qDebug().noquote() << "Device preset icon uses built-in fallback:" << resourcePath;
+        qDebug().noquote() << "Icon size preset icon uses built-in fallback:" << resourcePath;
         return QIcon(resourcePath);
     }
 
-    qWarning().noquote() << "Device preset icon not found:" << Path::display(sharedPath);
+    qWarning().noquote() << "Icon size preset icon not found:" << Path::display(sharedPath);
     return QIcon();
 }
 
 void DeviceModel::addFallbackDevices()
 {
     const QIcon iconAndroid(":/gfx/devices/android.png");
-    const QIcon iconBlackberry(":/gfx/devices/blackberry.png");
-    const QIcon iconAmazon(":/gfx/devices/amazon.png");
+    Device *android = new Device("Android Default", iconAndroid, 36, 48, 72, 96, 144, 192);
+    Device *androidTv = new Device("Android TV / Google TV", iconAndroid, 80, 80, 120, 160, 240, 320);
+    androidTv->setIconSize(Icon::Tvdpi, QSize(107, 107));
 
-    const QSize tvBannerSize(320, 180);
-
-    Device *android = new Device("Android Default", iconAndroid, 36, 48, 72, 96, 144, 192, tvBannerSize);
-    Device *androidTv = new Device("Android TV / Leanback", iconAndroid, 36, 48, 72, 96, 144, 192, tvBannerSize);
-    Device *bb_q10 = new Device("BlackBerry Q10", iconBlackberry, 90, 90, 90, 90, 90, 90, tvBannerSize); // Q10, Q5, Q10
-    Device *bb_z10 = new Device("BlackBerry Z10", iconBlackberry, 110, 110, 110, 110, 110, 110, tvBannerSize);
-    Device *bb_z30 = new Device("BlackBerry Z30", iconBlackberry, 96, 96, 96, 96, 96, 96, tvBannerSize); // Z30, Z3, Z30
-    Device *bb_passport = new Device("BlackBerry Passport", iconBlackberry, 144, 144, 144, 144, 144, 144, tvBannerSize);
-    Device *kindle1 = new Device("Kindle Fire (1st Gen)", iconAmazon, 36, 322, 72, 96, 144, 192, tvBannerSize);
-    Device *kindle2 = new Device("Kindle Fire (2nd Gen)", iconAmazon, 36, 365, 72, 96, 144, 192, tvBannerSize);
-    Device *kindle3 = new Device("Kindle Fire HD 7\" (2nd Gen)", iconAmazon, 36, 48, 425, 96, 144, 192, tvBannerSize);
-    Device *kindle4 = new Device("Kindle Fire HD 8.9\" (2nd Gen)", iconAmazon, 36, 48, 675, 96, 144, 192, tvBannerSize);
-    Device *kindle5 = new Device("Kindle Fire HD 7\" (3rd Gen)", iconAmazon, 36, 48, 375, 96, 144, 192, tvBannerSize);
-    Device *kindle6 = new Device("Kindle Fire HDX 7\" (3rd Gen)", iconAmazon, 36, 48, 72, 562, 144, 192, tvBannerSize);
-    Device *kindle7 = new Device("Kindle Fire HDX 8.9\" (3rd Gen)", iconAmazon, 36, 48, 72, 624, 144, 192, tvBannerSize);
-    Device *kindle8 = new Device("Kindle Fire - All Models", iconAmazon, 36, 365, 675, 624, 144, 192, tvBannerSize);
-    kindle1->setHint(Icon::Mdpi, "Carousel");
-    kindle2->setHint(Icon::Mdpi, "Carousel");
-    kindle3->setHint(Icon::Hdpi, "Carousel");
-    kindle4->setHint(Icon::Hdpi, "Carousel");
-    kindle5->setHint(Icon::Hdpi, "Carousel");
-    kindle6->setHint(Icon::Xhdpi, "Carousel");
-    kindle7->setHint(Icon::Xhdpi, "Carousel");
-    kindle8->setHint(Icon::Mdpi, "Kindle Fire Carousel");
-    kindle8->setHint(Icon::Hdpi, "Kindle Fire HD Carousel");
-    kindle8->setHint(Icon::Xhdpi, "Kindle Fire HDX Carousel");
+    QList<Device *> androidPresets = QList<Device *>() << android << androidTv;
+    foreach (Device *device, androidPresets) {
+        device->setTvBannerSize("mdpi", QSize(160, 90));
+        device->setTvBannerSize("tvdpi", QSize(213, 120));
+        device->setTvBannerSize("hdpi", QSize(240, 135));
+        device->setTvBannerSize("xhdpi", QSize(320, 180));
+        device->setTvBannerSize("xxhdpi", QSize(480, 270));
+        device->setTvBannerSize("xxxhdpi", QSize(640, 360));
+    }
 
     add(android);
     add(androidTv);
-    add(bb_q10);
-    add(bb_z10);
-    add(bb_z30);
-    add(bb_passport);
-    add(kindle1);
-    add(kindle2);
-    add(kindle3);
-    add(kindle4);
-    add(kindle5);
-    add(kindle6);
-    add(kindle7);
-    add(kindle8);
 }
 
 void DeviceModel::add(Device *device)

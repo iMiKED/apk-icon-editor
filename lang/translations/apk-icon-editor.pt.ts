@@ -1069,8 +1069,8 @@ Redimensionar automaticamente?</translation>
     </message>
     <message>
         <location line="-29" />
-        <source>Device:</source>
-        <translation>Dispositivo:</translation>
+        <source>Icon size preset:</source>
+        <translation>Predefinição do tamanho do ícone:</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>

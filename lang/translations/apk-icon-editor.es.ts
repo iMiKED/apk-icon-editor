@@ -1069,8 +1069,8 @@ Resize automatically?</source>
     </message>
     <message>
         <location line="-29" />
-        <source>Device:</source>
-        <translation>Dispositivo:</translation>
+        <source>Icon size preset:</source>
+        <translation>Preajuste de tamaño del icono:</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>

@@ -1069,8 +1069,8 @@ Otomatik olarak boyutlandırılsın mı?</translation>
     </message>
     <message>
         <location line="-29" />
-        <source>Device:</source>
-        <translation>Cihaz:</translation>
+        <source>Icon size preset:</source>
+        <translation>Simge boyutu ön ayarı:</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>

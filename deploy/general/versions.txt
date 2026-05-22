@@ -1,8 +1,13 @@
 # Version History
 
 ## 3.0.0-beta4
-* Moved the Device size preset list to a shared cross-platform devices.json config with external device icon assets.
-* Added an Android TV / Leanback device preset and kept built-in device presets as a fallback when the shared config is missing or invalid.
+* Moved localization to the APK Icon Editor Reborn Crowdin project and added the source/translation synchronization workflow.
+* Refreshed the Reborn translation baseline for the currently supported languages.
+* Added adaptive XML rendering support for inline drawable bitmap layers.
+* Fixed split APK probing to follow manifest split metadata and ignore split metadata entries with empty split names.
+* Moved the Icon size preset list to a shared cross-platform JSON config with external preset icon assets.
+* Added current Android and Android TV / Google TV icon size presets with TVDPI launcher sizes and density-aware TV banner sizes.
+* Moved retired BlackBerry and Kindle Fire presets to the config legacy section and kept built-in Android presets as a fallback when the shared config is missing or invalid.
 
 ## 3.0.0-beta3
 * Added resource table alias resolution from resources.arsc for adaptive XML icons.

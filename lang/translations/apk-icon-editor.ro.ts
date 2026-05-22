@@ -1069,8 +1069,8 @@ Redimensionati automat?</translation>
     </message>
     <message>
         <location line="-29" />
-        <source>Device:</source>
-        <translation>Dispozitiv:</translation>
+        <source>Icon size preset:</source>
+        <translation>Preset dimensiune pictogramă:</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>

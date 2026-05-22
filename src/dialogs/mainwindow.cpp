@@ -299,6 +299,7 @@ void MainWindow::init_gui()
     actAddIconLdpi = new QAction(this);
     actAddIconMdpi = new QAction(this);
     actAddIconHdpi = new QAction(this);
+    actAddIconTvdpi = new QAction(this);
     actAddIconXhdpi = new QAction(this);
     actAddIconXxhdpi = new QAction(this);
     actAddIconXxxhdpi = new QAction(this);
@@ -308,6 +309,7 @@ void MainWindow::init_gui()
     menuIconAdd->addAction(actAddIconLdpi);
     menuIconAdd->addAction(actAddIconMdpi);
     menuIconAdd->addAction(actAddIconHdpi);
+    menuIconAdd->addAction(actAddIconTvdpi);
     menuIconAdd->addAction(actAddIconXhdpi);
     menuIconAdd->addAction(actAddIconXxhdpi);
     menuIconAdd->addAction(actAddIconXxxhdpi);
@@ -318,6 +320,7 @@ void MainWindow::init_gui()
         actAddIconLdpi->setText(device->getIconTitle(Icon(QString(), Icon::Ldpi)));
         actAddIconMdpi->setText(device->getIconTitle(Icon(QString(), Icon::Mdpi)));
         actAddIconHdpi->setText(device->getIconTitle(Icon(QString(), Icon::Hdpi)));
+        actAddIconTvdpi->setText(device->getIconTitle(Icon(QString(), Icon::Tvdpi)));
         actAddIconXhdpi->setText(device->getIconTitle(Icon(QString(), Icon::Xhdpi)));
         actAddIconXxhdpi->setText(device->getIconTitle(Icon(QString(), Icon::Xxhdpi)));
         actAddIconXxxhdpi->setText(device->getIconTitle(Icon(QString(), Icon::Xxxhdpi)));
@@ -520,6 +523,7 @@ void MainWindow::init_slots()
     connect(actAddIconLdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Ldpi); });
     connect(actAddIconMdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Mdpi); });
     connect(actAddIconHdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Hdpi); });
+    connect(actAddIconTvdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Tvdpi); });
     connect(actAddIconXhdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Xhdpi); });
     connect(actAddIconXxhdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Xxhdpi); });
     connect(actAddIconXxxhdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Xxxhdpi); });
@@ -657,7 +661,7 @@ void MainWindow::setLanguage(QString lang)
     tabs->setTabText(0, tr("Icons"));
     tabs->setTabText(1, tr("Translations"));
     tabs->setTabText(2, tr("Properties")); // tr("Details")
-    devicesLabel->setText(tr("Device:"));
+    devicesLabel->setText(tr("Icon size preset:"));
     btnApplyAppName->setText(tr("Apply to All"));
     checkDropbox->setText(tr("Upload to %1").arg(dropbox->getTitle()));
     checkGDrive->setText(tr("Upload to %1").arg(gdrive->getTitle()));
@@ -784,7 +788,7 @@ void MainWindow::setCurrentIcon(const QModelIndex &index)
         }
 
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(icon->getType()).size;
+        const QSize size = device->getIconSize(*icon).size;
         drawArea->setBounds(size.width(), size.height());
 
         disconnect(effects, 0, 0, 0);
@@ -957,7 +961,7 @@ bool MainWindow::icon_open(QString filename)
     if (icon->replace(imported)) {
         repaint();
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(icon->getType()).size;
+        const QSize size = device->getIconSize(*icon).size;
 
         if (icon->width() != size.width() || icon->height() != size.height()) {
             int result = QMessageBox::warning(this, tr("Resize?"),
@@ -994,7 +998,7 @@ bool MainWindow::icon_save(QString filename)
 
     if (filename.isEmpty()) {
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(icon->getType()).size;
+        const QSize size = device->getIconSize(*icon).size;
         filename = QString("%1-%2x%3").arg(QFileInfo(currentApk).completeBaseName()).arg(size.width()).arg(size.height());
         filename = QFileDialog::getSaveFileName(this, tr("Save Icon"), filename, Image::Formats::saveDialogFilter());
         if (filename.isEmpty()) {
@@ -1012,7 +1016,7 @@ bool MainWindow::icon_scale()
     }
 
     const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-    const QSize size = device->getIconSize(icon->getType()).size;
+    const QSize size = device->getIconSize(*icon).size;
     return icon_resize(size);
 }
 

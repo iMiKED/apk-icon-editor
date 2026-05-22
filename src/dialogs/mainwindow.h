@@ -276,6 +276,7 @@ private:
     QAction *actAddIconLdpi;
     QAction *actAddIconMdpi;
     QAction *actAddIconHdpi;
+    QAction *actAddIconTvdpi;
     QAction *actAddIconXhdpi;
     QAction *actAddIconXxhdpi;
     QAction *actAddIconXxxhdpi;

@@ -244,6 +244,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             << Icon::Ldpi
             << Icon::Mdpi
             << Icon::Hdpi
+            << Icon::Tvdpi
             << Icon::Xhdpi
             << Icon::Xxhdpi
             << Icon::Xxxhdpi;
@@ -449,6 +450,7 @@ QString Apk::File::getIconPath(Icon::Type type)
         case Icon::Ldpi: qualifier = "ldpi"; break;
         case Icon::Mdpi: qualifier = "mdpi"; break;
         case Icon::Hdpi: qualifier = "hdpi"; break;
+        case Icon::Tvdpi: qualifier = "tvdpi"; break;
         case Icon::Xhdpi: qualifier = "xhdpi"; break;
         case Icon::Xxhdpi: qualifier = "xxhdpi"; break;
         case Icon::Xxxhdpi: qualifier = "xxxhdpi"; break;

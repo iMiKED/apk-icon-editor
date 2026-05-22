@@ -261,6 +261,7 @@ Icon::Type ResourceResolver::typeFromQualifiers(const QStringList &qualifiers)
     if (qualifiers.contains("ldpi")) return Icon::Ldpi;
     if (qualifiers.contains("mdpi")) return Icon::Mdpi;
     if (qualifiers.contains("hdpi")) return Icon::Hdpi;
+    if (qualifiers.contains("tvdpi")) return Icon::Tvdpi;
     if (qualifiers.contains("xhdpi")) return Icon::Xhdpi;
     if (qualifiers.contains("xxhdpi")) return Icon::Xxhdpi;
     if (qualifiers.contains("xxxhdpi")) return Icon::Xxxhdpi;
@@ -273,6 +274,7 @@ QString ResourceResolver::qualifierForType(Icon::Type type)
         case Icon::Ldpi: return "ldpi";
         case Icon::Mdpi: return "mdpi";
         case Icon::Hdpi: return "hdpi";
+        case Icon::Tvdpi: return "tvdpi";
         case Icon::Xhdpi: return "xhdpi";
         case Icon::Xxhdpi: return "xxhdpi";
         case Icon::Xxxhdpi: return "xxxhdpi";
@@ -592,9 +594,10 @@ int ResourceResolver::rankForType(Icon::Type type) const
         case Icon::Ldpi: return 0;
         case Icon::Mdpi: return 1;
         case Icon::Hdpi: return 2;
-        case Icon::Xhdpi: return 3;
-        case Icon::Xxhdpi: return 4;
-        case Icon::Xxxhdpi: return 5;
+        case Icon::Tvdpi: return 3;
+        case Icon::Xhdpi: return 4;
+        case Icon::Xxhdpi: return 5;
+        case Icon::Xxxhdpi: return 6;
         default: return -1;
     }
 }

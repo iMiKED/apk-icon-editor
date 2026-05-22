@@ -1069,8 +1069,8 @@ Soll die Größe automatisch angepasst werden?</translation>
     </message>
     <message>
         <location line="-29" />
-        <source>Device:</source>
-        <translation>Gerät:</translation>
+        <source>Icon size preset:</source>
+        <translation>Symbolgrößen-Voreinstellung:</translation>
     </message>
     <message>
         <source>This APK does not support current DPI.</source>
