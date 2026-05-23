@@ -721,6 +721,18 @@ Check your JDK installation and PATH environment variable.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Adaptive Icon Preview Mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Themed Monochrome</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>No Mask</source>
         <translation type="unfinished"></translation>
     </message>

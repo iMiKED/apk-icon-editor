@@ -1087,6 +1087,18 @@ Resize automatically?</source>
         <translation>Форма предпросмотра адаптивной иконки</translation>
     </message>
     <message>
+        <source>Adaptive Icon Preview Mode</source>
+        <translation>Режим предпросмотра адаптивной иконки</translation>
+    </message>
+    <message>
+        <source>Normal</source>
+        <translation>Обычный</translation>
+    </message>
+    <message>
+        <source>Themed Monochrome</source>
+        <translation>Тематический монохромный</translation>
+    </message>
+    <message>
         <source>No Mask</source>
         <translation>Без маски</translation>
     </message>

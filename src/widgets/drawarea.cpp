@@ -21,6 +21,7 @@ DrawArea::DrawArea(QWidget *parent) : QLabel(parent)
     bounds = QSize(0, 0);
     background = palette().color(QPalette::Window);
     previewShape = PreviewShapeNone;
+    adaptivePreviewMode = AdaptivePreviewNormal;
 }
 
 void DrawArea::setIcon(Icon *icon)
@@ -54,10 +55,13 @@ void DrawArea::paintEvent(QPaintEvent *event)
         if (background == palette().color(QPalette::Window)) {
             painter.fillRect(bx + 1, by + 1, bw - 1, bh - 1, Qt::Dense7Pattern);
         }
-        const QRectF iconBounds(width() / 2 - icon->width() / 2,
-                                height() / 2 - icon->height() / 2,
-                                icon->width(),
-                                icon->height());
+        const QPixmap preview = adaptivePreviewMode == AdaptivePreviewThemed
+                ? icon->getThemedPixmap()
+                : icon->getPixmap();
+        const QRectF iconBounds(width() / 2 - preview.width() / 2,
+                                height() / 2 - preview.height() / 2,
+                                preview.width(),
+                                preview.height());
         if (icon->isAdaptiveIcon() && previewShape != PreviewShapeNone) {
             QPainterPath clip;
             const qreal size = qMin(iconBounds.width(), iconBounds.height());
@@ -88,10 +92,10 @@ void DrawArea::paintEvent(QPaintEvent *event)
             }
             painter.save();
             painter.setClipPath(clip);
-            painter.drawPixmap(iconBounds.topLeft(), icon->getPixmap());
+            painter.drawPixmap(iconBounds.topLeft(), preview);
             painter.restore();
         } else {
-            painter.drawPixmap(iconBounds.topLeft(), icon->getPixmap());
+            painter.drawPixmap(iconBounds.topLeft(), preview);
         }
         painter.drawRect(bx, by, bw, bh);
         painter.setPen(Qt::lightGray);

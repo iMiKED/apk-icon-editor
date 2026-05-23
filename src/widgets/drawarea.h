@@ -25,6 +25,11 @@ public:
         PreviewShapeSquircle
     };
 
+    enum AdaptivePreviewMode {
+        AdaptivePreviewNormal,
+        AdaptivePreviewThemed
+    };
+
     explicit DrawArea(QWidget *parent = 0);
 
     /// Draws the specified \c icon in the preview area.
@@ -46,6 +51,9 @@ public:
     /// Clips adaptive icon previews to the specified launcher shape.
     void setPreviewShape(PreviewShape shape) { previewShape = shape; repaint(); }
 
+    /// Sets the adaptive icon preview mode.
+    void setAdaptivePreviewMode(AdaptivePreviewMode mode) { adaptivePreviewMode = mode; repaint(); }
+
     /// Returns the current icon.
     Icon *getIcon() const { return icon; }
 
@@ -62,6 +70,7 @@ private:
     QColor background; ///< Preview area background color.
     QSize bounds;      ///< Size of the template border.
     PreviewShape previewShape; ///< Optional adaptive icon preview clipping shape.
+    AdaptivePreviewMode adaptivePreviewMode; ///< Normal or themed adaptive icon preview mode.
 
     /// Enables or disables the mouse hover widget styling.
     void setAllowHover(bool allow);

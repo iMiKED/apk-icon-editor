@@ -253,6 +253,7 @@ private:
     QMenu *menuIcon;
     QMenu *menuIconAdd;
     QMenu *menuView;
+    QMenu *menuAdaptivePreviewMode;
     QMenu *menuPreviewShape;
     QMenu *menuSett;
     QMenu *menuHelp;
@@ -289,6 +290,9 @@ private:
     QAction *actAddIconXxxhdpi;
     QAction *actAddIconTv;
     QAction *actViewActivities;
+    QActionGroup *adaptivePreviewModeActions;
+    QAction *actAdaptivePreviewNormal;
+    QAction *actAdaptivePreviewThemed;
     QActionGroup *previewShapeActions;
     QAction *actPreviewShapeNone;
     QAction *actPreviewShapeCircle;

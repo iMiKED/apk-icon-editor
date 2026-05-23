@@ -114,6 +114,7 @@ void MainWindow::init_gui()
     menuFile = new QMenu(this);
     menuIcon = new QMenu(this);
     menuView = new QMenu(this);
+    menuAdaptivePreviewMode = new QMenu(this);
     menuPreviewShape = new QMenu(this);
     menuSett = new QMenu(this);
     menuHelp = new QMenu(this);
@@ -149,6 +150,15 @@ void MainWindow::init_gui()
     actIconBackground = new QAction(this);
     actViewActivities = new QAction(this);
     actViewActivities->setCheckable(true);
+    adaptivePreviewModeActions = new QActionGroup(this);
+    adaptivePreviewModeActions->setExclusive(true);
+    actAdaptivePreviewNormal = new QAction(adaptivePreviewModeActions);
+    actAdaptivePreviewThemed = new QAction(adaptivePreviewModeActions);
+    foreach (QAction *action, adaptivePreviewModeActions->actions()) {
+        action->setCheckable(true);
+        menuAdaptivePreviewMode->addAction(action);
+    }
+    actAdaptivePreviewNormal->setChecked(true);
     previewShapeActions = new QActionGroup(this);
     previewShapeActions->setExclusive(true);
     actPreviewShapeNone = new QAction(previewShapeActions);
@@ -193,6 +203,7 @@ void MainWindow::init_gui()
     menuIcon->addSeparator();
     menuIcon->addAction(actIconBackground);
     menuView->addAction(actViewActivities);
+    menuView->addMenu(menuAdaptivePreviewMode);
     menuView->addMenu(menuPreviewShape);
     menuSett->addAction(actPacking);
     menuSett->addAction(actKeys);
@@ -533,6 +544,8 @@ void MainWindow::init_slots()
     connect(actIconClone, SIGNAL(triggered()), this, SLOT(cloneIcons()));
     connect(actIconBackground, SIGNAL(triggered()), this, SLOT(setPreviewColor()));
     connect(actViewActivities, &QAction::toggled, iconsProxy, &IconsProxy::setShowActivities);
+    connect(actAdaptivePreviewNormal, &QAction::triggered, [=]() { drawArea->setAdaptivePreviewMode(DrawArea::AdaptivePreviewNormal); });
+    connect(actAdaptivePreviewThemed, &QAction::triggered, [=]() { drawArea->setAdaptivePreviewMode(DrawArea::AdaptivePreviewThemed); });
     connect(actPreviewShapeNone, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeNone); });
     connect(actPreviewShapeCircle, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeCircle); });
     connect(actPreviewShapeRoundedSquare, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeRoundedSquare); });
@@ -724,6 +737,9 @@ void MainWindow::setLanguage(QString lang)
     menuIconAdd->setTitle(tr("&Add Icon"));
     btnAddIcon->setToolTip(tr("&Add Icon").remove('&'));
     actViewActivities->setText("Android Activities");
+    menuAdaptivePreviewMode->setTitle(tr("Adaptive Icon Preview Mode"));
+    actAdaptivePreviewNormal->setText(tr("Normal"));
+    actAdaptivePreviewThemed->setText(tr("Themed Monochrome"));
     menuPreviewShape->setTitle(tr("Adaptive Icon Preview Shape"));
     actPreviewShapeNone->setText(tr("No Mask"));
     actPreviewShapeCircle->setText(tr("Circle"));

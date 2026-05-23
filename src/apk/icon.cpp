@@ -373,6 +373,18 @@ QPixmap Icon::getPixmap()
     return pixmapFx;
 }
 
+QPixmap Icon::getThemedPixmap() const
+{
+    return adaptiveDescriptor.monochromePreview.isNull()
+            ? pixmapFx
+            : adaptiveDescriptor.monochromePreview;
+}
+
+bool Icon::hasThemedPixmap() const
+{
+    return !adaptiveDescriptor.monochromePreview.isNull();
+}
+
 const QStringList &Icon::getQualifiers() const
 {
     return qualifiers;

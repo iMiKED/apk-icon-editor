@@ -26,6 +26,71 @@ static QSize scaledSize(const QSize &size, int scale)
     return QSize(size.width() * scale, size.height() * scale);
 }
 
+static QPixmap tintPixmap(const QPixmap &source, const QColor &color)
+{
+    if (source.isNull() || !color.isValid()) {
+        return QPixmap();
+    }
+
+    QImage canvas(source.size(), QImage::Format_ARGB32_Premultiplied);
+    canvas.fill(Qt::transparent);
+    QPainter painter(&canvas);
+    painter.drawPixmap(0, 0, source);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+    painter.fillRect(canvas.rect(), color);
+    painter.end();
+    return QPixmap::fromImage(canvas);
+}
+
+static QRectF themedLayerRect(const QSize &size)
+{
+    static const qreal extraInsetPercentage = 0.25;
+    const qreal insetX = size.width() * extraInsetPercentage;
+    const qreal insetY = size.height() * extraInsetPercentage;
+    return QRectF(-insetX, -insetY, size.width() + insetX * 2.0, size.height() + insetY * 2.0);
+}
+
+static QPixmap themedPreview(const ResourceResolver::Value &monochrome, const QPixmap &monochromeOverride, const QSize &renderSize, const QSize &finalSize)
+{
+    if (!monochrome.found && monochromeOverride.isNull()) {
+        return QPixmap();
+    }
+
+    QImage maskCanvas(renderSize, QImage::Format_ARGB32_Premultiplied);
+    maskCanvas.fill(Qt::transparent);
+    QPainter maskPainter(&maskCanvas);
+    maskPainter.setRenderHint(QPainter::SmoothPixmapTransform);
+    const QRectF layerRect = themedLayerRect(renderSize);
+    QPixmap layer = monochromeOverride.isNull() ? QPixmap(monochrome.filePath) : monochromeOverride;
+    if (!layer.isNull()) {
+        maskPainter.drawPixmap(layerRect, layer, layer.rect());
+    } else if (monochrome.color.isValid()) {
+        maskPainter.fillRect(maskCanvas.rect(), monochrome.color);
+    }
+    maskPainter.end();
+
+    QPixmap mask = QPixmap::fromImage(maskCanvas);
+    if (mask.isNull()) {
+        return QPixmap();
+    }
+    if (renderSize != finalSize) {
+        mask = mask.scaled(finalSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    }
+
+    const QColor background("#E8EAED");
+    const QColor foreground("#3C4043");
+    QImage canvas(finalSize, QImage::Format_ARGB32_Premultiplied);
+    canvas.fill(background);
+    QPainter painter(&canvas);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    const QPixmap tinted = tintPixmap(mask, foreground);
+    if (!tinted.isNull()) {
+        painter.drawPixmap(0, 0, tinted);
+    }
+    painter.end();
+    return QPixmap::fromImage(canvas);
+}
+
 static qreal dimensionAttrForSize(const QString &value, qreal reference, qreal fallback = 0.0)
 {
     QString text = value.trimmed();
@@ -119,6 +184,7 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     if (previewOversample > 1) {
         pixmap = pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     }
+    const QPixmap monochromePreview = themedPreview(monochrome, monochromePixmap, renderSize, size);
 
     result.valid = true;
     result.pixmap = pixmap;
@@ -137,6 +203,7 @@ AdaptiveIcon::Result AdaptiveIcon::resolve(const ResourceResolver &resolver, con
     result.descriptor.monochromePath = monochrome.isBitmap ? monochrome.filePath : QString();
     result.descriptor.monochromeColor = monochrome.color;
     result.descriptor.monochromeRenderable = monochrome.found || !monochromePixmap.isNull();
+    result.descriptor.monochromePreview = monochromePreview;
     result.type = type;
     return result;
 }
