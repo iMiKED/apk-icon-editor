@@ -6,6 +6,7 @@
 * Added adaptive XML rendering support for inline drawable bitmap layers.
 * Fixed split APK probing to follow manifest split metadata and ignore split metadata entries with empty split names.
 * Added progress and an Icons tab busy indicator while the icon list is being built.
+* Kept the Icons busy indicator responsive while the icon list is being built.
 * Added preview-only adaptive icon launcher shape masks without changing APK resources.
 * Moved the Icon size preset list to a shared cross-platform JSON config with external preset icon assets.
 * Added current Android and Android TV / Google TV icon size presets with TVDPI launcher sizes and density-aware TV banner sizes.
