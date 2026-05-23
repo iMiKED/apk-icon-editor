@@ -81,7 +81,7 @@ void FileBox::exists(QString path)
 {
     bool exists = isDir ? QDir(path).exists() : QFile::exists(path);
     if (exists || path.isEmpty()) {
-        label->setStyleSheet("color: #000");
+        label->setStyleSheet("");
     }
     else {
         label->setStyleSheet("color: #d00");

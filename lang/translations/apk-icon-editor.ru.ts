@@ -1141,6 +1141,22 @@ Resize automatically?</source>
         <translation>Помочь перевести</translation>
     </message>
     <message>
+        <source>&amp;Theme</source>
+        <translation>&amp;Тема</translation>
+    </message>
+    <message>
+        <source>System</source>
+        <translation>Системная</translation>
+    </message>
+    <message>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <source>Dark</source>
+        <translation>Тёмная</translation>
+    </message>
+    <message>
         <location line="+304" />
         <source>Save Icon</source>
         <translation>Сохранить значок</translation>

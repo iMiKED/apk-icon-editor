@@ -1,4 +1,5 @@
 #include "drawarea.h"
+#include <QEvent>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPainterPath>
@@ -20,6 +21,7 @@ DrawArea::DrawArea(QWidget *parent) : QLabel(parent)
     icon = NULL;
     bounds = QSize(0, 0);
     background = palette().color(QPalette::Window);
+    customBackground = false;
     previewShape = PreviewShapeNone;
     adaptivePreviewMode = AdaptivePreviewNormal;
 }
@@ -29,6 +31,21 @@ void DrawArea::setIcon(Icon *icon)
     this->icon = icon;
     setAllowHover(!icon);
     repaint();
+}
+
+void DrawArea::resetBackground()
+{
+    background = palette().color(QPalette::Window);
+    customBackground = false;
+    repaint();
+}
+
+void DrawArea::syncPaletteBackground()
+{
+    if (!customBackground) {
+        background = palette().color(QPalette::Window);
+        repaint();
+    }
 }
 
 void DrawArea::mousePressEvent(QMouseEvent *event)
@@ -106,6 +123,14 @@ void DrawArea::paintEvent(QPaintEvent *event)
     }
 }
 
+void DrawArea::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::PaletteChange) {
+        syncPaletteBackground();
+    }
+    QLabel::changeEvent(event);
+}
+
 void DrawArea::setAllowHover(bool allow)
 {
     QString style =
@@ -113,7 +138,7 @@ void DrawArea::setAllowHover(bool allow)
         "no-repeat bottom left;"
         "border: 1px solid gray; }"
     ;
-    if (allow) style += "DrawArea::hover { background-color: white; }";
+    if (allow) style += "DrawArea::hover { background-color: palette(base); }";
     setStyleSheet(style);
     setCursor(allow ? Qt::PointingHandCursor : Qt::ArrowCursor);
 }

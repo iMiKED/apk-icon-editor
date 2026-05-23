@@ -85,6 +85,7 @@ public slots:
     /// Displays the icon with the specified \c index in the icon preview widget.
     void setCurrentIcon(const QModelIndex &index);
     void setLanguage(QString lang); ///< Sets the GUI language to \c lang.
+    void setTheme(QString theme);   ///< Sets the GUI theme mode.
     bool setPreviewColor();         ///< Displays background color selection dialog.
     void showEffectsDialog();       ///< Displays "Effects" dialog.
 
@@ -176,6 +177,7 @@ private slots:
     void error(QString title, QString text, QString details = QString());
 
 protected:
+    bool eventFilter(QObject *object, QEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
@@ -194,6 +196,7 @@ private:
     void setInitialSize(); ///< Sets the initial sizes for the window and splitter.
     void setIconsLoading(bool loading); ///< Shows or hides the icon list loading state.
     bool confirmExit();    ///< Displays the exit confirmation dialog.
+    void applyTheme(QString theme); ///< Applies the selected GUI theme.
 
     /// Uploads the specified file to a cloud service.
     /// \param uploader Cloud uploader object.
@@ -259,6 +262,7 @@ private:
     QMenu *menuHelp;
     QMenu *menuRecent;
     QMenu *menuLang;
+    QMenu *menuTheme;
     QMenu *menuLogs;
     QToolButton *btnDonate;
 
@@ -301,6 +305,10 @@ private:
     QAction *actPacking;
     QAction *actKeys;
     QAction *actTranslate;
+    QActionGroup *themeActions;
+    QAction *actThemeSystem;
+    QAction *actThemeLight;
+    QAction *actThemeDark;
     QAction *actAssoc;
     QAction *actReset;
     QAction *actAutoUpdate;
@@ -331,6 +339,7 @@ private:
     QTranslator *translatorQt;
     QString currentApk;
     QString currentLang;
+    QString currentTheme;
     QString currentPath;
 };
 

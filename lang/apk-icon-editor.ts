@@ -905,6 +905,26 @@ Check your JDK installation and PATH environment variable.</source>
     </message>
     <message>
         <location line="+1"/>
+        <source>&amp;Theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Light</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Dark</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
         <source>Auto-check for Updates</source>
         <translation type="unfinished"></translation>
     </message>
