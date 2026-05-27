@@ -5,10 +5,15 @@
 #include "decorationdelegate.h"
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QContextMenuEvent>
+#include <QIcon>
 #include <QLabel>
+#include <QMenu>
 #include <QMenuBar>
+#include <QMouseEvent>
 #include <QFileDialog>
 #include <QMimeData>
+#include <QPaintEvent>
 #include <QRegularExpression>
 #include <QDesktopServices>
 #include <QEvent>
@@ -58,6 +63,89 @@ static bool isSystemDark()
 #endif
 }
 
+enum class TitleButtonKind {
+    Minimize,
+    Maximize,
+    Restore,
+    Close
+};
+
+class TitleBarButton : public QToolButton
+{
+public:
+    explicit TitleBarButton(TitleButtonKind kind, QWidget *parent = nullptr)
+        : QToolButton(parent), kind(kind)
+    {
+        setObjectName("customTitleButton");
+        setAutoRaise(true);
+        setFixedSize(46, 32);
+        setFocusPolicy(Qt::NoFocus);
+        setCursor(Qt::ArrowCursor);
+        setAttribute(Qt::WA_Hover, true);
+    }
+
+    void setKind(TitleButtonKind newKind)
+    {
+        if (kind == newKind) {
+            return;
+        }
+        kind = newKind;
+        update();
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event)
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        const bool hovered = underMouse();
+        const bool pressed = isDown();
+        const bool closeButton = kind == TitleButtonKind::Close;
+        if (closeButton && hovered) {
+            painter.fillRect(rect(), pressed ? QColor(153, 31, 23) : QColor(196, 43, 28));
+        } else if (pressed) {
+            painter.fillRect(rect(), palette().highlight().color());
+        } else if (hovered) {
+            painter.fillRect(rect(), palette().color(QPalette::Button));
+        }
+
+        const QColor color = closeButton && hovered ? QColor(255, 255, 255)
+            : palette().color(QPalette::WindowText);
+        QPen pen(color, 1.25);
+        pen.setCosmetic(true);
+        pen.setCapStyle(Qt::SquareCap);
+        pen.setJoinStyle(Qt::MiterJoin);
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+
+        const qreal cx = width() / 2.0;
+        const qreal cy = height() / 2.0;
+        switch (kind) {
+        case TitleButtonKind::Minimize:
+            painter.drawLine(QPointF(cx - 5.0, cy + 4.0), QPointF(cx + 5.0, cy + 4.0));
+            break;
+        case TitleButtonKind::Maximize:
+            painter.drawRect(QRectF(cx - 5.0, cy - 5.0, 10.0, 10.0));
+            break;
+        case TitleButtonKind::Restore:
+            painter.drawRect(QRectF(cx - 3.0, cy - 6.0, 8.0, 8.0));
+            painter.fillRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0), palette().color(QPalette::Window));
+            painter.drawRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0));
+            break;
+        case TitleButtonKind::Close:
+            painter.drawLine(QPointF(cx - 5.0, cy - 5.0), QPointF(cx + 5.0, cy + 5.0));
+            painter.drawLine(QPointF(cx + 5.0, cy - 5.0), QPointF(cx - 5.0, cy + 5.0));
+            break;
+        }
+    }
+
+private:
+    TitleButtonKind kind;
+};
+
 class FramelessTitleBar : public QWidget
 {
 public:
@@ -72,24 +160,37 @@ public:
         titleLabel->setObjectName("customTitleLabel");
         titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-        btnMinimize = createButton("-");
-        btnMaximize = createButton("[]");
-        btnClose = createButton("x");
+        btnIcon = new QToolButton(this);
+        btnIcon->setObjectName("customTitleIconButton");
+        btnIcon->setAutoRaise(true);
+        btnIcon->setFixedSize(32, 32);
+        btnIcon->setIconSize(QSize(16, 16));
+        btnIcon->setFocusPolicy(Qt::NoFocus);
+        btnIcon->setCursor(Qt::ArrowCursor);
+
+        btnMinimize = new TitleBarButton(TitleButtonKind::Minimize, this);
+        btnMaximize = new TitleBarButton(TitleButtonKind::Maximize, this);
+        btnClose = new TitleBarButton(TitleButtonKind::Close, this);
         btnClose->setObjectName("customTitleCloseButton");
 
         QHBoxLayout *layout = new QHBoxLayout(this);
-        layout->setContentsMargins(8, 0, 0, 0);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
+        layout->addWidget(btnIcon);
         layout->addWidget(titleLabel);
         layout->addWidget(btnMinimize);
         layout->addWidget(btnMaximize);
         layout->addWidget(btnClose);
 
         connect(targetWindow, &QWidget::windowTitleChanged, this, &FramelessTitleBar::syncTitle);
+        connect(btnIcon, &QToolButton::clicked, [this]() {
+            showWindowMenu(btnIcon->mapToGlobal(QPoint(0, btnIcon->height())));
+        });
         connect(btnMinimize, &QToolButton::clicked, targetWindow, &QWidget::showMinimized);
         connect(btnMaximize, &QToolButton::clicked, this, &FramelessTitleBar::toggleMaximized);
         connect(btnClose, &QToolButton::clicked, targetWindow, &QWidget::close);
         targetWindow->installEventFilter(this);
+        syncIcon();
         syncTitle();
         syncMaximizeButton();
     }
@@ -100,7 +201,16 @@ protected:
         if (object == targetWindow && event->type() == QEvent::WindowStateChange) {
             syncMaximizeButton();
         }
+        if (object == targetWindow && event->type() == QEvent::WindowIconChange) {
+            syncIcon();
+        }
         return QWidget::eventFilter(object, event);
+    }
+
+    void contextMenuEvent(QContextMenuEvent *event) override
+    {
+        showWindowMenu(event->globalPos());
+        event->accept();
     }
 
     void mouseDoubleClickEvent(QMouseEvent *event) override
@@ -129,15 +239,47 @@ protected:
     }
 
 private:
-    static QToolButton *createButton(const QString &text)
+    void showWindowMenu(const QPoint &globalPos)
     {
-        QToolButton *button = new QToolButton;
-        button->setObjectName("customTitleButton");
-        button->setText(text);
-        button->setAutoRaise(true);
-        button->setFixedSize(46, 32);
-        button->setFocusPolicy(Qt::NoFocus);
-        return button;
+        QMenu menu(this);
+        QAction *restore = menu.addAction("Restore");
+        QAction *minimize = menu.addAction("Minimize");
+        QAction *maximize = menu.addAction("Maximize");
+        menu.addSeparator();
+        QAction *close = menu.addAction("Close");
+
+        const bool maximized = targetWindow && targetWindow->isMaximized();
+        restore->setEnabled(maximized);
+        maximize->setEnabled(!maximized);
+
+        QAction *selected = menu.exec(globalPos);
+        if (!selected || !targetWindow) {
+            return;
+        }
+        if (selected == restore) {
+            targetWindow->showNormal();
+        } else if (selected == minimize) {
+            targetWindow->showMinimized();
+        } else if (selected == maximize) {
+            targetWindow->showMaximized();
+        } else if (selected == close) {
+            targetWindow->close();
+        }
+        syncMaximizeButton();
+    }
+
+    void syncIcon()
+    {
+        QIcon icon = targetWindow ? targetWindow->windowIcon() : QIcon();
+        if (icon.isNull()) {
+            icon = qApp->windowIcon();
+        }
+        if (icon.isNull()) {
+            icon.addPixmap(QPixmap(":/gfx/icon/16.png"));
+            icon.addPixmap(QPixmap(":/gfx/icon/24.png"));
+            icon.addPixmap(QPixmap(":/gfx/icon/32.png"));
+        }
+        btnIcon->setIcon(icon);
     }
 
     void syncTitle()
@@ -151,7 +293,9 @@ private:
 
     void syncMaximizeButton()
     {
-        btnMaximize->setText(targetWindow && targetWindow->isMaximized() ? "][": "[]");
+        btnMaximize->setKind(targetWindow && targetWindow->isMaximized()
+            ? TitleButtonKind::Restore
+            : TitleButtonKind::Maximize);
     }
 
     void toggleMaximized()
@@ -168,10 +312,11 @@ private:
     }
 
     QWidget *targetWindow;
+    QToolButton *btnIcon;
     QLabel *titleLabel;
-    QToolButton *btnMinimize;
-    QToolButton *btnMaximize;
-    QToolButton *btnClose;
+    TitleBarButton *btnMinimize;
+    TitleBarButton *btnMaximize;
+    TitleBarButton *btnClose;
 };
 
 class DarkProxyStyle : public QProxyStyle
@@ -468,20 +613,20 @@ static QString framelessTitleBarStyleSheet(bool dark)
         return QString(
             "#customTitleBar { background-color: #2d2d30; border-bottom: 1px solid #1f1f1f; }"
             "#customTitleLabel { color: #f1f1f1; padding-left: 4px; }"
-            "#customTitleBar QToolButton { background: transparent; color: #f1f1f1; border: none; font-weight: bold; }"
-            "#customTitleBar QToolButton:hover { background-color: #3f3f46; }"
-            "#customTitleBar QToolButton:pressed { background-color: #0078d7; }"
-            "#customTitleCloseButton:hover { background-color: #c42b1c; color: #ffffff; }"
+            "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
+            " background: transparent; color: #f1f1f1; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
+            "#customTitleIconButton:hover { background-color: #3f3f46; }"
+            "#customTitleIconButton:pressed { background-color: #0078d7; }"
         );
     }
 
     return QString(
-        "#customTitleBar { background-color: #f0f0f0; border-bottom: 1px solid #d0d0d0; }"
+        "#customTitleBar { background-color: #ffffff; border-bottom: 1px solid #e5e5e5; }"
         "#customTitleLabel { color: #202020; padding-left: 4px; }"
-        "#customTitleBar QToolButton { background: transparent; color: #202020; border: none; font-weight: bold; }"
-        "#customTitleBar QToolButton:hover { background-color: #e5e5e5; }"
-        "#customTitleBar QToolButton:pressed { background-color: #d8d8d8; }"
-        "#customTitleCloseButton:hover { background-color: #e81123; color: #ffffff; }"
+        "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
+        " background: transparent; color: #202020; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
+        "#customTitleIconButton:hover { background-color: #e5e5e5; }"
+        "#customTitleIconButton:pressed { background-color: #d8d8d8; }"
     );
 }
 
