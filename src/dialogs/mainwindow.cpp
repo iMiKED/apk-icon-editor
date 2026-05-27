@@ -215,6 +215,7 @@ public:
         connect(btnMinimize, &QToolButton::clicked, targetWindow, &QWidget::showMinimized);
         connect(btnMaximize, &QToolButton::clicked, this, &FramelessTitleBar::toggleMaximized);
         connect(btnClose, &QToolButton::clicked, targetWindow, &QWidget::close);
+        titleLabel->installEventFilter(this);
         targetWindow->installEventFilter(this);
         syncIcon();
         syncTitle();
@@ -224,6 +225,14 @@ public:
 protected:
     bool eventFilter(QObject *object, QEvent *event) override
     {
+        if (object == titleLabel && event->type() == QEvent::MouseButtonDblClick) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                toggleMaximized();
+                mouseEvent->accept();
+                return true;
+            }
+        }
         if (object == targetWindow && event->type() == QEvent::WindowStateChange) {
             syncMaximizeButton();
         }
@@ -2372,47 +2381,62 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 {
     Q_UNUSED(eventType)
     MSG *msg = static_cast<MSG *>(message);
-    if (msg && msg->message == WM_NCHITTEST && !isMaximized()) {
+    if (msg && msg->message == WM_NCHITTEST) {
         const LONG border = 8;
-        const QRect rect = frameGeometry();
-        const LONG x = GET_X_LPARAM(msg->lParam);
-        const LONG y = GET_Y_LPARAM(msg->lParam);
-        const bool left = x >= rect.left() && x < rect.left() + border;
-        const bool right = x <= rect.right() && x > rect.right() - border;
-        const bool top = y >= rect.top() && y < rect.top() + border;
-        const bool bottom = y <= rect.bottom() && y > rect.bottom() - border;
+        const QPoint globalPos(GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam));
+        const QPoint pos = mapFromGlobal(globalPos);
+        const QRect windowRect = rect();
+        const bool canResize = !isMaximized() && !isFullScreen();
 
-        if (top && left) {
-            *result = HTTOPLEFT;
-            return true;
+        if (canResize) {
+            const bool left = pos.x() >= windowRect.left() && pos.x() < windowRect.left() + border;
+            const bool right = pos.x() <= windowRect.right() && pos.x() > windowRect.right() - border;
+            const bool top = pos.y() >= windowRect.top() && pos.y() < windowRect.top() + border;
+            const bool bottom = pos.y() <= windowRect.bottom() && pos.y() > windowRect.bottom() - border;
+
+            if (top && left) {
+                *result = HTTOPLEFT;
+                return true;
+            }
+            if (top && right) {
+                *result = HTTOPRIGHT;
+                return true;
+            }
+            if (bottom && left) {
+                *result = HTBOTTOMLEFT;
+                return true;
+            }
+            if (bottom && right) {
+                *result = HTBOTTOMRIGHT;
+                return true;
+            }
+            if (left) {
+                *result = HTLEFT;
+                return true;
+            }
+            if (right) {
+                *result = HTRIGHT;
+                return true;
+            }
+            if (top) {
+                *result = HTTOP;
+                return true;
+            }
+            if (bottom) {
+                *result = HTBOTTOM;
+                return true;
+            }
         }
-        if (top && right) {
-            *result = HTTOPRIGHT;
-            return true;
-        }
-        if (bottom && left) {
-            *result = HTBOTTOMLEFT;
-            return true;
-        }
-        if (bottom && right) {
-            *result = HTBOTTOMRIGHT;
-            return true;
-        }
-        if (left) {
-            *result = HTLEFT;
-            return true;
-        }
-        if (right) {
-            *result = HTRIGHT;
-            return true;
-        }
-        if (top) {
-            *result = HTTOP;
-            return true;
-        }
-        if (bottom) {
-            *result = HTBOTTOM;
-            return true;
+
+        if (customTitleBar) {
+            const QPoint titlePos = customTitleBar->mapFromGlobal(globalPos);
+            if (customTitleBar->rect().contains(titlePos)) {
+                QWidget *child = customTitleBar->childAt(titlePos);
+                if (!qobject_cast<QToolButton *>(child)) {
+                    *result = HTCAPTION;
+                    return true;
+                }
+            }
         }
     }
     return QMainWindow::nativeEvent(eventType, message, result);
