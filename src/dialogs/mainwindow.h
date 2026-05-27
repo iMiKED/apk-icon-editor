@@ -30,6 +30,8 @@
 #include "tooldialog.h"
 #include "updater.h"
 
+class QMenuBar;
+
 ///
 /// Main window class.
 /// This class describes the main "APK Icon Editor Reborn" window.
@@ -183,6 +185,13 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
     void closeEvent(QCloseEvent *event);
+#ifdef Q_OS_WIN
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result);
+#else
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
+#endif
+#endif
 
 private:
     void init_core();      ///< Initializes base objects.
@@ -227,6 +236,8 @@ private:
     // Widgets:
 
     QSplitter *splitter;
+    QWidget *customTitleBar;
+    QMenuBar *mainMenuBar;
     DrawArea *drawArea;
     QTabWidget *tabs;
     QWidget *tabIcons;

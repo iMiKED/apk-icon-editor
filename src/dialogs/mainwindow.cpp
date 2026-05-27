@@ -4,6 +4,8 @@
 #include "apkfile.h"
 #include "decorationdelegate.h"
 #include <QHeaderView>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QMimeData>
@@ -21,10 +23,14 @@
 #include <QStyleHints>
 #include <QStyleOption>
 #include <QTimer>
+#include <QToolButton>
+#include <QVBoxLayout>
+#include <QWindow>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
 #ifdef Q_OS_WIN
 #include <qt_windows.h>
+#include <windowsx.h>
 #endif
 
 static const char THEME_SYSTEM[] = "system";
@@ -51,6 +57,122 @@ static bool isSystemDark()
     return false;
 #endif
 }
+
+class FramelessTitleBar : public QWidget
+{
+public:
+    explicit FramelessTitleBar(QWidget *targetWindow, QWidget *parent = nullptr)
+        : QWidget(parent), targetWindow(targetWindow)
+    {
+        setObjectName("customTitleBar");
+        setFixedHeight(32);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        titleLabel = new QLabel(this);
+        titleLabel->setObjectName("customTitleLabel");
+        titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        btnMinimize = createButton("-");
+        btnMaximize = createButton("[]");
+        btnClose = createButton("x");
+        btnClose->setObjectName("customTitleCloseButton");
+
+        QHBoxLayout *layout = new QHBoxLayout(this);
+        layout->setContentsMargins(8, 0, 0, 0);
+        layout->setSpacing(0);
+        layout->addWidget(titleLabel);
+        layout->addWidget(btnMinimize);
+        layout->addWidget(btnMaximize);
+        layout->addWidget(btnClose);
+
+        connect(targetWindow, &QWidget::windowTitleChanged, this, &FramelessTitleBar::syncTitle);
+        connect(btnMinimize, &QToolButton::clicked, targetWindow, &QWidget::showMinimized);
+        connect(btnMaximize, &QToolButton::clicked, this, &FramelessTitleBar::toggleMaximized);
+        connect(btnClose, &QToolButton::clicked, targetWindow, &QWidget::close);
+        targetWindow->installEventFilter(this);
+        syncTitle();
+        syncMaximizeButton();
+    }
+
+protected:
+    bool eventFilter(QObject *object, QEvent *event) override
+    {
+        if (object == targetWindow && event->type() == QEvent::WindowStateChange) {
+            syncMaximizeButton();
+        }
+        return QWidget::eventFilter(object, event);
+    }
+
+    void mouseDoubleClickEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton) {
+            toggleMaximized();
+            event->accept();
+            return;
+        }
+        QWidget::mouseDoubleClickEvent(event);
+    }
+
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton && targetWindow) {
+            if (targetWindow->isMaximized()) {
+                toggleMaximized();
+            }
+            if (QWindow *handle = targetWindow->windowHandle()) {
+                handle->startSystemMove();
+                event->accept();
+                return;
+            }
+        }
+        QWidget::mousePressEvent(event);
+    }
+
+private:
+    static QToolButton *createButton(const QString &text)
+    {
+        QToolButton *button = new QToolButton;
+        button->setObjectName("customTitleButton");
+        button->setText(text);
+        button->setAutoRaise(true);
+        button->setFixedSize(46, 32);
+        button->setFocusPolicy(Qt::NoFocus);
+        return button;
+    }
+
+    void syncTitle()
+    {
+        QString title = targetWindow ? targetWindow->windowTitle().remove("[*]") : QString();
+        if (title.isEmpty()) {
+            title = qApp->applicationDisplayName();
+        }
+        titleLabel->setText(title);
+    }
+
+    void syncMaximizeButton()
+    {
+        btnMaximize->setText(targetWindow && targetWindow->isMaximized() ? "][": "[]");
+    }
+
+    void toggleMaximized()
+    {
+        if (!targetWindow) {
+            return;
+        }
+        if (targetWindow->isMaximized()) {
+            targetWindow->showNormal();
+        } else {
+            targetWindow->showMaximized();
+        }
+        syncMaximizeButton();
+    }
+
+    QWidget *targetWindow;
+    QLabel *titleLabel;
+    QToolButton *btnMinimize;
+    QToolButton *btnMaximize;
+    QToolButton *btnClose;
+};
 
 class DarkProxyStyle : public QProxyStyle
 {
@@ -340,6 +462,29 @@ static QString darkStyleSheet()
     );
 }
 
+static QString framelessTitleBarStyleSheet(bool dark)
+{
+    if (dark) {
+        return QString(
+            "#customTitleBar { background-color: #2d2d30; border-bottom: 1px solid #1f1f1f; }"
+            "#customTitleLabel { color: #f1f1f1; padding-left: 4px; }"
+            "#customTitleBar QToolButton { background: transparent; color: #f1f1f1; border: none; font-weight: bold; }"
+            "#customTitleBar QToolButton:hover { background-color: #3f3f46; }"
+            "#customTitleBar QToolButton:pressed { background-color: #0078d7; }"
+            "#customTitleCloseButton:hover { background-color: #c42b1c; color: #ffffff; }"
+        );
+    }
+
+    return QString(
+        "#customTitleBar { background-color: #f0f0f0; border-bottom: 1px solid #d0d0d0; }"
+        "#customTitleLabel { color: #202020; padding-left: 4px; }"
+        "#customTitleBar QToolButton { background: transparent; color: #202020; border: none; font-weight: bold; }"
+        "#customTitleBar QToolButton:hover { background-color: #e5e5e5; }"
+        "#customTitleBar QToolButton:pressed { background-color: #d8d8d8; }"
+        "#customTitleCloseButton:hover { background-color: #e81123; color: #ffffff; }"
+    );
+}
+
 static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeFrameRefresh = false)
 {
 #ifdef Q_OS_WIN
@@ -525,12 +670,22 @@ void MainWindow::init_gui()
 
     // Main Window:
 
+    setWindowFlag(Qt::FramelessWindowHint, true);
     splitter = new QSplitter(this);
     setCentralWidget(splitter);
     setAcceptDrops(true);
 
-    QMenuBar *menu = new QMenuBar(this);
-    setMenuBar(menu);
+    customTitleBar = new FramelessTitleBar(this, this);
+    mainMenuBar = new QMenuBar(this);
+    QWidget *topBar = new QWidget(this);
+    QVBoxLayout *topBarLayout = new QVBoxLayout(topBar);
+    topBarLayout->setContentsMargins(0, 0, 0, 0);
+    topBarLayout->setSpacing(0);
+    topBarLayout->addWidget(customTitleBar);
+    topBarLayout->addWidget(mainMenuBar);
+    setMenuWidget(topBar);
+
+    QMenuBar *menu = mainMenuBar;
     menuFile = new QMenu(this);
     menuIcon = new QMenu(this);
     menuView = new QMenu(this);
@@ -1213,7 +1368,7 @@ void MainWindow::setLanguage(QString lang)
     btnDonate->setText(tr("Donate"));
     loadingDialog->setWindowTitle(tr("Processing"));
     uploadDialog->setWindowTitle(tr("Uploading"));
-    menuBar()->resize(0, 0); // "Repaint" menu bar
+    mainMenuBar->resize(0, 0); // "Repaint" menu bar
 
     effects->retranslate();
     toolDialog->retranslate();
@@ -1253,6 +1408,9 @@ void MainWindow::applyTheme(QString theme)
     }
     qApp->setPalette(dark ? darkPalette() : lightPalette());
     qApp->setStyleSheet(dark ? darkStyleSheet() : QString());
+    if (customTitleBar) {
+        customTitleBar->setStyleSheet(framelessTitleBarStyleSheet(dark));
+    }
     scheduleWindowsDarkTitleBars(dark);
     drawArea->syncPaletteBackground();
 }
@@ -2027,6 +2185,62 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
     }
     return QMainWindow::eventFilter(object, event);
 }
+
+#ifdef Q_OS_WIN
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+#else
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+#endif
+{
+    Q_UNUSED(eventType)
+    MSG *msg = static_cast<MSG *>(message);
+    if (msg && msg->message == WM_NCHITTEST && !isMaximized()) {
+        const LONG border = 8;
+        const QRect rect = frameGeometry();
+        const LONG x = GET_X_LPARAM(msg->lParam);
+        const LONG y = GET_Y_LPARAM(msg->lParam);
+        const bool left = x >= rect.left() && x < rect.left() + border;
+        const bool right = x <= rect.right() && x > rect.right() - border;
+        const bool top = y >= rect.top() && y < rect.top() + border;
+        const bool bottom = y <= rect.bottom() && y > rect.bottom() - border;
+
+        if (top && left) {
+            *result = HTTOPLEFT;
+            return true;
+        }
+        if (top && right) {
+            *result = HTTOPRIGHT;
+            return true;
+        }
+        if (bottom && left) {
+            *result = HTBOTTOMLEFT;
+            return true;
+        }
+        if (bottom && right) {
+            *result = HTBOTTOMRIGHT;
+            return true;
+        }
+        if (left) {
+            *result = HTLEFT;
+            return true;
+        }
+        if (right) {
+            *result = HTRIGHT;
+            return true;
+        }
+        if (top) {
+            *result = HTTOP;
+            return true;
+        }
+        if (bottom) {
+            *result = HTBOTTOM;
+            return true;
+        }
+    }
+    return QMainWindow::nativeEvent(eventType, message, result);
+}
+#endif
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
