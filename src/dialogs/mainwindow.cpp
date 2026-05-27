@@ -126,7 +126,7 @@ protected:
         painter.setRenderHint(QPainter::Antialiasing, true);
 
         const bool pressed = isDown();
-        const bool dark = palette().color(QPalette::Window).lightness() < 128;
+        const bool dark = parentWidget() && parentWidget()->property("darkTitleBar").toBool();
         const bool closeButton = kind == TitleButtonKind::Close;
         if (closeButton && hovered) {
             painter.fillRect(rect(), pressed ? QColor(153, 31, 23) : QColor(196, 43, 28));
@@ -253,7 +253,8 @@ protected:
     {
         if (event->button() == Qt::LeftButton && targetWindow) {
             if (targetWindow->isMaximized()) {
-                toggleMaximized();
+                QWidget::mousePressEvent(event);
+                return;
             }
             if (QWindow *handle = targetWindow->windowHandle()) {
                 handle->startSystemMove();
@@ -1580,7 +1581,12 @@ void MainWindow::applyTheme(QString theme)
     qApp->setPalette(dark ? darkPalette() : lightPalette());
     qApp->setStyleSheet(dark ? darkStyleSheet() : QString());
     if (customTitleBar) {
+        customTitleBar->setProperty("darkTitleBar", dark);
         customTitleBar->setStyleSheet(framelessTitleBarStyleSheet(dark));
+        for (QToolButton *button : customTitleBar->findChildren<QToolButton *>()) {
+            button->update();
+        }
+        customTitleBar->update();
     }
     scheduleWindowsDarkTitleBars(dark);
     drawArea->syncPaletteBackground();
