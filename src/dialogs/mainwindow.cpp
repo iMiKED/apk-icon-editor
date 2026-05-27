@@ -138,9 +138,9 @@ protected:
 
         const QColor color = closeButton && hovered ? QColor(255, 255, 255)
             : palette().color(QPalette::WindowText);
-        QPen pen(color, 1.25);
+        QPen pen(color, 1.0);
         pen.setCosmetic(true);
-        pen.setCapStyle(Qt::SquareCap);
+        pen.setCapStyle(Qt::FlatCap);
         pen.setJoinStyle(Qt::MiterJoin);
         painter.setPen(pen);
         painter.setBrush(Qt::NoBrush);
@@ -149,20 +149,20 @@ protected:
         const qreal cy = height() / 2.0;
         switch (kind) {
         case TitleButtonKind::Minimize:
-            painter.drawLine(QPointF(cx - 5.0, cy + 4.0), QPointF(cx + 5.0, cy + 4.0));
+            painter.drawLine(QPointF(cx - 4.5, cy + 4.0), QPointF(cx + 4.5, cy + 4.0));
             break;
         case TitleButtonKind::Maximize:
-            painter.drawRect(QRectF(cx - 5.0, cy - 5.0, 10.0, 10.0));
+            painter.drawRect(QRectF(cx - 4.5, cy - 4.5, 9.0, 9.0));
             break;
         case TitleButtonKind::Restore:
-            painter.drawRect(QRectF(cx - 3.0, cy - 6.0, 8.0, 8.0));
-            painter.fillRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0),
+            painter.drawRect(QRectF(cx - 2.5, cy - 5.5, 7.5, 7.5));
+            painter.fillRect(QRectF(cx - 5.0, cy - 3.0, 7.5, 7.5),
                              dark ? QColor(45, 45, 48) : QColor(255, 255, 255));
-            painter.drawRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0));
+            painter.drawRect(QRectF(cx - 5.0, cy - 3.0, 7.5, 7.5));
             break;
         case TitleButtonKind::Close:
-            painter.drawLine(QPointF(cx - 5.0, cy - 5.0), QPointF(cx + 5.0, cy + 5.0));
-            painter.drawLine(QPointF(cx + 5.0, cy - 5.0), QPointF(cx - 5.0, cy + 5.0));
+            painter.drawLine(QPointF(cx - 4.5, cy - 4.5), QPointF(cx + 4.5, cy + 4.5));
+            painter.drawLine(QPointF(cx + 4.5, cy - 4.5), QPointF(cx - 4.5, cy + 4.5));
             break;
         }
     }
@@ -638,7 +638,7 @@ static QString framelessTitleBarStyleSheet(bool dark)
 {
     if (dark) {
         return QString(
-            "#customTitleBar { background-color: #2d2d30; border-bottom: 1px solid #1f1f1f; }"
+            "#customTitleBar { background-color: #2d2d30; border: none; }"
             "#customTitleLabel { color: #f1f1f1; padding-left: 4px; }"
             "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
             " background: transparent; color: #f1f1f1; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
@@ -648,7 +648,7 @@ static QString framelessTitleBarStyleSheet(bool dark)
     }
 
     return QString(
-        "#customTitleBar { background-color: #ffffff; border-bottom: 1px solid #e5e5e5; }"
+        "#customTitleBar { background-color: #ffffff; border: none; }"
         "#customTitleLabel { color: #202020; padding-left: 4px; }"
         "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
         " background: transparent; color: #202020; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
