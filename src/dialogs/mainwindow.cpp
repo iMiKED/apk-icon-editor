@@ -82,6 +82,7 @@ public:
         setFocusPolicy(Qt::NoFocus);
         setCursor(Qt::ArrowCursor);
         setAttribute(Qt::WA_Hover, true);
+        setMouseTracking(true);
     }
 
     void setKind(TitleButtonKind newKind)
@@ -94,6 +95,29 @@ public:
     }
 
 protected:
+    bool event(QEvent *event) override
+    {
+        switch (event->type()) {
+        case QEvent::Enter:
+        case QEvent::HoverEnter:
+            hovered = true;
+            update();
+            break;
+        case QEvent::Leave:
+        case QEvent::HoverLeave:
+            hovered = false;
+            update();
+            break;
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonRelease:
+            update();
+            break;
+        default:
+            break;
+        }
+        return QToolButton::event(event);
+    }
+
     void paintEvent(QPaintEvent *event) override
     {
         Q_UNUSED(event)
@@ -101,15 +125,15 @@ protected:
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing, true);
 
-        const bool hovered = underMouse();
         const bool pressed = isDown();
+        const bool dark = palette().color(QPalette::Window).lightness() < 128;
         const bool closeButton = kind == TitleButtonKind::Close;
         if (closeButton && hovered) {
             painter.fillRect(rect(), pressed ? QColor(153, 31, 23) : QColor(196, 43, 28));
         } else if (pressed) {
-            painter.fillRect(rect(), palette().highlight().color());
+            painter.fillRect(rect(), dark ? QColor(0, 120, 215) : QColor(216, 216, 216));
         } else if (hovered) {
-            painter.fillRect(rect(), palette().color(QPalette::Button));
+            painter.fillRect(rect(), dark ? QColor(63, 63, 70) : QColor(229, 229, 229));
         }
 
         const QColor color = closeButton && hovered ? QColor(255, 255, 255)
@@ -132,7 +156,8 @@ protected:
             break;
         case TitleButtonKind::Restore:
             painter.drawRect(QRectF(cx - 3.0, cy - 6.0, 8.0, 8.0));
-            painter.fillRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0), palette().color(QPalette::Window));
+            painter.fillRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0),
+                             dark ? QColor(45, 45, 48) : QColor(255, 255, 255));
             painter.drawRect(QRectF(cx - 6.0, cy - 3.0, 8.0, 8.0));
             break;
         case TitleButtonKind::Close:
@@ -144,6 +169,7 @@ protected:
 
 private:
     TitleButtonKind kind;
+    bool hovered = false;
 };
 
 class FramelessTitleBar : public QWidget
