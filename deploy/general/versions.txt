@@ -10,6 +10,9 @@
 * Added preview-only adaptive icon launcher shape masks without changing APK resources.
 * Added preview-only themed monochrome mode for adaptive icons that provide a monochrome layer.
 * Added Light, Dark and System application theme modes.
+* Added an experimental Windows frameless themed title bar with custom window controls.
+* Improved frameless title bar hit testing, resize cursors, title button hover states, and maximize/restore behavior.
+* Fixed dark theme rendering for menu selection indicators, checkbox and radio indicators, spin box arrows, combo boxes, and the Icon size preset dropdown arrow.
 * Moved the Icon size preset list to a shared cross-platform JSON config with external preset icon assets.
 * Added current Android and Android TV / Google TV icon size presets with TVDPI launcher sizes and density-aware TV banner sizes.
 * Moved retired BlackBerry and Kindle Fire presets to the config legacy section and kept built-in Android presets as a fallback when the shared config is missing or invalid.

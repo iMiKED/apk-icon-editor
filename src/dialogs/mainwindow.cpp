@@ -373,7 +373,7 @@ public:
             return;
         }
 
-        if (element == PE_IndicatorArrowRight && option) {
+        if ((element == PE_IndicatorArrowRight || element == PE_IndicatorArrowDown) && option) {
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing, true);
             painter->setPen(Qt::NoPen);
@@ -381,9 +381,15 @@ public:
             const QRect r = option->rect;
             const QPoint center = r.center();
             QPolygon arrow;
-            arrow << QPoint(center.x() - 2, center.y() - 5)
-                  << QPoint(center.x() - 2, center.y() + 5)
-                  << QPoint(center.x() + 4, center.y());
+            if (element == PE_IndicatorArrowRight) {
+                arrow << QPoint(center.x() - 2, center.y() - 5)
+                      << QPoint(center.x() - 2, center.y() + 5)
+                      << QPoint(center.x() + 4, center.y());
+            } else {
+                arrow << QPoint(center.x() - 5, center.y() - 2)
+                      << QPoint(center.x() + 5, center.y() - 2)
+                      << QPoint(center.x(), center.y() + 4);
+            }
             painter->drawPolygon(arrow);
             painter->restore();
             return;
@@ -625,7 +631,10 @@ static QString darkStyleSheet()
         "QHeaderView::section { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #55555a; padding: 4px; }"
         "QTableView, QListView, QTreeView, QPlainTextEdit, QTextEdit, QLineEdit, QSpinBox, QComboBox {"
         " background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; selection-background-color: #0078d7; selection-color: #ffffff; }"
-        "QComboBox::drop-down { border-left: 1px solid #55555a; background-color: #3f3f46; }"
+        "QComboBox { padding: 4px 24px 4px 4px; }"
+        "QComboBox::drop-down { subcontrol-origin: border; subcontrol-position: top right; width: 22px; border-left: 1px solid #55555a; background-color: #3f3f46; }"
+        "QComboBox::down-arrow { image: url(:/gfx/actions/combo-arrow-down-light.xpm); width: 9px; height: 5px; }"
+        "QComboBox::down-arrow:disabled { image: url(:/gfx/actions/combo-arrow-down-light.xpm); }"
         "QComboBox QAbstractItemView { background-color: #1e1e1e; color: #f1f1f1; selection-background-color: #0078d7; }"
         "QPushButton, QToolButton { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #66666d; border-radius: 3px; padding: 4px 8px; }"
         "QPushButton:hover, QToolButton:hover { background-color: #4b4b52; }"
@@ -829,6 +838,7 @@ void MainWindow::init_core()
     updater = new Updater(this);
     recent = NULL;
     manualUpdateCheck = false;
+    framelessResizeCursorActive = false;
 
     dropbox = new Dropbox(this);
     gdrive = new GoogleDrive(this);
@@ -852,6 +862,7 @@ void MainWindow::init_gui()
     // Main Window:
 
     setWindowFlag(Qt::FramelessWindowHint, true);
+    setMouseTracking(true);
     splitter = new QSplitter(this);
     setCentralWidget(splitter);
     setAcceptDrops(true);
@@ -1075,7 +1086,6 @@ void MainWindow::init_gui()
     QVBoxLayout *layoutIcons = new QVBoxLayout(tabIcons);
     devicesLabel = new QLabel(this);
     devices = new QComboBox(this);
-    devices->setStyleSheet("QComboBox {padding: 4px}");
     devices->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     layoutDevices->addWidget(devicesLabel);
     layoutDevices->addWidget(devices);
@@ -2340,8 +2350,127 @@ void MainWindow::dropEvent(QDropEvent *event)
     }
 }
 
+Qt::Edges MainWindow::framelessResizeEdgesAt(const QPoint &globalPos) const
+{
+    if (!isVisible() || isMaximized() || isFullScreen()) {
+        return {};
+    }
+
+    const int border = 8;
+    const QPoint pos = mapFromGlobal(globalPos);
+    const QRect windowRect = rect();
+    if (!windowRect.adjusted(-border, -border, border, border).contains(pos)) {
+        return {};
+    }
+
+    Qt::Edges edges;
+    if (pos.x() >= windowRect.left() && pos.x() < windowRect.left() + border) {
+        edges |= Qt::LeftEdge;
+    }
+    if (pos.x() <= windowRect.right() && pos.x() > windowRect.right() - border) {
+        edges |= Qt::RightEdge;
+    }
+    if (pos.y() >= windowRect.top() && pos.y() < windowRect.top() + border) {
+        edges |= Qt::TopEdge;
+    }
+    if (pos.y() <= windowRect.bottom() && pos.y() > windowRect.bottom() - border) {
+        edges |= Qt::BottomEdge;
+    }
+    return edges;
+}
+
+static Qt::CursorShape resizeCursorShape(Qt::Edges edges)
+{
+    const bool left = edges.testFlag(Qt::LeftEdge);
+    const bool right = edges.testFlag(Qt::RightEdge);
+    const bool top = edges.testFlag(Qt::TopEdge);
+    const bool bottom = edges.testFlag(Qt::BottomEdge);
+
+    if ((top && left) || (bottom && right)) {
+        return Qt::SizeFDiagCursor;
+    }
+    if ((top && right) || (bottom && left)) {
+        return Qt::SizeBDiagCursor;
+    }
+    if (left || right) {
+        return Qt::SizeHorCursor;
+    }
+    if (top || bottom) {
+        return Qt::SizeVerCursor;
+    }
+    return Qt::ArrowCursor;
+}
+
+void MainWindow::updateFramelessResizeCursor(const QPoint &globalPos)
+{
+    const Qt::Edges edges = framelessResizeEdgesAt(globalPos);
+    if (!edges) {
+        clearFramelessResizeCursor();
+        return;
+    }
+
+    const QCursor cursor(resizeCursorShape(edges));
+    if (framelessResizeCursorActive && QApplication::overrideCursor()) {
+        QApplication::changeOverrideCursor(cursor);
+    } else {
+        QApplication::setOverrideCursor(cursor);
+        framelessResizeCursorActive = true;
+    }
+}
+
+void MainWindow::clearFramelessResizeCursor()
+{
+    if (framelessResizeCursorActive && QApplication::overrideCursor()) {
+        QApplication::restoreOverrideCursor();
+    }
+    framelessResizeCursorActive = false;
+}
+
+bool MainWindow::startFramelessResize(const QPoint &globalPos)
+{
+    const Qt::Edges edges = framelessResizeEdgesAt(globalPos);
+    if (!edges) {
+        return false;
+    }
+    if (QWindow *handle = windowHandle()) {
+        return handle->startSystemResize(edges);
+    }
+    return false;
+}
+
 bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
+    QWidget *eventWidget = qobject_cast<QWidget *>(object);
+    if (eventWidget && (eventWidget == this || isAncestorOf(eventWidget))) {
+        switch (event->type()) {
+        case QEvent::Enter:
+        case QEvent::HoverMove:
+        case QEvent::MouseMove:
+            updateFramelessResizeCursor(QCursor::pos());
+            break;
+        case QEvent::MouseButtonPress: {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if (mouseEvent->button() == Qt::LeftButton && startFramelessResize(QCursor::pos())) {
+                mouseEvent->accept();
+                return true;
+            }
+            break;
+        }
+        case QEvent::Leave:
+            if (!rect().contains(mapFromGlobal(QCursor::pos()))) {
+                clearFramelessResizeCursor();
+            }
+            break;
+        case QEvent::Hide:
+        case QEvent::Close:
+        case QEvent::WindowDeactivate:
+            clearFramelessResizeCursor();
+            break;
+        default:
+            break;
+        }
+    }
+
     if (event->type() == QEvent::Show ||
         event->type() == QEvent::Hide ||
         event->type() == QEvent::Close ||
@@ -2382,47 +2511,40 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
     Q_UNUSED(eventType)
     MSG *msg = static_cast<MSG *>(message);
     if (msg && msg->message == WM_NCHITTEST) {
-        const LONG border = 8;
         const QPoint globalPos(GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam));
-        const QPoint pos = mapFromGlobal(globalPos);
-        const QRect windowRect = rect();
-        const bool canResize = !isMaximized() && !isFullScreen();
+        const Qt::Edges edges = framelessResizeEdgesAt(globalPos);
+        if (edges) {
+            updateFramelessResizeCursor(globalPos);
 
-        if (canResize) {
-            const bool left = pos.x() >= windowRect.left() && pos.x() < windowRect.left() + border;
-            const bool right = pos.x() <= windowRect.right() && pos.x() > windowRect.right() - border;
-            const bool top = pos.y() >= windowRect.top() && pos.y() < windowRect.top() + border;
-            const bool bottom = pos.y() <= windowRect.bottom() && pos.y() > windowRect.bottom() - border;
-
-            if (top && left) {
+            if (edges.testFlag(Qt::TopEdge) && edges.testFlag(Qt::LeftEdge)) {
                 *result = HTTOPLEFT;
                 return true;
             }
-            if (top && right) {
+            if (edges.testFlag(Qt::TopEdge) && edges.testFlag(Qt::RightEdge)) {
                 *result = HTTOPRIGHT;
                 return true;
             }
-            if (bottom && left) {
+            if (edges.testFlag(Qt::BottomEdge) && edges.testFlag(Qt::LeftEdge)) {
                 *result = HTBOTTOMLEFT;
                 return true;
             }
-            if (bottom && right) {
+            if (edges.testFlag(Qt::BottomEdge) && edges.testFlag(Qt::RightEdge)) {
                 *result = HTBOTTOMRIGHT;
                 return true;
             }
-            if (left) {
+            if (edges.testFlag(Qt::LeftEdge)) {
                 *result = HTLEFT;
                 return true;
             }
-            if (right) {
+            if (edges.testFlag(Qt::RightEdge)) {
                 *result = HTRIGHT;
                 return true;
             }
-            if (top) {
+            if (edges.testFlag(Qt::TopEdge)) {
                 *result = HTTOP;
                 return true;
             }
-            if (bottom) {
+            if (edges.testFlag(Qt::BottomEdge)) {
                 *result = HTBOTTOM;
                 return true;
             }

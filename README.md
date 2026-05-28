@@ -35,6 +35,7 @@ If APK Icon Editor Reborn saves you time, you can support the fork author:
 - Supported image formats: PNG, ICO, GIF, JPG, BMP, WebP;
 - Parse application `roundIcon`, launcher activity aliases, and activity icon fallbacks;
 - Cross-platform JSON icon size presets for *Android* and *Android TV / Google TV*;
+- Light, Dark and System theme modes, with an experimental themed frameless title bar on Windows;
 - Cloud storage upload: *Dropbox*, *Google Drive*, *Microsoft OneDrive*;
 - Multilingual interface.
 
@@ -64,6 +65,19 @@ Adaptive/vector previews are intended for display, replacement, export, and safe
 Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
 
 Split APK resources are currently supported for preview only. If an adaptive icon uses a resource from a split APK, the tooltip and logs mark it as read-only and replacement/repacking of that split APK set is intentionally blocked. Classic single-APK repacking remains supported.
+
+## 3.0.0-beta4 Release Notes
+Highlights:
+
+- Moved localization to the APK Icon Editor Reborn Crowdin project and refreshed the translation baseline.
+- Added adaptive XML rendering support for inline drawable bitmap layers.
+- Fixed split APK probing so ordinary APK folders are not scanned slowly and empty split metadata entries are ignored.
+- Added a responsive busy indicator while the Icons tab is building the icon list.
+- Added preview-only themed monochrome mode for adaptive icons that provide a monochrome layer.
+- Moved icon size presets to a shared cross-platform JSON config and added current Android TV / Google TV density-aware sizes.
+- Added Light, Dark and System application theme modes.
+- Added an experimental Windows frameless themed title bar with custom window controls, resize cursors, hover states, and maximize/restore behavior.
+- Fixed dark theme rendering for menu selection indicators, checkbox and radio indicators, spin box arrows, combo boxes, and the Icon size preset dropdown arrow.
 
 ## 3.0.0-beta3 Release Notes
 Highlights:

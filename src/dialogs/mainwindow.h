@@ -204,6 +204,10 @@ private:
     bool resetApktool();   ///< Removes the Apktool "1.apk" framework file.
     void setInitialSize(); ///< Sets the initial sizes for the window and splitter.
     void setIconsLoading(bool loading); ///< Shows or hides the icon list loading state.
+    Qt::Edges framelessResizeEdgesAt(const QPoint &globalPos) const; ///< Returns frameless window resize edges.
+    void updateFramelessResizeCursor(const QPoint &globalPos); ///< Updates cursor over frameless resize edges.
+    void clearFramelessResizeCursor(); ///< Restores cursor after leaving frameless resize edges.
+    bool startFramelessResize(const QPoint &globalPos); ///< Starts system resize for frameless windows.
     bool confirmExit();    ///< Displays the exit confirmation dialog.
     void applyTheme(QString theme); ///< Applies the selected GUI theme.
 
@@ -352,6 +356,7 @@ private:
     QString currentLang;
     QString currentTheme;
     QString currentPath;
+    bool framelessResizeCursorActive;
 };
 
 #endif // MAINWINDOW_H
