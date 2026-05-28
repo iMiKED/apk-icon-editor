@@ -4,6 +4,7 @@
 * Moved localization to the APK Icon Editor Reborn Crowdin project and added the source/translation synchronization workflow.
 * Refreshed the Reborn translation baseline for the currently supported languages.
 * Updated the Russian localization from Crowdin and regenerated the runtime translation file.
+* Completed remaining beta4 strings for all supported localizations, uploaded them to Crowdin, and regenerated runtime translation files.
 * Added adaptive XML rendering support for inline drawable bitmap layers.
 * Fixed split APK probing to follow manifest split metadata and ignore split metadata entries with empty split names.
 * Added progress and an Icons tab busy indicator while the icon list is being built.

@@ -724,7 +724,7 @@ Check your JDK installation and PATH environment variable.</source>
     </message>
     <message>
       <source>Adaptive Icon Preview Mode</source>
-      <translation>Режим предпросмотра адаптивной иконки</translation>
+      <translation>Режим просмотра адаптивной иконки</translation>
     </message>
     <message>
       <source>Normal</source>
@@ -933,7 +933,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
       <location line="+1"/>
       <source>Associate .APK</source>
-      <translation>Ассоциировать .APK</translation>
+      <translation>Ассоциировать с .APK</translation>
     </message>
     <message>
       <location line="+1"/>
