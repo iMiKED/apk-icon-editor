@@ -3,7 +3,7 @@
 ## 3.0.0-beta4
 * Moved localization to the APK Icon Editor Reborn Crowdin project and added the source/translation synchronization workflow.
 * Refreshed the Reborn translation baseline for the currently supported languages.
-* Updated the Russian localization from Crowdin and regenerated the runtime translation file.
+* Approved all Russian translations in Crowdin, exported only approved strings, and regenerated the runtime translation file.
 * Completed remaining beta4 strings for all supported localizations, uploaded them to Crowdin, and regenerated runtime translation files.
 * Added adaptive XML rendering support for inline drawable bitmap layers.
 * Fixed split APK probing to follow manifest split metadata and ignore split metadata entries with empty split names.
@@ -13,6 +13,10 @@
 * Added preview-only themed monochrome mode for adaptive icons that provide a monochrome layer.
 * Added Light, Dark and System application theme modes.
 * Added an experimental Windows frameless themed title bar with custom window controls.
+* Used the Windows 10/11 accent color for window borders, selections, progress highlights and title bar button states.
+* Made the Windows frameless window border respect the system "show accent color on title bars and window borders" setting.
+* Fixed the custom accent border overlay so it no longer blocks title bar dragging, menus, buttons, or other controls.
+* Kept standard Windows dialog title bars neutral instead of filling them with the accent color.
 * Improved frameless title bar hit testing, resize cursors, title button hover states, and maximize/restore behavior.
 * Fixed dark theme rendering for menu selection indicators, checkbox and radio indicators, spin box arrows, combo boxes, and the Icon size preset dropdown arrow.
 * Moved the Icon size preset list to a shared cross-platform JSON config with external preset icon assets.

@@ -31,6 +31,8 @@
 #include "updater.h"
 
 class QMenuBar;
+class QResizeEvent;
+class AccentBorderOverlay;
 
 ///
 /// Main window class.
@@ -180,6 +182,7 @@ private slots:
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);
+    void resizeEvent(QResizeEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
@@ -208,6 +211,7 @@ private:
     void updateFramelessResizeCursor(const QPoint &globalPos); ///< Updates cursor over frameless resize edges.
     void clearFramelessResizeCursor(); ///< Restores cursor after leaving frameless resize edges.
     bool startFramelessResize(const QPoint &globalPos); ///< Starts system resize for frameless windows.
+    void updateAccentBorderOverlay(); ///< Keeps the accent border above child widgets.
     bool confirmExit();    ///< Displays the exit confirmation dialog.
     void applyTheme(QString theme); ///< Applies the selected GUI theme.
 
@@ -240,6 +244,7 @@ private:
     // Widgets:
 
     QSplitter *splitter;
+    AccentBorderOverlay *accentBorderOverlay;
     QWidget *customTitleBar;
     QMenuBar *mainMenuBar;
     DrawArea *drawArea;

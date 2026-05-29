@@ -23,6 +23,9 @@
 #include <QPainter>
 #include <QProxyStyle>
 #include <QPointer>
+#include <QResizeEvent>
+#include <QRegion>
+#include <QSettings>
 #include <QStyle>
 #include <QStyleFactory>
 #include <QStyleHints>
@@ -61,6 +64,84 @@ static bool isSystemDark()
 #else
     return false;
 #endif
+}
+
+static QColor defaultAccentColor()
+{
+    return QColor(0, 120, 215);
+}
+
+static QColor systemAccentColor()
+{
+#ifdef Q_OS_WIN
+    const QStringList keys = QStringList()
+        << "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM"
+        << "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Accent";
+    const QStringList values = QStringList() << "AccentColor" << "AccentColorMenu";
+
+    foreach (const QString &key, keys) {
+        QSettings registry(key, QSettings::NativeFormat);
+        foreach (const QString &name, values) {
+            if (!registry.contains(name)) {
+                continue;
+            }
+
+            bool ok = false;
+            const QVariant rawValue = registry.value(name);
+            qulonglong wideValue = rawValue.toULongLong(&ok);
+            if (!ok) {
+                const qlonglong signedValue = rawValue.toLongLong(&ok);
+                wideValue = quint32(signedValue);
+            }
+            if (!ok) {
+                continue;
+            }
+
+            const quint32 value = quint32(wideValue);
+            const QColor color(value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff);
+            if (color.isValid()) {
+                return color;
+            }
+        }
+    }
+#endif
+    return defaultAccentColor();
+}
+
+static QColor titleButtonHoverColor(bool dark)
+{
+    QColor color = systemAccentColor();
+    color.setAlpha(dark ? 96 : 44);
+    return color;
+}
+
+static QColor titleButtonPressedColor()
+{
+    return systemAccentColor().darker(115);
+}
+
+static QString colorName(const QColor &color)
+{
+    return color.name(QColor::HexRgb);
+}
+
+static bool systemAccentWindowBordersEnabled()
+{
+#ifdef Q_OS_WIN
+    QSettings registry("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM", QSettings::NativeFormat);
+    return registry.value("ColorPrevalence", 0).toInt() != 0;
+#else
+    return false;
+#endif
+}
+
+static QColor windowBorderColor(bool dark)
+{
+    if (systemAccentWindowBordersEnabled()) {
+        return systemAccentColor();
+    }
+
+    return dark ? QColor(85, 85, 90) : QColor(204, 204, 204);
 }
 
 enum class TitleButtonKind {
@@ -131,9 +212,9 @@ protected:
         if (closeButton && hovered) {
             painter.fillRect(rect(), pressed ? QColor(153, 31, 23) : QColor(196, 43, 28));
         } else if (pressed) {
-            painter.fillRect(rect(), dark ? QColor(0, 120, 215) : QColor(216, 216, 216));
+            painter.fillRect(rect(), titleButtonPressedColor());
         } else if (hovered) {
-            painter.fillRect(rect(), dark ? QColor(63, 63, 70) : QColor(229, 229, 229));
+            painter.fillRect(rect(), titleButtonHoverColor(dark));
         }
 
         const QColor color = closeButton && hovered ? QColor(255, 255, 255)
@@ -170,6 +251,48 @@ protected:
 private:
     TitleButtonKind kind;
     bool hovered = false;
+};
+
+class AccentBorderOverlay : public QWidget
+{
+public:
+    explicit AccentBorderOverlay(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        setObjectName("accentBorderOverlay");
+        setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        setAttribute(Qt::WA_NoSystemBackground, true);
+        setAttribute(Qt::WA_TranslucentBackground, true);
+        setFocusPolicy(Qt::NoFocus);
+    }
+
+protected:
+    void resizeEvent(QResizeEvent *event) override
+    {
+        QWidget::resizeEvent(event);
+        QRegion border(rect());
+        const QRect inner = rect().adjusted(1, 1, -1, -1);
+        if (inner.isValid()) {
+            border -= QRegion(inner);
+        }
+        setMask(border);
+    }
+
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event)
+
+        QWidget *window = parentWidget();
+        if (window && (window->isMaximized() || window->isFullScreen())) {
+            return;
+        }
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        const bool dark = qApp->palette().color(QPalette::Window).lightness() < 128;
+        painter.setPen(QPen(windowBorderColor(dark), 1));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(rect().adjusted(0, 0, -1, -1));
+    }
 };
 
 class FramelessTitleBar : public QWidget
@@ -418,7 +541,7 @@ public:
         if (checkedMenuItem && menuItem->checkType != QStyleOptionMenuItem::Exclusive && !menuItem->icon.isNull()) {
             painter->save();
             painter->setPen(Qt::NoPen);
-            painter->setBrush(QColor(0, 120, 215));
+            painter->setBrush(systemAccentColor());
             painter->drawRect(menuIndicatorFrameRect(menuItem));
             painter->restore();
         }
@@ -577,7 +700,7 @@ private:
 
         painter->save();
         painter->setPen(QPen(QColor(85, 85, 90), 1));
-        painter->setBrush(pressed ? QColor(0, 120, 215) : active ? QColor(75, 75, 82) : QColor(63, 63, 70));
+        painter->setBrush(pressed ? systemAccentColor() : active ? QColor(75, 75, 82) : QColor(63, 63, 70));
         painter->drawRect(buttonRect.adjusted(0, 0, -1, -1));
 
         QStyleOption arrowOption;
@@ -590,11 +713,15 @@ private:
 
 static QPalette lightPalette()
 {
-    return defaultPalette();
+    QPalette palette = defaultPalette();
+    palette.setColor(QPalette::Highlight, systemAccentColor());
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    return palette;
 }
 
 static QPalette darkPalette()
 {
+    const QColor accent = systemAccentColor();
     QPalette palette;
     palette.setColor(QPalette::Window, QColor(45, 45, 48));
     palette.setColor(QPalette::WindowText, QColor(241, 241, 241));
@@ -607,7 +734,7 @@ static QPalette darkPalette()
     palette.setColor(QPalette::ButtonText, QColor(241, 241, 241));
     palette.setColor(QPalette::BrightText, Qt::red);
     palette.setColor(QPalette::Link, QColor(88, 166, 255));
-    palette.setColor(QPalette::Highlight, QColor(0, 120, 215));
+    palette.setColor(QPalette::Highlight, accent);
     palette.setColor(QPalette::HighlightedText, Qt::white);
     palette.setColor(QPalette::Disabled, QPalette::Text, QColor(140, 140, 140));
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(140, 140, 140));
@@ -617,8 +744,12 @@ static QPalette darkPalette()
 
 static QString darkStyleSheet()
 {
+    const QColor accent = systemAccentColor();
+    const QColor accentBorder = accent.lighter(135);
+    const QString accentName = colorName(accent);
+    const QString accentBorderName = colorName(accentBorder);
     return QString(
-        "QMainWindow, QDialog, QMessageBox, QColorDialog { color: #f1f1f1; background-color: #2d2d30; selection-background-color: #0078d7; selection-color: #ffffff; }"
+        "QMainWindow, QDialog, QMessageBox, QColorDialog { color: #f1f1f1; background-color: #2d2d30; selection-background-color: %1; selection-color: #ffffff; }"
         "QMenuBar { background-color: #2d2d30; color: #f1f1f1; }"
         "QMenuBar::item { background: transparent; padding: 3px 8px; }"
         "QMenuBar::item:selected, QMenuBar::item:pressed { background-color: #3f3f46; }"
@@ -630,30 +761,31 @@ static QString darkStyleSheet()
         "QTabBar::tab:!selected { background-color: #252526; }"
         "QHeaderView::section { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #55555a; padding: 4px; }"
         "QTableView, QListView, QTreeView, QPlainTextEdit, QTextEdit, QLineEdit, QSpinBox, QComboBox {"
-        " background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; selection-background-color: #0078d7; selection-color: #ffffff; }"
+        " background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; selection-background-color: %1; selection-color: #ffffff; }"
         "QComboBox { padding: 4px 24px 4px 4px; }"
         "QComboBox::drop-down { subcontrol-origin: border; subcontrol-position: top right; width: 22px; border-left: 1px solid #55555a; background-color: #3f3f46; }"
         "QComboBox::down-arrow { image: url(:/gfx/actions/combo-arrow-down-light.xpm); width: 9px; height: 5px; }"
         "QComboBox::down-arrow:disabled { image: url(:/gfx/actions/combo-arrow-down-light.xpm); }"
-        "QComboBox QAbstractItemView { background-color: #1e1e1e; color: #f1f1f1; selection-background-color: #0078d7; }"
+        "QComboBox QAbstractItemView { background-color: #1e1e1e; color: #f1f1f1; selection-background-color: %1; }"
         "QPushButton, QToolButton { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #66666d; border-radius: 3px; padding: 4px 8px; }"
         "QPushButton:hover, QToolButton:hover { background-color: #4b4b52; }"
-        "QPushButton:pressed, QToolButton:pressed, QToolButton:checked { background-color: #0078d7; border-color: #3399ff; }"
+        "QPushButton:pressed, QToolButton:pressed, QToolButton:checked { background-color: %1; border-color: %2; }"
         "QPushButton:disabled, QToolButton:disabled { background-color: #333337; color: #8c8c8c; border-color: #44444a; }"
         "QCheckBox, QRadioButton, QGroupBox, QLabel { color: #f1f1f1; background-color: transparent; }"
         "QGroupBox { border: 1px solid #55555a; border-radius: 3px; margin-top: 8px; padding-top: 8px; }"
         "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 3px; background-color: #2d2d30; color: #f1f1f1; }"
         "QProgressBar { border: 1px solid #55555a; background-color: #1e1e1e; color: #f1f1f1; text-align: center; }"
-        "QProgressBar::chunk { background-color: #0078d7; }"
+        "QProgressBar::chunk { background-color: %1; }"
         "QSlider::groove:horizontal { height: 4px; background: #55555a; }"
         "QSlider::handle:horizontal { background: #f1f1f1; border: 1px solid #77777d; width: 12px; margin: -5px 0; border-radius: 6px; }"
         "QDialogButtonBox QPushButton { min-width: 72px; }"
         "QToolTip { color: #f1f1f1; background-color: #2d2d30; border: 1px solid #767676; }"
-    );
+    ).arg(accentName, accentBorderName);
 }
 
 static QString framelessTitleBarStyleSheet(bool dark)
 {
+    const QString accentName = colorName(systemAccentColor());
     if (dark) {
         return QString(
             "#customTitleBar { background-color: #2d2d30; border: none; }"
@@ -661,8 +793,8 @@ static QString framelessTitleBarStyleSheet(bool dark)
             "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
             " background: transparent; color: #f1f1f1; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
             "#customTitleIconButton:hover { background-color: #3f3f46; }"
-            "#customTitleIconButton:pressed { background-color: #0078d7; }"
-        );
+            "#customTitleIconButton:pressed { background-color: %1; }"
+        ).arg(accentName);
     }
 
     return QString(
@@ -671,9 +803,90 @@ static QString framelessTitleBarStyleSheet(bool dark)
         "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
         " background: transparent; color: #202020; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
         "#customTitleIconButton:hover { background-color: #e5e5e5; }"
-        "#customTitleIconButton:pressed { background-color: #d8d8d8; }"
-    );
+        "#customTitleIconButton:pressed { background-color: %1; color: #ffffff; }"
+    ).arg(accentName);
 }
+
+#ifdef Q_OS_WIN
+struct DwmMargins
+{
+    int cxLeftWidth;
+    int cxRightWidth;
+    int cyTopHeight;
+    int cyBottomHeight;
+};
+
+static DWORD windowsColorRef(const QColor &color)
+{
+    return (DWORD(color.blue()) << 16) | (DWORD(color.green()) << 8) | DWORD(color.red());
+}
+
+static HWND hwndForWidget(QWidget *widget)
+{
+    return widget ? reinterpret_cast<HWND>(widget->winId()) : nullptr;
+}
+
+static void setWindowsFramelessFrame(QWidget *widget, bool forceNativeFrameRefresh = false)
+{
+    if (!widget || !widget->isWindow() || !widget->windowFlags().testFlag(Qt::FramelessWindowHint)) {
+        return;
+    }
+
+    HWND hwnd = hwndForWidget(widget);
+    if (!hwnd) {
+        return;
+    }
+
+    using GetWindowLongPtrFunc = LONG_PTR (WINAPI *)(HWND, int);
+    using SetWindowLongPtrFunc = LONG_PTR (WINAPI *)(HWND, int, LONG_PTR);
+    using SetWindowPosFunc = BOOL (WINAPI *)(HWND, HWND, int, int, int, int, UINT);
+    using GetWindowRectFunc = BOOL (WINAPI *)(HWND, LPRECT);
+    HMODULE user32 = LoadLibraryW(L"user32.dll");
+    if (!user32) {
+        return;
+    }
+
+    auto getWindowLongPtr = reinterpret_cast<GetWindowLongPtrFunc>(GetProcAddress(user32, "GetWindowLongPtrW"));
+    auto setWindowLongPtr = reinterpret_cast<SetWindowLongPtrFunc>(GetProcAddress(user32, "SetWindowLongPtrW"));
+    auto setWindowPos = reinterpret_cast<SetWindowPosFunc>(GetProcAddress(user32, "SetWindowPos"));
+    auto getWindowRect = reinterpret_cast<GetWindowRectFunc>(GetProcAddress(user32, "GetWindowRect"));
+    if (!getWindowLongPtr || !setWindowLongPtr || !setWindowPos) {
+        FreeLibrary(user32);
+        return;
+    }
+
+    LONG_PTR style = getWindowLongPtr(hwnd, GWL_STYLE);
+    style |= WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    setWindowLongPtr(hwnd, GWL_STYLE, style);
+
+    HMODULE module = LoadLibraryW(L"dwmapi.dll");
+    if (module) {
+        using DwmExtendFrameIntoClientAreaFunc = HRESULT (WINAPI *)(HWND, const DwmMargins *);
+        auto extendFrame = reinterpret_cast<DwmExtendFrameIntoClientAreaFunc>(
+                    GetProcAddress(module, "DwmExtendFrameIntoClientArea"));
+        if (extendFrame) {
+            const DwmMargins margins = { 1, 1, 1, 1 };
+            extendFrame(hwnd, &margins);
+        }
+        FreeLibrary(module);
+    }
+
+    UINT flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED;
+    setWindowPos(hwnd, nullptr, 0, 0, 0, 0, flags);
+    if (forceNativeFrameRefresh && getWindowRect) {
+        RECT rect;
+        if (getWindowRect(hwnd, &rect)) {
+            const int width = rect.right - rect.left;
+            const int height = rect.bottom - rect.top;
+            setWindowPos(hwnd, nullptr, 0, 0, width, height + 1,
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+            setWindowPos(hwnd, nullptr, 0, 0, width, height,
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        }
+    }
+    FreeLibrary(user32);
+}
+#endif
 
 static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeFrameRefresh = false)
 {
@@ -681,6 +894,8 @@ static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeF
     if (!widget || !widget->isWindow()) {
         return;
     }
+
+    setWindowsFramelessFrame(widget, forceNativeFrameRefresh);
 
     using DwmSetWindowAttributeFunc = HRESULT (WINAPI *)(HWND, DWORD, LPCVOID, DWORD);
     HMODULE module = LoadLibraryW(L"dwmapi.dll");
@@ -699,7 +914,9 @@ static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeF
         const DWORD darkCaptionColor = 0x00302d2d;
         const DWORD darkTextColor = 0x00f1f1f1;
         HWND hwnd = reinterpret_cast<HWND>(widget->winId());
+        const bool frameless = widget->windowFlags().testFlag(Qt::FramelessWindowHint);
         const DWORD captionColor = dark ? darkCaptionColor : DWMWA_COLOR_DEFAULT;
+        const DWORD borderColor = frameless ? windowsColorRef(windowBorderColor(dark)) : captionColor;
         const DWORD textColor = dark ? darkTextColor : DWMWA_COLOR_DEFAULT;
         const BOOL systemDarkCaption = dark ? TRUE : FALSE;
         if (FAILED(setAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_CURRENT,
@@ -709,7 +926,7 @@ static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeF
 
         auto applyCaptionColors = [&]() {
             setAttribute(hwnd, DWMWA_CAPTION_COLOR, &captionColor, sizeof(captionColor));
-            setAttribute(hwnd, DWMWA_BORDER_COLOR, &captionColor, sizeof(captionColor));
+            setAttribute(hwnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor));
             setAttribute(hwnd, DWMWA_TEXT_COLOR, &textColor, sizeof(textColor));
         };
         applyCaptionColors();
@@ -839,6 +1056,7 @@ void MainWindow::init_core()
     recent = NULL;
     manualUpdateCheck = false;
     framelessResizeCursorActive = false;
+    accentBorderOverlay = NULL;
 
     dropbox = new Dropbox(this);
     gdrive = new GoogleDrive(this);
@@ -866,6 +1084,7 @@ void MainWindow::init_gui()
     splitter = new QSplitter(this);
     setCentralWidget(splitter);
     setAcceptDrops(true);
+    accentBorderOverlay = new AccentBorderOverlay(this);
 
     customTitleBar = new FramelessTitleBar(this, this);
     mainMenuBar = new QMenuBar(this);
@@ -1250,6 +1469,7 @@ void MainWindow::init_gui()
     splitter->setStyleSheet("QSplitter {padding: 8px;}");
 
     setInitialSize();
+    updateAccentBorderOverlay();
 }
 
 void MainWindow::init_languages()
@@ -1608,6 +1828,7 @@ void MainWindow::applyTheme(QString theme)
         customTitleBar->update();
     }
     scheduleWindowsDarkTitleBars(dark);
+    updateAccentBorderOverlay();
     drawArea->syncPaletteBackground();
 }
 
@@ -2350,6 +2571,24 @@ void MainWindow::dropEvent(QDropEvent *event)
     }
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    updateAccentBorderOverlay();
+}
+
+void MainWindow::updateAccentBorderOverlay()
+{
+    if (!accentBorderOverlay) {
+        return;
+    }
+
+    accentBorderOverlay->setGeometry(rect());
+    accentBorderOverlay->raise();
+    accentBorderOverlay->setVisible(!isMaximized() && !isFullScreen());
+    accentBorderOverlay->update();
+}
+
 Qt::Edges MainWindow::framelessResizeEdgesAt(const QPoint &globalPos) const
 {
     if (!isVisible() || isMaximized() || isFullScreen()) {
@@ -2472,6 +2711,7 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
     }
 
     if (event->type() == QEvent::Show ||
+        event->type() == QEvent::WindowStateChange ||
         event->type() == QEvent::Hide ||
         event->type() == QEvent::Close ||
         event->type() == QEvent::WindowActivate ||
@@ -2498,6 +2738,9 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
             QTimer::singleShot(700, qApp, [dark]() { setWindowsDarkTitleBars(dark); });
         }
     }
+    if (object == this && event->type() == QEvent::WindowStateChange) {
+        updateAccentBorderOverlay();
+    }
     return QMainWindow::eventFilter(object, event);
 }
 
@@ -2510,6 +2753,11 @@ bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *r
 {
     Q_UNUSED(eventType)
     MSG *msg = static_cast<MSG *>(message);
+    if (msg && msg->message == WM_NCCALCSIZE && msg->wParam) {
+        *result = 0;
+        return true;
+    }
+
     if (msg && msg->message == WM_NCHITTEST) {
         const QPoint globalPos(GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam));
         const Qt::Edges edges = framelessResizeEdgesAt(globalPos);

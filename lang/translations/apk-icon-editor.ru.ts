@@ -114,7 +114,7 @@
     <message>
       <location filename="../src/apk/apkpacker.cpp" line="+37"/>
       <source>Saving PNG icons...</source>
-      <translation>Сохранение значков PNG...</translation>
+      <translation>Сохранение иконок PNG...</translation>
     </message>
     <message>
       <location line="+11"/>
@@ -691,12 +691,12 @@ Check your JDK installation and PATH environment variable.</source>
       <source>CLICK HERE
 (or drag APK and icons)</source>
       <translation>Нажмите здесь
-(или перетащите APK и значки)</translation>
+(или перетащите APK и иконки)</translation>
     </message>
     <message>
       <location line="+1"/>
       <source>Icons</source>
-      <translation>Значки</translation>
+      <translation>Иконки</translation>
     </message>
     <message>
       <location line="+1"/>
@@ -782,7 +782,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
       <location line="+1"/>
       <source>&amp;Icon</source>
-      <translation>&amp;Значок</translation>
+      <translation>&amp;Иконка</translation>
     </message>
     <message>
       <location line="+1"/>
@@ -842,17 +842,17 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
       <location line="+1"/>
       <source>Replace &amp;Icon</source>
-      <translation>&amp;Заменить значок</translation>
+      <translation>&amp;Заменить иконку</translation>
     </message>
     <message>
       <location line="+1"/>
       <source>&amp;Save Icon</source>
-      <translation>&amp;Сохранить значок</translation>
+      <translation>&amp;Сохранить иконку</translation>
     </message>
     <message>
       <location line="+1"/>
       <source>Remove Icon</source>
-      <translation>Удалить значок</translation>
+      <translation>Удалить иконку</translation>
     </message>
     <message>
       <location line="+1"/>
@@ -878,7 +878,7 @@ Check your JDK installation and PATH environment variable.</source>
       <location line="+2"/>
       <location line="+1"/>
       <source>&amp;Add Icon</source>
-      <translation>&amp;Добавить значок</translation>
+      <translation>&amp;Добавить иконку</translation>
     </message>
     <message>
       <location line="+2"/>
@@ -1006,7 +1006,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
       <location line="+45"/>
       <source>Apply the current icon to all sizes?</source>
-      <translation>Применить текущий значок ко всем размерам?</translation>
+      <translation>Применить текущую иконку ко всем размерам?</translation>
     </message>
     <message>
       <location line="+11"/>
@@ -1026,7 +1026,7 @@ Check your JDK installation and PATH environment variable.</source>
     <message>
       <location line="+9"/>
       <source>Import Icon</source>
-      <translation>Импорт значка</translation>
+      <translation>Импорт иконки</translation>
     </message>
     <message>
       <location line="+8"/>
@@ -1038,7 +1038,7 @@ Check your JDK installation and PATH environment variable.</source>
       <location line="-49"/>
       <location line="+49"/>
       <source>You are trying to load invalid or unsupported icon.</source>
-      <translation>Вы пытаетесь загрузить значок неверного формата.</translation>
+      <translation>Вы пытаетесь загрузить иконку неверного формата.</translation>
     </message>
     <message>
       <location line="-44"/>
@@ -1059,13 +1059,13 @@ Check your JDK installation and PATH environment variable.</source>
       <location line="+1"/>
       <source>Icon you are trying to load is off-size.
 Resize automatically?</source>
-      <translation>Вы пытаетесь загрузить значок несоответствующего размера.
+      <translation>Вы пытаетесь загрузить иконку несоответствующего размера.
 Изменить размер автоматически?</translation>
     </message>
     <message>
       <location line="+35"/>
       <source>Save Icon</source>
-      <translation>Сохранить значок</translation>
+      <translation>Сохранить иконку</translation>
     </message>
     <message>
       <location line="+30"/>
@@ -1166,7 +1166,7 @@ Download?</source>
     <message>
       <location line="+51"/>
       <source>Are you sure you want to delete this icon?</source>
-      <translation>Вы уверены, что хотите удалить этот значок?</translation>
+      <translation>Вы уверены, что хотите удалить эту иконку?</translation>
     </message>
     <message>
       <location line="+9"/>
