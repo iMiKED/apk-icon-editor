@@ -1,15 +1,16 @@
 # Version History
 
+
 ## 3.0.0-beta4
 * Moved localization to the APK Icon Editor Reborn Crowdin project and added the source/translation synchronization workflow.
 * Refreshed the Reborn translation baseline for the currently supported languages.
-* Approved all Russian translations in Crowdin, exported only approved strings, and regenerated the runtime translation file.
-* Completed remaining beta4 strings for all supported localizations, uploaded them to Crowdin, and regenerated runtime translation files.
 * Added adaptive XML rendering support for inline drawable bitmap layers.
 * Fixed split APK probing to follow manifest split metadata and ignore split metadata entries with empty split names.
 * Added progress and an Icons tab busy indicator while the icon list is being built.
 * Kept the Icons busy indicator responsive while the icon list is being built.
+
 * Added preview-only adaptive icon launcher shape masks without changing APK resources.
+
 * Added preview-only themed monochrome mode for adaptive icons that provide a monochrome layer.
 * Added Light, Dark and System application theme modes.
 * Added an experimental Windows frameless themed title bar with custom window controls.
@@ -19,13 +20,17 @@
 * Kept standard Windows dialog title bars neutral instead of filling them with the accent color.
 * Improved frameless title bar hit testing, resize cursors, title button hover states, and maximize/restore behavior.
 * Fixed dark theme rendering for menu selection indicators, checkbox and radio indicators, spin box arrows, combo boxes, and the Icon size preset dropdown arrow.
+* Fixed dark theme repainting for the Icons list background and stabilized combo box dropdown arrow layout.
 * Moved the Icon size preset list to a shared cross-platform JSON config with external preset icon assets.
 * Added current Android and Android TV / Google TV icon size presets with TVDPI launcher sizes and density-aware TV banner sizes.
 * Moved retired BlackBerry and Kindle Fire presets to the config legacy section and kept built-in Android presets as a fallback when the shared config is missing or invalid.
+* Approved all Russian translations in Crowdin, exported only approved strings, and regenerated the runtime translation file.
+* Completed remaining beta4 strings for all supported localizations, uploaded them to Crowdin, and regenerated runtime translation files.
 
 ## 3.0.0-beta3
 * Added resource table alias resolution from resources.arsc for adaptive XML icons.
 * Fixed adaptive icon rendering for APKs whose launcher foreground is a resources.arsc alias, such as Snapseed.
+
 * Fixed resource resolution when an APK provides both a direct XML resource and a default values alias for the same launcher icon.
 * Added adaptive XML rendering support for drawable color XML files and percent-based inset drawables.
 * Renamed application branding and package/binary names to APK Icon Editor Reborn.

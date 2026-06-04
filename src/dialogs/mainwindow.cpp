@@ -711,6 +711,63 @@ private:
     }
 };
 
+class IconSizePresetComboBox : public QComboBox
+{
+public:
+    explicit IconSizePresetComboBox(QWidget *parent = nullptr) : QComboBox(parent)
+    {
+        setAttribute(Qt::WA_Hover);
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        const bool dark = palette().color(QPalette::Base).lightness() < 64;
+        if (!dark) {
+            QComboBox::paintEvent(event);
+            return;
+        }
+
+        Q_UNUSED(event)
+        const bool enabled = isEnabled();
+        const QColor base = palette().color(QPalette::Base);
+        const QColor text = enabled ? palette().color(QPalette::Text) : QColor(140, 140, 140);
+        const QColor border = hasFocus() || underMouse() ? QColor(102, 102, 109) : QColor(85, 85, 90);
+        const QColor arrow = enabled ? QColor(241, 241, 241) : QColor(140, 140, 140);
+
+        QPainter painter(this);
+        painter.fillRect(rect(), base);
+        painter.setPen(border);
+        painter.drawRect(rect().adjusted(0, 0, -1, -1));
+
+        const int margin = 5;
+        const int arrowWidth = 24;
+        int left = margin;
+        const QIcon icon = itemIcon(currentIndex());
+        if (!icon.isNull()) {
+            const int size = qMin(16, qMax(0, height() - 8));
+            const QRect iconRect(left, (height() - size) / 2, size, size);
+            icon.paint(&painter, iconRect, Qt::AlignCenter, enabled ? QIcon::Normal : QIcon::Disabled);
+            left += size + margin;
+        }
+
+        const QRect textRect(left, 0, qMax(0, width() - left - arrowWidth - margin), height());
+        painter.setPen(text);
+        painter.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft,
+                         fontMetrics().elidedText(currentText(), Qt::ElideRight, textRect.width()));
+
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(arrow);
+        const QPoint c(width() - arrowWidth / 2, height() / 2);
+        QPolygonF polygon;
+        polygon << QPointF(c.x() - 4.0, c.y() - 2.0)
+                << QPointF(c.x() + 4.0, c.y() - 2.0)
+                << QPointF(c.x(), c.y() + 3.0);
+        painter.drawPolygon(polygon);
+    }
+};
+
 static QPalette lightPalette()
 {
     QPalette palette = defaultPalette();
@@ -762,11 +819,18 @@ static QString darkStyleSheet()
         "QHeaderView::section { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #55555a; padding: 4px; }"
         "QTableView, QListView, QTreeView, QPlainTextEdit, QTextEdit, QLineEdit, QSpinBox, QComboBox {"
         " background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; selection-background-color: %1; selection-color: #ffffff; }"
-        "QComboBox { padding: 4px 24px 4px 4px; }"
-        "QComboBox::drop-down { subcontrol-origin: border; subcontrol-position: top right; width: 22px; border-left: 1px solid #55555a; background-color: #3f3f46; }"
+        "QListView#iconsList { background-color: #1e1e1e; alternate-background-color: #1e1e1e; outline: 0px; }"
+        "QListView#iconsList::item { background-color: #1e1e1e; color: #f1f1f1; padding: 1px; }"
+        "QListView#iconsList::item:hover:!selected { background-color: #252526; color: #f1f1f1; }"
+        "QListView#iconsList::item:selected, QListView#iconsList::item:selected:active, QListView#iconsList::item:selected:!active {"
+        " background-color: %1; color: #ffffff; }"
+        "QComboBox { min-height: 22px; padding: 3px 28px 3px 5px; }"
+        "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right; top: 0px; right: 0px; bottom: 0px; width: 24px; border: none; background: transparent; }"
+        "QComboBox::drop-down:on, QComboBox::drop-down:open { background: transparent; border: none; }"
         "QComboBox::down-arrow { image: url(:/gfx/actions/combo-arrow-down-light.xpm); width: 9px; height: 5px; }"
+        "QComboBox::down-arrow:on, QComboBox::down-arrow:open { image: url(:/gfx/actions/combo-arrow-down-light.xpm); width: 9px; height: 5px; }"
         "QComboBox::down-arrow:disabled { image: url(:/gfx/actions/combo-arrow-down-light.xpm); }"
-        "QComboBox QAbstractItemView { background-color: #1e1e1e; color: #f1f1f1; selection-background-color: %1; }"
+        "QComboBox QAbstractItemView { background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; outline: 0px; selection-background-color: %1; }"
         "QPushButton, QToolButton { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #66666d; border-radius: 3px; padding: 4px 8px; }"
         "QPushButton:hover, QToolButton:hover { background-color: #4b4b52; }"
         "QPushButton:pressed, QToolButton:pressed, QToolButton:checked { background-color: %1; border-color: %2; }"
@@ -1304,14 +1368,18 @@ void MainWindow::init_gui()
     QHBoxLayout *layoutDevices = new QHBoxLayout;
     QVBoxLayout *layoutIcons = new QVBoxLayout(tabIcons);
     devicesLabel = new QLabel(this);
-    devices = new QComboBox(this);
+    devices = new IconSizePresetComboBox(this);
+    devices->setObjectName("iconSizePresetCombo");
     devices->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     layoutDevices->addWidget(devicesLabel);
     layoutDevices->addWidget(devices);
 
     listIcons = new QListView(this);
+    listIcons->setObjectName("iconsList");
     listIcons->addActions(menuIcon->actions());
     listIcons->setContextMenuPolicy(Qt::ActionsContextMenu);
+    listIcons->setAlternatingRowColors(false);
+    listIcons->viewport()->setAutoFillBackground(true);
     listIcons->setItemDelegate(new DecorationDelegate(QSize(32, 32), this));
     iconsProxy = new IconsProxy(this);
     listIcons->setModel(iconsProxy);
@@ -1819,6 +1887,16 @@ void MainWindow::applyTheme(QString theme)
     }
     qApp->setPalette(dark ? darkPalette() : lightPalette());
     qApp->setStyleSheet(dark ? darkStyleSheet() : QString());
+    if (listIcons) {
+        QPalette listPalette = dark ? darkPalette() : lightPalette();
+        listIcons->setPalette(listPalette);
+        listIcons->viewport()->setPalette(listPalette);
+        listIcons->viewport()->setAutoFillBackground(true);
+        listIcons->viewport()->update();
+    }
+    if (devices) {
+        devices->update();
+    }
     if (customTitleBar) {
         customTitleBar->setProperty("darkTitleBar", dark);
         customTitleBar->setStyleSheet(framelessTitleBarStyleSheet(dark));
