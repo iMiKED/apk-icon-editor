@@ -1,0 +1,11 @@
+/* XPM */
+static const char *combo_arrow_down_light_xpm[] = {
+"9 5 2 1",
+"  c None",
+". c #F1F1F1",
+".........",
+" ....... ",
+"  .....  ",
+"   ...   ",
+"    .    "
+};

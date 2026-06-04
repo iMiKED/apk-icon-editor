@@ -20,5 +20,5 @@ find "bin/macosx/apk-icon-editor-reborn.app" -name ".DS_Store" -type f -delete
 
 mkdir "setup/macosx/build"
 cp -R bin/macosx/apk-icon-editor-reborn.app "setup/macosx/build/APK Icon Editor Reborn.app"
-ditto -c -k --sequesterRsrc --keepParent "setup/macosx/build/APK Icon Editor Reborn.app" "setup/macosx/build/apk-icon-editor-reborn_3.0.0-beta3${ARTIFACT_SUFFIX}.app.zip"
-appdmg setup/macosx/appdmg.json "setup/macosx/build/apk-icon-editor-reborn_3.0.0-beta3${ARTIFACT_SUFFIX}.dmg" || { echo "Could not create installer."; exit 4; }
+ditto -c -k --sequesterRsrc --keepParent "setup/macosx/build/APK Icon Editor Reborn.app" "setup/macosx/build/apk-icon-editor-reborn_3.0.0-beta4${ARTIFACT_SUFFIX}.app.zip"
+appdmg setup/macosx/appdmg.json "setup/macosx/build/apk-icon-editor-reborn_3.0.0-beta4${ARTIFACT_SUFFIX}.dmg" || { echo "Could not create installer."; exit 4; }

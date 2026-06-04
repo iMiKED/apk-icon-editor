@@ -4,15 +4,1050 @@
 #include "apkfile.h"
 #include "decorationdelegate.h"
 #include <QHeaderView>
+#include <QHBoxLayout>
+#include <QContextMenuEvent>
+#include <QIcon>
+#include <QLabel>
+#include <QMenu>
 #include <QMenuBar>
+#include <QMouseEvent>
 #include <QFileDialog>
 #include <QMimeData>
+#include <QPaintEvent>
 #include <QRegularExpression>
 #include <QDesktopServices>
+#include <QEvent>
+#include <QPainterPath>
 #include <QProcess>
 #include <QDebug>
+#include <QPainter>
+#include <QProxyStyle>
+#include <QPointer>
+#include <QResizeEvent>
+#include <QRegion>
+#include <QSettings>
+#include <QStyle>
+#include <QStyleFactory>
+#include <QStyleHints>
+#include <QStyleOption>
+#include <QTimer>
+#include <QToolButton>
+#include <QVBoxLayout>
+#include <QWindow>
 #include <QtConcurrent/QtConcurrentRun>
 #include <QApplication>
+#ifdef Q_OS_WIN
+#include <qt_windows.h>
+#include <windowsx.h>
+#endif
+
+static const char THEME_SYSTEM[] = "system";
+static const char THEME_LIGHT[] = "light";
+static const char THEME_DARK[] = "dark";
+
+static QPalette defaultPalette()
+{
+    static const QPalette palette = qApp->palette();
+    return palette;
+}
+
+static QString defaultStyleName()
+{
+    static const QString styleName = qApp->style()->objectName();
+    return styleName;
+}
+
+static bool isSystemDark()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    return qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+#else
+    return false;
+#endif
+}
+
+static QColor defaultAccentColor()
+{
+    return QColor(0, 120, 215);
+}
+
+static QColor systemAccentColor()
+{
+#ifdef Q_OS_WIN
+    const QStringList keys = QStringList()
+        << "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM"
+        << "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Accent";
+    const QStringList values = QStringList() << "AccentColor" << "AccentColorMenu";
+
+    foreach (const QString &key, keys) {
+        QSettings registry(key, QSettings::NativeFormat);
+        foreach (const QString &name, values) {
+            if (!registry.contains(name)) {
+                continue;
+            }
+
+            bool ok = false;
+            const QVariant rawValue = registry.value(name);
+            qulonglong wideValue = rawValue.toULongLong(&ok);
+            if (!ok) {
+                const qlonglong signedValue = rawValue.toLongLong(&ok);
+                wideValue = quint32(signedValue);
+            }
+            if (!ok) {
+                continue;
+            }
+
+            const quint32 value = quint32(wideValue);
+            const QColor color(value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff);
+            if (color.isValid()) {
+                return color;
+            }
+        }
+    }
+#endif
+    return defaultAccentColor();
+}
+
+static QColor titleButtonHoverColor(bool dark)
+{
+    QColor color = systemAccentColor();
+    color.setAlpha(dark ? 96 : 44);
+    return color;
+}
+
+static QColor titleButtonPressedColor()
+{
+    return systemAccentColor().darker(115);
+}
+
+static QString colorName(const QColor &color)
+{
+    return color.name(QColor::HexRgb);
+}
+
+static bool systemAccentWindowBordersEnabled()
+{
+#ifdef Q_OS_WIN
+    QSettings registry("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM", QSettings::NativeFormat);
+    return registry.value("ColorPrevalence", 0).toInt() != 0;
+#else
+    return false;
+#endif
+}
+
+static QColor windowBorderColor(bool dark)
+{
+    if (systemAccentWindowBordersEnabled()) {
+        return systemAccentColor();
+    }
+
+    return dark ? QColor(85, 85, 90) : QColor(204, 204, 204);
+}
+
+enum class TitleButtonKind {
+    Minimize,
+    Maximize,
+    Restore,
+    Close
+};
+
+class TitleBarButton : public QToolButton
+{
+public:
+    explicit TitleBarButton(TitleButtonKind kind, QWidget *parent = nullptr)
+        : QToolButton(parent), kind(kind)
+    {
+        setObjectName("customTitleButton");
+        setAutoRaise(true);
+        setFixedSize(46, 32);
+        setFocusPolicy(Qt::NoFocus);
+        setCursor(Qt::ArrowCursor);
+        setAttribute(Qt::WA_Hover, true);
+        setMouseTracking(true);
+    }
+
+    void setKind(TitleButtonKind newKind)
+    {
+        if (kind == newKind) {
+            return;
+        }
+        kind = newKind;
+        update();
+    }
+
+protected:
+    bool event(QEvent *event) override
+    {
+        switch (event->type()) {
+        case QEvent::Enter:
+        case QEvent::HoverEnter:
+            hovered = true;
+            update();
+            break;
+        case QEvent::Leave:
+        case QEvent::HoverLeave:
+            hovered = false;
+            update();
+            break;
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonRelease:
+            update();
+            break;
+        default:
+            break;
+        }
+        return QToolButton::event(event);
+    }
+
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event)
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        const bool pressed = isDown();
+        const bool dark = parentWidget() && parentWidget()->property("darkTitleBar").toBool();
+        const bool closeButton = kind == TitleButtonKind::Close;
+        if (closeButton && hovered) {
+            painter.fillRect(rect(), pressed ? QColor(153, 31, 23) : QColor(196, 43, 28));
+        } else if (pressed) {
+            painter.fillRect(rect(), titleButtonPressedColor());
+        } else if (hovered) {
+            painter.fillRect(rect(), titleButtonHoverColor(dark));
+        }
+
+        const QColor color = closeButton && hovered ? QColor(255, 255, 255)
+            : palette().color(QPalette::WindowText);
+        QPen pen(color, 1.0);
+        pen.setCosmetic(true);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setJoinStyle(Qt::MiterJoin);
+        painter.setPen(pen);
+        painter.setBrush(Qt::NoBrush);
+
+        const qreal cx = width() / 2.0;
+        const qreal cy = height() / 2.0;
+        switch (kind) {
+        case TitleButtonKind::Minimize:
+            painter.drawLine(QPointF(cx - 4.5, cy + 4.0), QPointF(cx + 4.5, cy + 4.0));
+            break;
+        case TitleButtonKind::Maximize:
+            painter.drawRect(QRectF(cx - 4.5, cy - 4.5, 9.0, 9.0));
+            break;
+        case TitleButtonKind::Restore:
+            painter.drawRect(QRectF(cx - 2.5, cy - 5.5, 7.5, 7.5));
+            painter.fillRect(QRectF(cx - 5.0, cy - 3.0, 7.5, 7.5),
+                             dark ? QColor(45, 45, 48) : QColor(255, 255, 255));
+            painter.drawRect(QRectF(cx - 5.0, cy - 3.0, 7.5, 7.5));
+            break;
+        case TitleButtonKind::Close:
+            painter.drawLine(QPointF(cx - 4.5, cy - 4.5), QPointF(cx + 4.5, cy + 4.5));
+            painter.drawLine(QPointF(cx + 4.5, cy - 4.5), QPointF(cx - 4.5, cy + 4.5));
+            break;
+        }
+    }
+
+private:
+    TitleButtonKind kind;
+    bool hovered = false;
+};
+
+class AccentBorderOverlay : public QWidget
+{
+public:
+    explicit AccentBorderOverlay(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        setObjectName("accentBorderOverlay");
+        setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        setAttribute(Qt::WA_NoSystemBackground, true);
+        setAttribute(Qt::WA_TranslucentBackground, true);
+        setFocusPolicy(Qt::NoFocus);
+    }
+
+protected:
+    void resizeEvent(QResizeEvent *event) override
+    {
+        QWidget::resizeEvent(event);
+        QRegion border(rect());
+        const QRect inner = rect().adjusted(1, 1, -1, -1);
+        if (inner.isValid()) {
+            border -= QRegion(inner);
+        }
+        setMask(border);
+    }
+
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event)
+
+        QWidget *window = parentWidget();
+        if (window && (window->isMaximized() || window->isFullScreen())) {
+            return;
+        }
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, false);
+        const bool dark = qApp->palette().color(QPalette::Window).lightness() < 128;
+        painter.setPen(QPen(windowBorderColor(dark), 1));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRect(rect().adjusted(0, 0, -1, -1));
+    }
+};
+
+class FramelessTitleBar : public QWidget
+{
+public:
+    explicit FramelessTitleBar(QWidget *targetWindow, QWidget *parent = nullptr)
+        : QWidget(parent), targetWindow(targetWindow)
+    {
+        setObjectName("customTitleBar");
+        setFixedHeight(32);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        titleLabel = new QLabel(this);
+        titleLabel->setObjectName("customTitleLabel");
+        titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        btnIcon = new QToolButton(this);
+        btnIcon->setObjectName("customTitleIconButton");
+        btnIcon->setAutoRaise(true);
+        btnIcon->setFixedSize(32, 32);
+        btnIcon->setIconSize(QSize(16, 16));
+        btnIcon->setFocusPolicy(Qt::NoFocus);
+        btnIcon->setCursor(Qt::ArrowCursor);
+
+        btnMinimize = new TitleBarButton(TitleButtonKind::Minimize, this);
+        btnMaximize = new TitleBarButton(TitleButtonKind::Maximize, this);
+        btnClose = new TitleBarButton(TitleButtonKind::Close, this);
+        btnClose->setObjectName("customTitleCloseButton");
+
+        QHBoxLayout *layout = new QHBoxLayout(this);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+        layout->addWidget(btnIcon);
+        layout->addWidget(titleLabel);
+        layout->addWidget(btnMinimize);
+        layout->addWidget(btnMaximize);
+        layout->addWidget(btnClose);
+
+        connect(targetWindow, &QWidget::windowTitleChanged, this, &FramelessTitleBar::syncTitle);
+        connect(btnIcon, &QToolButton::clicked, [this]() {
+            showWindowMenu(btnIcon->mapToGlobal(QPoint(0, btnIcon->height())));
+        });
+        connect(btnMinimize, &QToolButton::clicked, targetWindow, &QWidget::showMinimized);
+        connect(btnMaximize, &QToolButton::clicked, this, &FramelessTitleBar::toggleMaximized);
+        connect(btnClose, &QToolButton::clicked, targetWindow, &QWidget::close);
+        titleLabel->installEventFilter(this);
+        targetWindow->installEventFilter(this);
+        syncIcon();
+        syncTitle();
+        syncMaximizeButton();
+    }
+
+protected:
+    bool eventFilter(QObject *object, QEvent *event) override
+    {
+        if (object == titleLabel && event->type() == QEvent::MouseButtonDblClick) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                toggleMaximized();
+                mouseEvent->accept();
+                return true;
+            }
+        }
+        if (object == targetWindow && event->type() == QEvent::WindowStateChange) {
+            syncMaximizeButton();
+        }
+        if (object == targetWindow && event->type() == QEvent::WindowIconChange) {
+            syncIcon();
+        }
+        return QWidget::eventFilter(object, event);
+    }
+
+    void contextMenuEvent(QContextMenuEvent *event) override
+    {
+        showWindowMenu(event->globalPos());
+        event->accept();
+    }
+
+    void mouseDoubleClickEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton) {
+            toggleMaximized();
+            event->accept();
+            return;
+        }
+        QWidget::mouseDoubleClickEvent(event);
+    }
+
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton && targetWindow) {
+            if (targetWindow->isMaximized()) {
+                QWidget::mousePressEvent(event);
+                return;
+            }
+            if (QWindow *handle = targetWindow->windowHandle()) {
+                handle->startSystemMove();
+                event->accept();
+                return;
+            }
+        }
+        QWidget::mousePressEvent(event);
+    }
+
+private:
+    void showWindowMenu(const QPoint &globalPos)
+    {
+        QMenu menu(this);
+        QAction *restore = menu.addAction("Restore");
+        QAction *minimize = menu.addAction("Minimize");
+        QAction *maximize = menu.addAction("Maximize");
+        menu.addSeparator();
+        QAction *close = menu.addAction("Close");
+
+        const bool maximized = targetWindow && targetWindow->isMaximized();
+        restore->setEnabled(maximized);
+        maximize->setEnabled(!maximized);
+
+        QAction *selected = menu.exec(globalPos);
+        if (!selected || !targetWindow) {
+            return;
+        }
+        if (selected == restore) {
+            targetWindow->showNormal();
+        } else if (selected == minimize) {
+            targetWindow->showMinimized();
+        } else if (selected == maximize) {
+            targetWindow->showMaximized();
+        } else if (selected == close) {
+            targetWindow->close();
+        }
+        syncMaximizeButton();
+    }
+
+    void syncIcon()
+    {
+        QIcon icon = targetWindow ? targetWindow->windowIcon() : QIcon();
+        if (icon.isNull()) {
+            icon = qApp->windowIcon();
+        }
+        if (icon.isNull()) {
+            icon.addPixmap(QPixmap(":/gfx/icon/16.png"));
+            icon.addPixmap(QPixmap(":/gfx/icon/24.png"));
+            icon.addPixmap(QPixmap(":/gfx/icon/32.png"));
+        }
+        btnIcon->setIcon(icon);
+    }
+
+    void syncTitle()
+    {
+        QString title = targetWindow ? targetWindow->windowTitle().remove("[*]") : QString();
+        if (title.isEmpty()) {
+            title = qApp->applicationDisplayName();
+        }
+        titleLabel->setText(title);
+    }
+
+    void syncMaximizeButton()
+    {
+        btnMaximize->setKind(targetWindow && targetWindow->isMaximized()
+            ? TitleButtonKind::Restore
+            : TitleButtonKind::Maximize);
+    }
+
+    void toggleMaximized()
+    {
+        if (!targetWindow) {
+            return;
+        }
+        if (targetWindow->isMaximized()) {
+            targetWindow->showNormal();
+        } else {
+            targetWindow->showMaximized();
+        }
+        syncMaximizeButton();
+    }
+
+    QWidget *targetWindow;
+    QToolButton *btnIcon;
+    QLabel *titleLabel;
+    TitleBarButton *btnMinimize;
+    TitleBarButton *btnMaximize;
+    TitleBarButton *btnClose;
+};
+
+class DarkProxyStyle : public QProxyStyle
+{
+public:
+    explicit DarkProxyStyle(QStyle *style) : QProxyStyle(style) {}
+
+    void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
+                       const QWidget *widget = nullptr) const override
+    {
+        if ((element == PE_IndicatorCheckBox || element == PE_IndicatorRadioButton) && option) {
+            drawChoiceIndicator(element == PE_IndicatorRadioButton, option, painter);
+            return;
+        }
+
+        if ((element == PE_IndicatorSpinUp || element == PE_IndicatorSpinDown) && option) {
+            drawSpinArrow(element == PE_IndicatorSpinUp, option, painter);
+            return;
+        }
+
+        if ((element == PE_IndicatorArrowRight || element == PE_IndicatorArrowDown) && option) {
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QColor(241, 241, 241));
+            const QRect r = option->rect;
+            const QPoint center = r.center();
+            QPolygon arrow;
+            if (element == PE_IndicatorArrowRight) {
+                arrow << QPoint(center.x() - 2, center.y() - 5)
+                      << QPoint(center.x() - 2, center.y() + 5)
+                      << QPoint(center.x() + 4, center.y());
+            } else {
+                arrow << QPoint(center.x() - 5, center.y() - 2)
+                      << QPoint(center.x() + 5, center.y() - 2)
+                      << QPoint(center.x(), center.y() + 4);
+            }
+            painter->drawPolygon(arrow);
+            painter->restore();
+            return;
+        }
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
+    }
+
+    void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter,
+                     const QWidget *widget = nullptr) const override
+    {
+        QStyleOptionMenuItem menuCopy;
+        const QStyleOptionMenuItem *menuItem = nullptr;
+        const bool checkedMenuItem = element == CE_MenuItem
+            && (menuItem = qstyleoption_cast<const QStyleOptionMenuItem *>(option))
+            && menuItem->checked
+            && menuItem->checkType != QStyleOptionMenuItem::NotCheckable;
+        if (element == CE_MenuItem) {
+            if (checkedMenuItem) {
+                menuCopy = *menuItem;
+                menuCopy.checked = false;
+                menuCopy.checkType = QStyleOptionMenuItem::NotCheckable;
+                option = &menuCopy;
+            }
+        }
+
+        if (checkedMenuItem && menuItem->checkType != QStyleOptionMenuItem::Exclusive && !menuItem->icon.isNull()) {
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(systemAccentColor());
+            painter->drawRect(menuIndicatorFrameRect(menuItem));
+            painter->restore();
+        }
+
+        QProxyStyle::drawControl(element, option, painter, widget);
+
+        if (element != CE_MenuItem) {
+            return;
+        }
+
+        if (!menuItem) {
+            menuItem = qstyleoption_cast<const QStyleOptionMenuItem *>(option);
+        }
+        if (!menuItem || !menuItem->checked || menuItem->checkType == QStyleOptionMenuItem::NotCheckable) {
+            return;
+        }
+
+        const bool exclusiveLike = menuItem->checkType == QStyleOptionMenuItem::Exclusive;
+        if (!exclusiveLike && !menuItem->icon.isNull()) {
+            return;
+        }
+
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        const QRectF r = menuIndicatorRect(menuItem, QSizeF(12.0, 12.0));
+        painter->setPen(QPen(QColor(241, 241, 241), 2.0, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter->setBrush(Qt::NoBrush);
+
+        if (exclusiveLike) {
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QColor(241, 241, 241));
+            painter->drawEllipse(QRectF(r.center().x() - 3.0, r.center().y() - 3.0, 6.0, 6.0));
+        } else {
+            QPainterPath path;
+            path.moveTo(r.left() + 1.0, r.center().y());
+            path.lineTo(r.center().x() - 1.0, r.bottom() - 1.5);
+            path.lineTo(r.right() - 0.5, r.top() + 1.5);
+            painter->drawPath(path);
+        }
+        painter->restore();
+    }
+
+    void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter,
+                            const QWidget *widget = nullptr) const override
+    {
+        QProxyStyle::drawComplexControl(control, option, painter, widget);
+
+        if (control != CC_SpinBox) {
+            return;
+        }
+
+        const QStyleOptionSpinBox *spinBox = qstyleoption_cast<const QStyleOptionSpinBox *>(option);
+        if (!spinBox) {
+            return;
+        }
+
+        drawSpinButton(spinBox, SC_SpinBoxUp, painter, widget);
+        drawSpinButton(spinBox, SC_SpinBoxDown, painter, widget);
+    }
+
+private:
+    static QRectF menuIndicatorRect(const QStyleOptionMenuItem *menuItem, const QSizeF &size)
+    {
+        const qreal columnWidth = 28.0;
+        const qreal columnLeft = menuItem->direction == Qt::RightToLeft
+            ? menuItem->rect.right() + 1.0 - columnWidth
+            : menuItem->rect.left();
+        return QRectF(columnLeft + (columnWidth - size.width()) / 2.0,
+                      menuItem->rect.top() + (menuItem->rect.height() - size.height()) / 2.0,
+                      size.width(),
+                      size.height());
+    }
+
+    static QRectF menuIndicatorFrameRect(const QStyleOptionMenuItem *menuItem)
+    {
+        const qreal width = qMin<qreal>(26.0, qMax<qreal>(22.0, menuItem->maxIconWidth + 8.0));
+        const qreal height = qMin<qreal>(24.0, qMax<qreal>(20.0, menuItem->rect.height() - 2.0));
+        return menuIndicatorRect(menuItem, QSizeF(width, height));
+    }
+
+    static void drawChoiceIndicator(bool radio, const QStyleOption *option, QPainter *painter)
+    {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+
+        const bool checked = option->state & State_On;
+        const bool enabled = option->state & State_Enabled;
+        const bool hover = option->state & State_MouseOver;
+        QRect r = option->rect.adjusted(1, 1, -1, -1);
+
+        QColor border = enabled ? QColor(154, 154, 160) : QColor(85, 85, 90);
+        if (hover && enabled) {
+            border = QColor(200, 200, 200);
+        }
+
+        painter->setPen(QPen(border, 1.2));
+        painter->setBrush(QColor(37, 37, 38));
+        if (radio) {
+            painter->drawEllipse(r);
+        } else {
+            painter->drawRoundedRect(r, 2, 2);
+        }
+
+        if (checked) {
+            painter->setPen(QPen(enabled ? QColor(241, 241, 241) : QColor(140, 140, 140), 1.7,
+                                 Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            if (radio) {
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(enabled ? QColor(241, 241, 241) : QColor(140, 140, 140));
+                const QPointF center = QRectF(r).center();
+                painter->drawEllipse(QRectF(center.x() - 3.0, center.y() - 3.0, 6.0, 6.0));
+            } else {
+                QPainterPath path;
+                path.moveTo(r.left() + 3, r.center().y());
+                path.lineTo(r.center().x() - 1, r.bottom() - 3);
+                path.lineTo(r.right() - 2, r.top() + 3);
+                painter->drawPath(path);
+            }
+        }
+
+        painter->restore();
+    }
+
+    static void drawSpinArrow(bool up, const QStyleOption *option, QPainter *painter)
+    {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(option->state & State_Enabled ? QColor(241, 241, 241) : QColor(140, 140, 140));
+        const QPoint c = option->rect.center();
+        QPolygon arrow;
+        if (up) {
+            arrow << QPoint(c.x() - 4, c.y() + 2)
+                  << QPoint(c.x() + 4, c.y() + 2)
+                  << QPoint(c.x(), c.y() - 3);
+        } else {
+            arrow << QPoint(c.x() - 4, c.y() - 2)
+                  << QPoint(c.x() + 4, c.y() - 2)
+                  << QPoint(c.x(), c.y() + 3);
+        }
+        painter->drawPolygon(arrow);
+        painter->restore();
+    }
+
+    void drawSpinButton(const QStyleOptionSpinBox *spinBox, SubControl control, QPainter *painter,
+                        const QWidget *widget) const
+    {
+        const QRect buttonRect = subControlRect(CC_SpinBox, spinBox, control, widget);
+        if (buttonRect.isEmpty()) {
+            return;
+        }
+
+        const bool enabled = spinBox->state & State_Enabled;
+        const bool active = spinBox->activeSubControls & control;
+        const bool pressed = active && (spinBox->state & State_Sunken);
+
+        painter->save();
+        painter->setPen(QPen(QColor(85, 85, 90), 1));
+        painter->setBrush(pressed ? systemAccentColor() : active ? QColor(75, 75, 82) : QColor(63, 63, 70));
+        painter->drawRect(buttonRect.adjusted(0, 0, -1, -1));
+
+        QStyleOption arrowOption;
+        arrowOption.rect = buttonRect.adjusted(3, 2, -3, -2);
+        arrowOption.state = enabled ? State_Enabled : State_None;
+        drawSpinArrow(control == SC_SpinBoxUp, &arrowOption, painter);
+        painter->restore();
+    }
+};
+
+class IconSizePresetComboBox : public QComboBox
+{
+public:
+    explicit IconSizePresetComboBox(QWidget *parent = nullptr) : QComboBox(parent)
+    {
+        setAttribute(Qt::WA_Hover);
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        const bool dark = palette().color(QPalette::Base).lightness() < 64;
+        if (!dark) {
+            QComboBox::paintEvent(event);
+            return;
+        }
+
+        Q_UNUSED(event)
+        const bool enabled = isEnabled();
+        const QColor base = palette().color(QPalette::Base);
+        const QColor text = enabled ? palette().color(QPalette::Text) : QColor(140, 140, 140);
+        const QColor border = hasFocus() || underMouse() ? QColor(102, 102, 109) : QColor(85, 85, 90);
+        const QColor arrow = enabled ? QColor(241, 241, 241) : QColor(140, 140, 140);
+
+        QPainter painter(this);
+        painter.fillRect(rect(), base);
+        painter.setPen(border);
+        painter.drawRect(rect().adjusted(0, 0, -1, -1));
+
+        const int margin = 5;
+        const int arrowWidth = 24;
+        int left = margin;
+        const QIcon icon = itemIcon(currentIndex());
+        if (!icon.isNull()) {
+            const int size = qMin(16, qMax(0, height() - 8));
+            const QRect iconRect(left, (height() - size) / 2, size, size);
+            icon.paint(&painter, iconRect, Qt::AlignCenter, enabled ? QIcon::Normal : QIcon::Disabled);
+            left += size + margin;
+        }
+
+        const QRect textRect(left, 0, qMax(0, width() - left - arrowWidth - margin), height());
+        painter.setPen(text);
+        painter.drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft,
+                         fontMetrics().elidedText(currentText(), Qt::ElideRight, textRect.width()));
+
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(arrow);
+        const QPoint c(width() - arrowWidth / 2, height() / 2);
+        QPolygonF polygon;
+        polygon << QPointF(c.x() - 4.0, c.y() - 2.0)
+                << QPointF(c.x() + 4.0, c.y() - 2.0)
+                << QPointF(c.x(), c.y() + 3.0);
+        painter.drawPolygon(polygon);
+    }
+};
+
+static QPalette lightPalette()
+{
+    QPalette palette = defaultPalette();
+    palette.setColor(QPalette::Highlight, systemAccentColor());
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    return palette;
+}
+
+static QPalette darkPalette()
+{
+    const QColor accent = systemAccentColor();
+    QPalette palette;
+    palette.setColor(QPalette::Window, QColor(45, 45, 48));
+    palette.setColor(QPalette::WindowText, QColor(241, 241, 241));
+    palette.setColor(QPalette::Base, QColor(30, 30, 30));
+    palette.setColor(QPalette::AlternateBase, QColor(37, 37, 38));
+    palette.setColor(QPalette::ToolTipBase, QColor(45, 45, 48));
+    palette.setColor(QPalette::ToolTipText, QColor(241, 241, 241));
+    palette.setColor(QPalette::Text, QColor(241, 241, 241));
+    palette.setColor(QPalette::Button, QColor(63, 63, 70));
+    palette.setColor(QPalette::ButtonText, QColor(241, 241, 241));
+    palette.setColor(QPalette::BrightText, Qt::red);
+    palette.setColor(QPalette::Link, QColor(88, 166, 255));
+    palette.setColor(QPalette::Highlight, accent);
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    palette.setColor(QPalette::Disabled, QPalette::Text, QColor(140, 140, 140));
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(140, 140, 140));
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(140, 140, 140));
+    return palette;
+}
+
+static QString darkStyleSheet()
+{
+    const QColor accent = systemAccentColor();
+    const QColor accentBorder = accent.lighter(135);
+    const QString accentName = colorName(accent);
+    const QString accentBorderName = colorName(accentBorder);
+    return QString(
+        "QMainWindow, QDialog, QMessageBox, QColorDialog { color: #f1f1f1; background-color: #2d2d30; selection-background-color: %1; selection-color: #ffffff; }"
+        "QMenuBar { background-color: #2d2d30; color: #f1f1f1; }"
+        "QMenuBar::item { background: transparent; padding: 3px 8px; }"
+        "QMenuBar::item:selected, QMenuBar::item:pressed { background-color: #3f3f46; }"
+        "QMenuBar QToolButton { background: transparent; border: none; border-radius: 0px; padding: 1px 6px; margin: 0px; }"
+        "QMenuBar QToolButton:hover { background-color: #3f3f46; }"
+        "QTabWidget::pane { border: 1px solid #55555a; background-color: #2d2d30; }"
+        "QTabBar::tab { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #55555a; padding: 5px 10px; }"
+        "QTabBar::tab:selected { background-color: #2d2d30; border-bottom-color: #2d2d30; }"
+        "QTabBar::tab:!selected { background-color: #252526; }"
+        "QHeaderView::section { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #55555a; padding: 4px; }"
+        "QTableView, QListView, QTreeView, QPlainTextEdit, QTextEdit, QLineEdit, QSpinBox, QComboBox {"
+        " background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; selection-background-color: %1; selection-color: #ffffff; }"
+        "QListView#iconsList { background-color: #1e1e1e; alternate-background-color: #1e1e1e; outline: 0px; }"
+        "QListView#iconsList::item { background-color: #1e1e1e; color: #f1f1f1; padding: 1px; }"
+        "QListView#iconsList::item:hover:!selected { background-color: #252526; color: #f1f1f1; }"
+        "QListView#iconsList::item:selected, QListView#iconsList::item:selected:active, QListView#iconsList::item:selected:!active {"
+        " background-color: %1; color: #ffffff; }"
+        "QComboBox { min-height: 22px; padding: 3px 28px 3px 5px; }"
+        "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right; top: 0px; right: 0px; bottom: 0px; width: 24px; border: none; background: transparent; }"
+        "QComboBox::drop-down:on, QComboBox::drop-down:open { background: transparent; border: none; }"
+        "QComboBox::down-arrow { image: url(:/gfx/actions/combo-arrow-down-light.xpm); width: 9px; height: 5px; }"
+        "QComboBox::down-arrow:on, QComboBox::down-arrow:open { image: url(:/gfx/actions/combo-arrow-down-light.xpm); width: 9px; height: 5px; }"
+        "QComboBox::down-arrow:disabled { image: url(:/gfx/actions/combo-arrow-down-light.xpm); }"
+        "QComboBox QAbstractItemView { background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; outline: 0px; selection-background-color: %1; }"
+        "QPushButton, QToolButton { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #66666d; border-radius: 3px; padding: 4px 8px; }"
+        "QPushButton:hover, QToolButton:hover { background-color: #4b4b52; }"
+        "QPushButton:pressed, QToolButton:pressed, QToolButton:checked { background-color: %1; border-color: %2; }"
+        "QPushButton:disabled, QToolButton:disabled { background-color: #333337; color: #8c8c8c; border-color: #44444a; }"
+        "QCheckBox, QRadioButton, QGroupBox, QLabel { color: #f1f1f1; background-color: transparent; }"
+        "QGroupBox { border: 1px solid #55555a; border-radius: 3px; margin-top: 8px; padding-top: 8px; }"
+        "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 3px; background-color: #2d2d30; color: #f1f1f1; }"
+        "QProgressBar { border: 1px solid #55555a; background-color: #1e1e1e; color: #f1f1f1; text-align: center; }"
+        "QProgressBar::chunk { background-color: %1; }"
+        "QSlider::groove:horizontal { height: 4px; background: #55555a; }"
+        "QSlider::handle:horizontal { background: #f1f1f1; border: 1px solid #77777d; width: 12px; margin: -5px 0; border-radius: 6px; }"
+        "QDialogButtonBox QPushButton { min-width: 72px; }"
+        "QToolTip { color: #f1f1f1; background-color: #2d2d30; border: 1px solid #767676; }"
+    ).arg(accentName, accentBorderName);
+}
+
+static QString framelessTitleBarStyleSheet(bool dark)
+{
+    const QString accentName = colorName(systemAccentColor());
+    if (dark) {
+        return QString(
+            "#customTitleBar { background-color: #2d2d30; border: none; }"
+            "#customTitleLabel { color: #f1f1f1; padding-left: 4px; }"
+            "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
+            " background: transparent; color: #f1f1f1; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
+            "#customTitleIconButton:hover { background-color: #3f3f46; }"
+            "#customTitleIconButton:pressed { background-color: %1; }"
+        ).arg(accentName);
+    }
+
+    return QString(
+        "#customTitleBar { background-color: #ffffff; border: none; }"
+        "#customTitleLabel { color: #202020; padding-left: 4px; }"
+        "#customTitleIconButton, #customTitleButton, #customTitleCloseButton {"
+        " background: transparent; color: #202020; border: none; border-radius: 0px; padding: 0px; margin: 0px; }"
+        "#customTitleIconButton:hover { background-color: #e5e5e5; }"
+        "#customTitleIconButton:pressed { background-color: %1; color: #ffffff; }"
+    ).arg(accentName);
+}
+
+#ifdef Q_OS_WIN
+struct DwmMargins
+{
+    int cxLeftWidth;
+    int cxRightWidth;
+    int cyTopHeight;
+    int cyBottomHeight;
+};
+
+static DWORD windowsColorRef(const QColor &color)
+{
+    return (DWORD(color.blue()) << 16) | (DWORD(color.green()) << 8) | DWORD(color.red());
+}
+
+static HWND hwndForWidget(QWidget *widget)
+{
+    return widget ? reinterpret_cast<HWND>(widget->winId()) : nullptr;
+}
+
+static void setWindowsFramelessFrame(QWidget *widget, bool forceNativeFrameRefresh = false)
+{
+    if (!widget || !widget->isWindow() || !widget->windowFlags().testFlag(Qt::FramelessWindowHint)) {
+        return;
+    }
+
+    HWND hwnd = hwndForWidget(widget);
+    if (!hwnd) {
+        return;
+    }
+
+    using GetWindowLongPtrFunc = LONG_PTR (WINAPI *)(HWND, int);
+    using SetWindowLongPtrFunc = LONG_PTR (WINAPI *)(HWND, int, LONG_PTR);
+    using SetWindowPosFunc = BOOL (WINAPI *)(HWND, HWND, int, int, int, int, UINT);
+    using GetWindowRectFunc = BOOL (WINAPI *)(HWND, LPRECT);
+    HMODULE user32 = LoadLibraryW(L"user32.dll");
+    if (!user32) {
+        return;
+    }
+
+    auto getWindowLongPtr = reinterpret_cast<GetWindowLongPtrFunc>(GetProcAddress(user32, "GetWindowLongPtrW"));
+    auto setWindowLongPtr = reinterpret_cast<SetWindowLongPtrFunc>(GetProcAddress(user32, "SetWindowLongPtrW"));
+    auto setWindowPos = reinterpret_cast<SetWindowPosFunc>(GetProcAddress(user32, "SetWindowPos"));
+    auto getWindowRect = reinterpret_cast<GetWindowRectFunc>(GetProcAddress(user32, "GetWindowRect"));
+    if (!getWindowLongPtr || !setWindowLongPtr || !setWindowPos) {
+        FreeLibrary(user32);
+        return;
+    }
+
+    LONG_PTR style = getWindowLongPtr(hwnd, GWL_STYLE);
+    style |= WS_CAPTION | WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+    setWindowLongPtr(hwnd, GWL_STYLE, style);
+
+    HMODULE module = LoadLibraryW(L"dwmapi.dll");
+    if (module) {
+        using DwmExtendFrameIntoClientAreaFunc = HRESULT (WINAPI *)(HWND, const DwmMargins *);
+        auto extendFrame = reinterpret_cast<DwmExtendFrameIntoClientAreaFunc>(
+                    GetProcAddress(module, "DwmExtendFrameIntoClientArea"));
+        if (extendFrame) {
+            const DwmMargins margins = { 1, 1, 1, 1 };
+            extendFrame(hwnd, &margins);
+        }
+        FreeLibrary(module);
+    }
+
+    UINT flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED;
+    setWindowPos(hwnd, nullptr, 0, 0, 0, 0, flags);
+    if (forceNativeFrameRefresh && getWindowRect) {
+        RECT rect;
+        if (getWindowRect(hwnd, &rect)) {
+            const int width = rect.right - rect.left;
+            const int height = rect.bottom - rect.top;
+            setWindowPos(hwnd, nullptr, 0, 0, width, height + 1,
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+            setWindowPos(hwnd, nullptr, 0, 0, width, height,
+                         SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        }
+    }
+    FreeLibrary(user32);
+}
+#endif
+
+static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeFrameRefresh = false)
+{
+#ifdef Q_OS_WIN
+    if (!widget || !widget->isWindow()) {
+        return;
+    }
+
+    setWindowsFramelessFrame(widget, forceNativeFrameRefresh);
+
+    using DwmSetWindowAttributeFunc = HRESULT (WINAPI *)(HWND, DWORD, LPCVOID, DWORD);
+    HMODULE module = LoadLibraryW(L"dwmapi.dll");
+    if (!module) {
+        return;
+    }
+
+    auto setAttribute = reinterpret_cast<DwmSetWindowAttributeFunc>(GetProcAddress(module, "DwmSetWindowAttribute"));
+    if (setAttribute) {
+        const DWORD DWMWA_USE_IMMERSIVE_DARK_MODE_CURRENT = 20;
+        const DWORD DWMWA_USE_IMMERSIVE_DARK_MODE_OLD = 19;
+        const DWORD DWMWA_BORDER_COLOR = 34;
+        const DWORD DWMWA_CAPTION_COLOR = 35;
+        const DWORD DWMWA_TEXT_COLOR = 36;
+        const DWORD DWMWA_COLOR_DEFAULT = 0xFFFFFFFF;
+        const DWORD darkCaptionColor = 0x00302d2d;
+        const DWORD darkTextColor = 0x00f1f1f1;
+        HWND hwnd = reinterpret_cast<HWND>(widget->winId());
+        const bool frameless = widget->windowFlags().testFlag(Qt::FramelessWindowHint);
+        const DWORD captionColor = dark ? darkCaptionColor : DWMWA_COLOR_DEFAULT;
+        const DWORD borderColor = frameless ? windowsColorRef(windowBorderColor(dark)) : captionColor;
+        const DWORD textColor = dark ? darkTextColor : DWMWA_COLOR_DEFAULT;
+        const BOOL systemDarkCaption = dark ? TRUE : FALSE;
+        if (FAILED(setAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_CURRENT,
+                                &systemDarkCaption, sizeof(systemDarkCaption)))) {
+            setAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_OLD, &systemDarkCaption, sizeof(systemDarkCaption));
+        }
+
+        auto applyCaptionColors = [&]() {
+            setAttribute(hwnd, DWMWA_CAPTION_COLOR, &captionColor, sizeof(captionColor));
+            setAttribute(hwnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor));
+            setAttribute(hwnd, DWMWA_TEXT_COLOR, &textColor, sizeof(textColor));
+        };
+        applyCaptionColors();
+        using SetWindowPosFunc = BOOL (WINAPI *)(HWND, HWND, int, int, int, int, UINT);
+        using GetWindowRectFunc = BOOL (WINAPI *)(HWND, LPRECT);
+        HMODULE user32 = LoadLibraryW(L"user32.dll");
+        if (user32) {
+            auto setWindowPos = reinterpret_cast<SetWindowPosFunc>(GetProcAddress(user32, "SetWindowPos"));
+            auto getWindowRect = reinterpret_cast<GetWindowRectFunc>(GetProcAddress(user32, "GetWindowRect"));
+            if (setWindowPos) {
+                setWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+                             SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+                if (forceNativeFrameRefresh && getWindowRect) {
+                    RECT rect;
+                    if (getWindowRect(hwnd, &rect)) {
+                        const int width = rect.right - rect.left;
+                        const int height = rect.bottom - rect.top;
+                        setWindowPos(hwnd, nullptr, 0, 0, width, height + 1,
+                                     SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+                        setWindowPos(hwnd, nullptr, 0, 0, width, height,
+                                     SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+                    }
+                }
+            }
+            applyCaptionColors();
+            using RedrawWindowFunc = BOOL (WINAPI *)(HWND, const RECT *, HRGN, UINT);
+            auto redrawWindow = reinterpret_cast<RedrawWindowFunc>(GetProcAddress(user32, "RedrawWindow"));
+            if (redrawWindow) {
+                redrawWindow(hwnd, nullptr, nullptr, RDW_INVALIDATE | RDW_FRAME | RDW_UPDATENOW | RDW_ALLCHILDREN);
+            }
+            FreeLibrary(user32);
+        }
+    }
+    FreeLibrary(module);
+#else
+    Q_UNUSED(widget)
+    Q_UNUSED(dark)
+#endif
+}
+
+static void setWindowsDarkTitleBars(bool dark, bool forceNativeFrameRefresh = false)
+{
+    foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+        setWindowsDarkTitleBar(widget, dark, forceNativeFrameRefresh);
+    }
+}
+
+static void scheduleWindowsDarkTitleBars(bool dark)
+{
+    setWindowsDarkTitleBars(dark, true);
+    foreach (int delay, QList<int>() << 0 << 100 << 300 << 700) {
+        const bool forceNativeFrameRefresh = delay <= 100;
+        QTimer::singleShot(delay, qApp, [dark, forceNativeFrameRefresh]() {
+            setWindowsDarkTitleBars(dark, forceNativeFrameRefresh);
+        });
+    }
+}
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -21,6 +1056,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     init_languages();
     init_devices();
     init_slots();
+    qApp->installEventFilter(this);
 
     apk_close();
 
@@ -83,6 +1119,8 @@ void MainWindow::init_core()
     updater = new Updater(this);
     recent = NULL;
     manualUpdateCheck = false;
+    framelessResizeCursorActive = false;
+    accentBorderOverlay = NULL;
 
     dropbox = new Dropbox(this);
     gdrive = new GoogleDrive(this);
@@ -105,15 +1143,29 @@ void MainWindow::init_gui()
 
     // Main Window:
 
+    setWindowFlag(Qt::FramelessWindowHint, true);
+    setMouseTracking(true);
     splitter = new QSplitter(this);
     setCentralWidget(splitter);
     setAcceptDrops(true);
+    accentBorderOverlay = new AccentBorderOverlay(this);
 
-    QMenuBar *menu = new QMenuBar(this);
-    setMenuBar(menu);
+    customTitleBar = new FramelessTitleBar(this, this);
+    mainMenuBar = new QMenuBar(this);
+    QWidget *topBar = new QWidget(this);
+    QVBoxLayout *topBarLayout = new QVBoxLayout(topBar);
+    topBarLayout->setContentsMargins(0, 0, 0, 0);
+    topBarLayout->setSpacing(0);
+    topBarLayout->addWidget(customTitleBar);
+    topBarLayout->addWidget(mainMenuBar);
+    setMenuWidget(topBar);
+
+    QMenuBar *menu = mainMenuBar;
     menuFile = new QMenu(this);
     menuIcon = new QMenu(this);
     menuView = new QMenu(this);
+    menuAdaptivePreviewMode = new QMenu(this);
+    menuPreviewShape = new QMenu(this);
     menuSett = new QMenu(this);
     menuHelp = new QMenu(this);
     btnDonate = new QToolButton(this);
@@ -148,9 +1200,40 @@ void MainWindow::init_gui()
     actIconBackground = new QAction(this);
     actViewActivities = new QAction(this);
     actViewActivities->setCheckable(true);
+    adaptivePreviewModeActions = new QActionGroup(this);
+    adaptivePreviewModeActions->setExclusive(true);
+    actAdaptivePreviewNormal = new QAction(adaptivePreviewModeActions);
+    actAdaptivePreviewThemed = new QAction(adaptivePreviewModeActions);
+    foreach (QAction *action, adaptivePreviewModeActions->actions()) {
+        action->setCheckable(true);
+        menuAdaptivePreviewMode->addAction(action);
+    }
+    actAdaptivePreviewNormal->setChecked(true);
+    previewShapeActions = new QActionGroup(this);
+    previewShapeActions->setExclusive(true);
+    actPreviewShapeNone = new QAction(previewShapeActions);
+    actPreviewShapeCircle = new QAction(previewShapeActions);
+    actPreviewShapeRoundedSquare = new QAction(previewShapeActions);
+    actPreviewShapeSquircle = new QAction(previewShapeActions);
+    foreach (QAction *action, previewShapeActions->actions()) {
+        action->setCheckable(true);
+        menuPreviewShape->addAction(action);
+    }
+    actPreviewShapeNone->setChecked(true);
     actPacking = new QAction(this);
     actKeys = new QAction(this);
     menuLang = new QMenu(this);
+    menuTheme = new QMenu(this);
+    themeActions = new QActionGroup(this);
+    themeActions->setExclusive(true);
+    actThemeSystem = new QAction(themeActions);
+    actThemeLight = new QAction(themeActions);
+    actThemeDark = new QAction(themeActions);
+    foreach (QAction *action, themeActions->actions()) {
+        action->setCheckable(true);
+        menuTheme->addAction(action);
+    }
+    actThemeSystem->setChecked(true);
     actAutoUpdate = new QAction(this);
     actAssoc = new QAction(this);
     actReset = new QAction(this);
@@ -181,10 +1264,13 @@ void MainWindow::init_gui()
     menuIcon->addSeparator();
     menuIcon->addAction(actIconBackground);
     menuView->addAction(actViewActivities);
+    menuView->addMenu(menuAdaptivePreviewMode);
+    menuView->addMenu(menuPreviewShape);
     menuSett->addAction(actPacking);
     menuSett->addAction(actKeys);
     menuSett->addSeparator();
     menuSett->addMenu(menuLang);
+    menuSett->addMenu(menuTheme);
     menuSett->addAction(actAutoUpdate);
     menuSett->addSeparator();
 #ifndef Q_OS_UNIX
@@ -282,23 +1368,41 @@ void MainWindow::init_gui()
     QHBoxLayout *layoutDevices = new QHBoxLayout;
     QVBoxLayout *layoutIcons = new QVBoxLayout(tabIcons);
     devicesLabel = new QLabel(this);
-    devices = new QComboBox(this);
-    devices->setStyleSheet("QComboBox {padding: 4px}");
+    devices = new IconSizePresetComboBox(this);
+    devices->setObjectName("iconSizePresetCombo");
     devices->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     layoutDevices->addWidget(devicesLabel);
     layoutDevices->addWidget(devices);
 
     listIcons = new QListView(this);
+    listIcons->setObjectName("iconsList");
     listIcons->addActions(menuIcon->actions());
     listIcons->setContextMenuPolicy(Qt::ActionsContextMenu);
+    listIcons->setAlternatingRowColors(false);
+    listIcons->viewport()->setAutoFillBackground(true);
     listIcons->setItemDelegate(new DecorationDelegate(QSize(32, 32), this));
     iconsProxy = new IconsProxy(this);
     listIcons->setModel(iconsProxy);
     setCurrentIcon(QModelIndex());
 
+    QWidget *iconsLoading = new QWidget(this);
+    QVBoxLayout *layoutIconsLoading = new QVBoxLayout(iconsLoading);
+    layoutIconsLoading->addStretch();
+    iconsLoadingIndicator = new BusyIndicator(this);
+    iconsLoadingLabel = new QLabel(this);
+    iconsLoadingLabel->setAlignment(Qt::AlignCenter);
+    layoutIconsLoading->addWidget(iconsLoadingIndicator, 0, Qt::AlignHCenter);
+    layoutIconsLoading->addWidget(iconsLoadingLabel);
+    layoutIconsLoading->addStretch();
+
+    iconsStack = new QStackedWidget(this);
+    iconsStack->addWidget(listIcons);
+    iconsStack->addWidget(iconsLoading);
+
     actAddIconLdpi = new QAction(this);
     actAddIconMdpi = new QAction(this);
     actAddIconHdpi = new QAction(this);
+    actAddIconTvdpi = new QAction(this);
     actAddIconXhdpi = new QAction(this);
     actAddIconXxhdpi = new QAction(this);
     actAddIconXxxhdpi = new QAction(this);
@@ -308,6 +1412,7 @@ void MainWindow::init_gui()
     menuIconAdd->addAction(actAddIconLdpi);
     menuIconAdd->addAction(actAddIconMdpi);
     menuIconAdd->addAction(actAddIconHdpi);
+    menuIconAdd->addAction(actAddIconTvdpi);
     menuIconAdd->addAction(actAddIconXhdpi);
     menuIconAdd->addAction(actAddIconXxhdpi);
     menuIconAdd->addAction(actAddIconXxxhdpi);
@@ -318,6 +1423,7 @@ void MainWindow::init_gui()
         actAddIconLdpi->setText(device->getIconTitle(Icon(QString(), Icon::Ldpi)));
         actAddIconMdpi->setText(device->getIconTitle(Icon(QString(), Icon::Mdpi)));
         actAddIconHdpi->setText(device->getIconTitle(Icon(QString(), Icon::Hdpi)));
+        actAddIconTvdpi->setText(device->getIconTitle(Icon(QString(), Icon::Tvdpi)));
         actAddIconXhdpi->setText(device->getIconTitle(Icon(QString(), Icon::Xhdpi)));
         actAddIconXxhdpi->setText(device->getIconTitle(Icon(QString(), Icon::Xxhdpi)));
         actAddIconXxxhdpi->setText(device->getIconTitle(Icon(QString(), Icon::Xxxhdpi)));
@@ -367,7 +1473,7 @@ void MainWindow::init_gui()
     layoutIconsButtons->setSpacing(2);
 
     layoutIcons->addLayout(layoutDevices);
-    layoutIcons->addWidget(listIcons);
+    layoutIcons->addWidget(iconsStack);
     layoutIcons->addLayout(layoutIconsButtons);
     layoutIcons->setContentsMargins(4, 4, 4, 4);
     layoutIcons->setSpacing(6);
@@ -431,6 +1537,7 @@ void MainWindow::init_gui()
     splitter->setStyleSheet("QSplitter {padding: 8px;}");
 
     setInitialSize();
+    updateAccentBorderOverlay();
 }
 
 void MainWindow::init_languages()
@@ -503,8 +1610,24 @@ void MainWindow::init_slots()
     connect(actIconClone, SIGNAL(triggered()), this, SLOT(cloneIcons()));
     connect(actIconBackground, SIGNAL(triggered()), this, SLOT(setPreviewColor()));
     connect(actViewActivities, &QAction::toggled, iconsProxy, &IconsProxy::setShowActivities);
+    connect(actAdaptivePreviewNormal, &QAction::triggered, [=]() { drawArea->setAdaptivePreviewMode(DrawArea::AdaptivePreviewNormal); });
+    connect(actAdaptivePreviewThemed, &QAction::triggered, [=]() { drawArea->setAdaptivePreviewMode(DrawArea::AdaptivePreviewThemed); });
+    connect(actPreviewShapeNone, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeNone); });
+    connect(actPreviewShapeCircle, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeCircle); });
+    connect(actPreviewShapeRoundedSquare, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeRoundedSquare); });
+    connect(actPreviewShapeSquircle, &QAction::triggered, [=]() { drawArea->setPreviewShape(DrawArea::PreviewShapeSquircle); });
     connect(actPacking, SIGNAL(triggered()), toolDialog, SLOT(open()));
     connect(actKeys, SIGNAL(triggered()), keyManager, SLOT(open()));
+    connect(actThemeSystem, &QAction::triggered, [=]() { setTheme(THEME_SYSTEM); });
+    connect(actThemeLight, &QAction::triggered, [=]() { setTheme(THEME_LIGHT); });
+    connect(actThemeDark, &QAction::triggered, [=]() { setTheme(THEME_DARK); });
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, [=]() {
+        if (currentTheme == THEME_SYSTEM) {
+            applyTheme(currentTheme);
+        }
+    });
+#endif
     connect(actAssoc, SIGNAL(triggered()), this, SLOT(associate()));
     connect(actReset, SIGNAL(triggered()), this, SLOT(settings_reset()));
     connect(actWebsite, SIGNAL(triggered()), this, SLOT(browseSite()));
@@ -520,6 +1643,7 @@ void MainWindow::init_slots()
     connect(actAddIconLdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Ldpi); });
     connect(actAddIconMdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Mdpi); });
     connect(actAddIconHdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Hdpi); });
+    connect(actAddIconTvdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Tvdpi); });
     connect(actAddIconXhdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Xhdpi); });
     connect(actAddIconXxhdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Xxhdpi); });
     connect(actAddIconXxxhdpi, &QAction::triggered, [=]() { apk->addIcon(Icon::Xxxhdpi); });
@@ -571,6 +1695,7 @@ void MainWindow::settings_load()
     restoreGeometry(Settings::get_geometry());
     splitter->restoreState(Settings::get_splitter());
     setLanguage(Settings::get_language());
+    setTheme(Settings::get_theme());
     currentPath = Settings::get_last_path();
     devices->setCurrentText(Settings::get_device());
     actAutoUpdate->setChecked(Settings::get_update());
@@ -657,7 +1782,8 @@ void MainWindow::setLanguage(QString lang)
     tabs->setTabText(0, tr("Icons"));
     tabs->setTabText(1, tr("Translations"));
     tabs->setTabText(2, tr("Properties")); // tr("Details")
-    devicesLabel->setText(tr("Device:"));
+    devicesLabel->setText(tr("Icon size preset:"));
+    iconsLoadingLabel->setText(tr("Building icon list..."));
     btnApplyAppName->setText(tr("Apply to All"));
     checkDropbox->setText(tr("Upload to %1").arg(dropbox->getTitle()));
     checkGDrive->setText(tr("Upload to %1").arg(gdrive->getTitle()));
@@ -688,11 +1814,23 @@ void MainWindow::setLanguage(QString lang)
     menuIconAdd->setTitle(tr("&Add Icon"));
     btnAddIcon->setToolTip(tr("&Add Icon").remove('&'));
     actViewActivities->setText("Android Activities");
+    menuAdaptivePreviewMode->setTitle(tr("Adaptive Icon Preview Mode"));
+    actAdaptivePreviewNormal->setText(tr("Normal"));
+    actAdaptivePreviewThemed->setText(tr("Themed Monochrome"));
+    menuPreviewShape->setTitle(tr("Adaptive Icon Preview Shape"));
+    actPreviewShapeNone->setText(tr("No Mask"));
+    actPreviewShapeCircle->setText(tr("Circle"));
+    actPreviewShapeRoundedSquare->setText(tr("Rounded Square"));
+    actPreviewShapeSquircle->setText(tr("Squircle"));
     actIconBackground->setText(tr("Preview Background &Color"));
     actPacking->setText(tr("&Repacking"));
     actKeys->setText(tr("Key Manager"));
     menuLang->setTitle(tr("&Language"));
     actTranslate->setText(tr("Help Translate"));
+    menuTheme->setTitle(tr("&Theme"));
+    actThemeSystem->setText(tr("System"));
+    actThemeLight->setText(tr("Light"));
+    actThemeDark->setText(tr("Dark"));
     actAutoUpdate->setText(tr("Auto-check for Updates"));
     actAssoc->setText(tr("Associate .APK"));
     actReset->setText(tr("Reset Settings"));
@@ -709,12 +1847,67 @@ void MainWindow::setLanguage(QString lang)
     btnDonate->setText(tr("Donate"));
     loadingDialog->setWindowTitle(tr("Processing"));
     uploadDialog->setWindowTitle(tr("Uploading"));
-    menuBar()->resize(0, 0); // "Repaint" menu bar
+    mainMenuBar->resize(0, 0); // "Repaint" menu bar
 
     effects->retranslate();
     toolDialog->retranslate();
     keyManager->retranslate();
     about->retranslate();
+}
+
+void MainWindow::setTheme(QString theme)
+{
+    if (theme != THEME_LIGHT && theme != THEME_DARK && theme != THEME_SYSTEM) {
+        theme = THEME_SYSTEM;
+    }
+
+    currentTheme = theme;
+    actThemeSystem->setChecked(theme == THEME_SYSTEM);
+    actThemeLight->setChecked(theme == THEME_LIGHT);
+    actThemeDark->setChecked(theme == THEME_DARK);
+    Settings::set_theme(theme);
+    applyTheme(theme);
+    qDebug() << "Theme set to" << theme;
+}
+
+void MainWindow::applyTheme(QString theme)
+{
+    const QString styleName = defaultStyleName();
+    const QPalette basePalette = defaultPalette();
+    Q_UNUSED(basePalette)
+    const bool dark = theme == THEME_DARK || (theme == THEME_SYSTEM && isSystemDark());
+    if (dark) {
+        if (QStyle *style = QStyleFactory::create("Fusion")) {
+            qApp->setStyle(new DarkProxyStyle(style));
+        }
+    } else if (!styleName.isEmpty()) {
+        if (QStyle *style = QStyleFactory::create(styleName)) {
+            qApp->setStyle(style);
+        }
+    }
+    qApp->setPalette(dark ? darkPalette() : lightPalette());
+    qApp->setStyleSheet(dark ? darkStyleSheet() : QString());
+    if (listIcons) {
+        QPalette listPalette = dark ? darkPalette() : lightPalette();
+        listIcons->setPalette(listPalette);
+        listIcons->viewport()->setPalette(listPalette);
+        listIcons->viewport()->setAutoFillBackground(true);
+        listIcons->viewport()->update();
+    }
+    if (devices) {
+        devices->update();
+    }
+    if (customTitleBar) {
+        customTitleBar->setProperty("darkTitleBar", dark);
+        customTitleBar->setStyleSheet(framelessTitleBarStyleSheet(dark));
+        for (QToolButton *button : customTitleBar->findChildren<QToolButton *>()) {
+            button->update();
+        }
+        customTitleBar->update();
+    }
+    scheduleWindowsDarkTitleBars(dark);
+    updateAccentBorderOverlay();
+    drawArea->syncPaletteBackground();
 }
 
 void MainWindow::recent_add(QString filename)
@@ -784,7 +1977,7 @@ void MainWindow::setCurrentIcon(const QModelIndex &index)
         }
 
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(icon->getType()).size;
+        const QSize size = device->getIconSize(*icon).size;
         drawArea->setBounds(size.width(), size.height());
 
         disconnect(effects, 0, 0, 0);
@@ -824,6 +2017,17 @@ void MainWindow::setActiveApk(QString filename)
     setWindowModified(false);
     setWindowTitle(QFileInfo(filename).fileName() + "[*]");
     recent_add(filename);
+}
+
+void MainWindow::setIconsLoading(bool loading)
+{
+    iconsStack->setCurrentWidget(loading ? iconsStack->widget(1) : listIcons);
+    devices->setEnabled(!loading);
+    if (loading) {
+        menuIconAdd->setEnabled(false);
+        btnAddIcon->setEnabled(false);
+        setCurrentIcon(QModelIndex());
+    }
 }
 
 void MainWindow::enableUpload(bool enable)
@@ -875,7 +2079,6 @@ void MainWindow::apk_packed(Apk::File *apk, bool isSuccess, QString text, QStrin
 void MainWindow::apk_unpacked(Apk::File *apk)
 {
     this->apk = apk;
-    loadingDialog->accept();
     setActiveApk(apk->getFilePath());
 
     // Set models:
@@ -885,6 +2088,7 @@ void MainWindow::apk_unpacked(Apk::File *apk)
     tableTitles->setModel(&apk->titlesModel);
     tableTitles->resizeColumnsToContents();
     listIcons->setCurrentIndex(listIcons->model()->index(0, 0));
+    setIconsLoading(false);
     connect(&apk->manifestModel, &ManifestModel::dataChanged, [=]() { setWindowModified(true); });
     connect(&apk->titlesModel, &TitlesModel::dataChanged, [=]() { setWindowModified(true); });
 
@@ -898,8 +2102,10 @@ void MainWindow::apk_unpacked(Apk::File *apk)
     actApkClose->setEnabled(true);
     iconActions->setEnabled(true);
     menuIconAdd->setEnabled(true);
+    btnAddIcon->setEnabled(true);
     btnPack->setEnabled(true);
 
+    loadingDialog->accept();
     setWindowModified(false);
 }
 
@@ -957,7 +2163,7 @@ bool MainWindow::icon_open(QString filename)
     if (icon->replace(imported)) {
         repaint();
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(icon->getType()).size;
+        const QSize size = device->getIconSize(*icon).size;
 
         if (icon->width() != size.width() || icon->height() != size.height()) {
             int result = QMessageBox::warning(this, tr("Resize?"),
@@ -994,7 +2200,7 @@ bool MainWindow::icon_save(QString filename)
 
     if (filename.isEmpty()) {
         const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(icon->getType()).size;
+        const QSize size = device->getIconSize(*icon).size;
         filename = QString("%1-%2x%3").arg(QFileInfo(currentApk).completeBaseName()).arg(size.width()).arg(size.height());
         filename = QFileDialog::getSaveFileName(this, tr("Save Icon"), filename, Image::Formats::saveDialogFilter());
         if (filename.isEmpty()) {
@@ -1012,7 +2218,7 @@ bool MainWindow::icon_scale()
     }
 
     const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-    const QSize size = device->getIconSize(icon->getType()).size;
+    const QSize size = device->getIconSize(*icon).size;
     return icon_resize(size);
 }
 
@@ -1137,6 +2343,8 @@ bool MainWindow::apk_open(QString filename)
     const QString apktool = Settings::get_apktool();
     const bool smali = Settings::get_smali();
     apk_close();
+    setIconsLoading(true);
+    tabIcons->setEnabled(true);
     apkManager->unpack(filename, destination, apktool, smali);
 
     return true;
@@ -1219,6 +2427,7 @@ void MainWindow::apk_close()
     iconActions->setEnabled(false);
     menuIconAdd->setEnabled(false);
     btnPack->setEnabled(false);
+    setIconsLoading(false);
 }
 
 void MainWindow::associate() const
@@ -1440,6 +2649,248 @@ void MainWindow::dropEvent(QDropEvent *event)
     }
 }
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    updateAccentBorderOverlay();
+}
+
+void MainWindow::updateAccentBorderOverlay()
+{
+    if (!accentBorderOverlay) {
+        return;
+    }
+
+    accentBorderOverlay->setGeometry(rect());
+    accentBorderOverlay->raise();
+    accentBorderOverlay->setVisible(!isMaximized() && !isFullScreen());
+    accentBorderOverlay->update();
+}
+
+Qt::Edges MainWindow::framelessResizeEdgesAt(const QPoint &globalPos) const
+{
+    if (!isVisible() || isMaximized() || isFullScreen()) {
+        return {};
+    }
+
+    const int border = 8;
+    const QPoint pos = mapFromGlobal(globalPos);
+    const QRect windowRect = rect();
+    if (!windowRect.adjusted(-border, -border, border, border).contains(pos)) {
+        return {};
+    }
+
+    Qt::Edges edges;
+    if (pos.x() >= windowRect.left() && pos.x() < windowRect.left() + border) {
+        edges |= Qt::LeftEdge;
+    }
+    if (pos.x() <= windowRect.right() && pos.x() > windowRect.right() - border) {
+        edges |= Qt::RightEdge;
+    }
+    if (pos.y() >= windowRect.top() && pos.y() < windowRect.top() + border) {
+        edges |= Qt::TopEdge;
+    }
+    if (pos.y() <= windowRect.bottom() && pos.y() > windowRect.bottom() - border) {
+        edges |= Qt::BottomEdge;
+    }
+    return edges;
+}
+
+static Qt::CursorShape resizeCursorShape(Qt::Edges edges)
+{
+    const bool left = edges.testFlag(Qt::LeftEdge);
+    const bool right = edges.testFlag(Qt::RightEdge);
+    const bool top = edges.testFlag(Qt::TopEdge);
+    const bool bottom = edges.testFlag(Qt::BottomEdge);
+
+    if ((top && left) || (bottom && right)) {
+        return Qt::SizeFDiagCursor;
+    }
+    if ((top && right) || (bottom && left)) {
+        return Qt::SizeBDiagCursor;
+    }
+    if (left || right) {
+        return Qt::SizeHorCursor;
+    }
+    if (top || bottom) {
+        return Qt::SizeVerCursor;
+    }
+    return Qt::ArrowCursor;
+}
+
+void MainWindow::updateFramelessResizeCursor(const QPoint &globalPos)
+{
+    const Qt::Edges edges = framelessResizeEdgesAt(globalPos);
+    if (!edges) {
+        clearFramelessResizeCursor();
+        return;
+    }
+
+    const QCursor cursor(resizeCursorShape(edges));
+    if (framelessResizeCursorActive && QApplication::overrideCursor()) {
+        QApplication::changeOverrideCursor(cursor);
+    } else {
+        QApplication::setOverrideCursor(cursor);
+        framelessResizeCursorActive = true;
+    }
+}
+
+void MainWindow::clearFramelessResizeCursor()
+{
+    if (framelessResizeCursorActive && QApplication::overrideCursor()) {
+        QApplication::restoreOverrideCursor();
+    }
+    framelessResizeCursorActive = false;
+}
+
+bool MainWindow::startFramelessResize(const QPoint &globalPos)
+{
+    const Qt::Edges edges = framelessResizeEdgesAt(globalPos);
+    if (!edges) {
+        return false;
+    }
+    if (QWindow *handle = windowHandle()) {
+        return handle->startSystemResize(edges);
+    }
+    return false;
+}
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    QWidget *eventWidget = qobject_cast<QWidget *>(object);
+    if (eventWidget && (eventWidget == this || isAncestorOf(eventWidget))) {
+        switch (event->type()) {
+        case QEvent::Enter:
+        case QEvent::HoverMove:
+        case QEvent::MouseMove:
+            updateFramelessResizeCursor(QCursor::pos());
+            break;
+        case QEvent::MouseButtonPress: {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if (mouseEvent->button() == Qt::LeftButton && startFramelessResize(QCursor::pos())) {
+                mouseEvent->accept();
+                return true;
+            }
+            break;
+        }
+        case QEvent::Leave:
+            if (!rect().contains(mapFromGlobal(QCursor::pos()))) {
+                clearFramelessResizeCursor();
+            }
+            break;
+        case QEvent::Hide:
+        case QEvent::Close:
+        case QEvent::WindowDeactivate:
+            clearFramelessResizeCursor();
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (event->type() == QEvent::Show ||
+        event->type() == QEvent::WindowStateChange ||
+        event->type() == QEvent::Hide ||
+        event->type() == QEvent::Close ||
+        event->type() == QEvent::WindowActivate ||
+        event->type() == QEvent::WindowDeactivate ||
+        event->type() == QEvent::ActivationChange) {
+        QWidget *widget = qobject_cast<QWidget *>(object);
+        if (widget && widget->isWindow()) {
+            const bool dark = currentTheme == THEME_DARK || (currentTheme == THEME_SYSTEM && isSystemDark());
+            const bool forceNativeFrameRefresh = event->type() == QEvent::Show
+                || event->type() == QEvent::Hide
+                || event->type() == QEvent::Close
+                || event->type() == QEvent::WindowActivate;
+            setWindowsDarkTitleBar(widget, dark, forceNativeFrameRefresh);
+            const QPointer<QWidget> guardedWidget(widget);
+            QTimer::singleShot(0, qApp, [guardedWidget, dark, forceNativeFrameRefresh]() {
+                setWindowsDarkTitleBar(guardedWidget, dark, forceNativeFrameRefresh);
+            });
+            QTimer::singleShot(100, qApp, [guardedWidget, dark, forceNativeFrameRefresh]() {
+                setWindowsDarkTitleBar(guardedWidget, dark, forceNativeFrameRefresh);
+            });
+            QTimer::singleShot(300, qApp, [dark, forceNativeFrameRefresh]() {
+                setWindowsDarkTitleBars(dark, forceNativeFrameRefresh);
+            });
+            QTimer::singleShot(700, qApp, [dark]() { setWindowsDarkTitleBars(dark); });
+        }
+    }
+    if (object == this && event->type() == QEvent::WindowStateChange) {
+        updateAccentBorderOverlay();
+    }
+    return QMainWindow::eventFilter(object, event);
+}
+
+#ifdef Q_OS_WIN
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+#else
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+#endif
+{
+    Q_UNUSED(eventType)
+    MSG *msg = static_cast<MSG *>(message);
+    if (msg && msg->message == WM_NCCALCSIZE && msg->wParam) {
+        *result = 0;
+        return true;
+    }
+
+    if (msg && msg->message == WM_NCHITTEST) {
+        const QPoint globalPos(GET_X_LPARAM(msg->lParam), GET_Y_LPARAM(msg->lParam));
+        const Qt::Edges edges = framelessResizeEdgesAt(globalPos);
+        if (edges) {
+            updateFramelessResizeCursor(globalPos);
+
+            if (edges.testFlag(Qt::TopEdge) && edges.testFlag(Qt::LeftEdge)) {
+                *result = HTTOPLEFT;
+                return true;
+            }
+            if (edges.testFlag(Qt::TopEdge) && edges.testFlag(Qt::RightEdge)) {
+                *result = HTTOPRIGHT;
+                return true;
+            }
+            if (edges.testFlag(Qt::BottomEdge) && edges.testFlag(Qt::LeftEdge)) {
+                *result = HTBOTTOMLEFT;
+                return true;
+            }
+            if (edges.testFlag(Qt::BottomEdge) && edges.testFlag(Qt::RightEdge)) {
+                *result = HTBOTTOMRIGHT;
+                return true;
+            }
+            if (edges.testFlag(Qt::LeftEdge)) {
+                *result = HTLEFT;
+                return true;
+            }
+            if (edges.testFlag(Qt::RightEdge)) {
+                *result = HTRIGHT;
+                return true;
+            }
+            if (edges.testFlag(Qt::TopEdge)) {
+                *result = HTTOP;
+                return true;
+            }
+            if (edges.testFlag(Qt::BottomEdge)) {
+                *result = HTBOTTOM;
+                return true;
+            }
+        }
+
+        if (customTitleBar) {
+            const QPoint titlePos = customTitleBar->mapFromGlobal(globalPos);
+            if (customTitleBar->rect().contains(titlePos)) {
+                QWidget *child = customTitleBar->childAt(titlePos);
+                if (!qobject_cast<QToolButton *>(child)) {
+                    *result = HTCAPTION;
+                    return true;
+                }
+            }
+        }
+    }
+    return QMainWindow::nativeEvent(eventType, message, result);
+}
+#endif
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     // Confirm exit:
@@ -1454,6 +2905,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     Settings::set_version(VER);
     Settings::set_device(devices->currentText());
     Settings::set_language(currentLang);
+    Settings::set_theme(currentTheme);
     Settings::set_update(actAutoUpdate->isChecked());
     Settings::set_activities(actViewActivities->isChecked());
     Settings::set_path(currentPath);

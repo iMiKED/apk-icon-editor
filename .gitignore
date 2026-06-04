@@ -1,8 +1,12 @@
 .trash/
 /bin/
 /docs/html/
-/lang/
-!/lang/README
+/lang/*
+!/lang/README.md
+!/lang/GUIDE.md
+!/lang/*.ts
+!/lang/translations/
+!/lang/translations/*.ts
 /lib/bin/
 /setup/linux/rpm/build/
 /.qmake.cache

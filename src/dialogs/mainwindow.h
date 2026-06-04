@@ -9,6 +9,7 @@
 #include <QMainWindow>
 #include <QSplitter>
 #include <QListView>
+#include <QStackedWidget>
 #include <QTableView>
 #include <QComboBox>
 #include <QMessageBox>
@@ -17,6 +18,7 @@
 #include <QCloseEvent>
 #include "about.h"
 #include "apkmanager.h"
+#include "busyindicator.h"
 #include "cloud.h"
 #include "dialogs.h"
 #include "drawarea.h"
@@ -27,6 +29,10 @@
 #include "recent.h"
 #include "tooldialog.h"
 #include "updater.h"
+
+class QMenuBar;
+class QResizeEvent;
+class AccentBorderOverlay;
 
 ///
 /// Main window class.
@@ -83,6 +89,7 @@ public slots:
     /// Displays the icon with the specified \c index in the icon preview widget.
     void setCurrentIcon(const QModelIndex &index);
     void setLanguage(QString lang); ///< Sets the GUI language to \c lang.
+    void setTheme(QString theme);   ///< Sets the GUI theme mode.
     bool setPreviewColor();         ///< Displays background color selection dialog.
     void showEffectsDialog();       ///< Displays "Effects" dialog.
 
@@ -174,11 +181,20 @@ private slots:
     void error(QString title, QString text, QString details = QString());
 
 protected:
+    bool eventFilter(QObject *object, QEvent *event);
+    void resizeEvent(QResizeEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
     void closeEvent(QCloseEvent *event);
+#ifdef Q_OS_WIN
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result);
+#else
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
+#endif
+#endif
 
 private:
     void init_core();      ///< Initializes base objects.
@@ -190,7 +206,14 @@ private:
     void checkReqs();      ///< Checks Java and Apktool versions.
     bool resetApktool();   ///< Removes the Apktool "1.apk" framework file.
     void setInitialSize(); ///< Sets the initial sizes for the window and splitter.
+    void setIconsLoading(bool loading); ///< Shows or hides the icon list loading state.
+    Qt::Edges framelessResizeEdgesAt(const QPoint &globalPos) const; ///< Returns frameless window resize edges.
+    void updateFramelessResizeCursor(const QPoint &globalPos); ///< Updates cursor over frameless resize edges.
+    void clearFramelessResizeCursor(); ///< Restores cursor after leaving frameless resize edges.
+    bool startFramelessResize(const QPoint &globalPos); ///< Starts system resize for frameless windows.
+    void updateAccentBorderOverlay(); ///< Keeps the accent border above child widgets.
     bool confirmExit();    ///< Displays the exit confirmation dialog.
+    void applyTheme(QString theme); ///< Applies the selected GUI theme.
 
     /// Uploads the specified file to a cloud service.
     /// \param uploader Cloud uploader object.
@@ -209,6 +232,9 @@ private:
     // MVC:
 
     QListView *listIcons;
+    QStackedWidget *iconsStack;
+    QLabel *iconsLoadingLabel;
+    BusyIndicator *iconsLoadingIndicator;
     QTableView *tableManifest;
     QTableView *tableTitles;
 
@@ -218,6 +244,9 @@ private:
     // Widgets:
 
     QSplitter *splitter;
+    AccentBorderOverlay *accentBorderOverlay;
+    QWidget *customTitleBar;
+    QMenuBar *mainMenuBar;
     DrawArea *drawArea;
     QTabWidget *tabs;
     QWidget *tabIcons;
@@ -247,10 +276,13 @@ private:
     QMenu *menuIcon;
     QMenu *menuIconAdd;
     QMenu *menuView;
+    QMenu *menuAdaptivePreviewMode;
+    QMenu *menuPreviewShape;
     QMenu *menuSett;
     QMenu *menuHelp;
     QMenu *menuRecent;
     QMenu *menuLang;
+    QMenu *menuTheme;
     QMenu *menuLogs;
     QToolButton *btnDonate;
 
@@ -276,14 +308,27 @@ private:
     QAction *actAddIconLdpi;
     QAction *actAddIconMdpi;
     QAction *actAddIconHdpi;
+    QAction *actAddIconTvdpi;
     QAction *actAddIconXhdpi;
     QAction *actAddIconXxhdpi;
     QAction *actAddIconXxxhdpi;
     QAction *actAddIconTv;
     QAction *actViewActivities;
+    QActionGroup *adaptivePreviewModeActions;
+    QAction *actAdaptivePreviewNormal;
+    QAction *actAdaptivePreviewThemed;
+    QActionGroup *previewShapeActions;
+    QAction *actPreviewShapeNone;
+    QAction *actPreviewShapeCircle;
+    QAction *actPreviewShapeRoundedSquare;
+    QAction *actPreviewShapeSquircle;
     QAction *actPacking;
     QAction *actKeys;
     QAction *actTranslate;
+    QActionGroup *themeActions;
+    QAction *actThemeSystem;
+    QAction *actThemeLight;
+    QAction *actThemeDark;
     QAction *actAssoc;
     QAction *actReset;
     QAction *actAutoUpdate;
@@ -314,7 +359,9 @@ private:
     QTranslator *translatorQt;
     QString currentApk;
     QString currentLang;
+    QString currentTheme;
     QString currentPath;
+    bool framelessResizeCursorActive;
 };
 
 #endif // MAINWINDOW_H

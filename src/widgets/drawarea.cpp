@@ -1,6 +1,8 @@
 #include "drawarea.h"
+#include <QEvent>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QDir>
 
 DrawArea::DrawArea(QWidget *parent) : QLabel(parent)
@@ -19,6 +21,9 @@ DrawArea::DrawArea(QWidget *parent) : QLabel(parent)
     icon = NULL;
     bounds = QSize(0, 0);
     background = palette().color(QPalette::Window);
+    customBackground = false;
+    previewShape = PreviewShapeNone;
+    adaptivePreviewMode = AdaptivePreviewNormal;
 }
 
 void DrawArea::setIcon(Icon *icon)
@@ -26,6 +31,21 @@ void DrawArea::setIcon(Icon *icon)
     this->icon = icon;
     setAllowHover(!icon);
     repaint();
+}
+
+void DrawArea::resetBackground()
+{
+    background = palette().color(QPalette::Window);
+    customBackground = false;
+    repaint();
+}
+
+void DrawArea::syncPaletteBackground()
+{
+    if (!customBackground) {
+        background = palette().color(QPalette::Window);
+        repaint();
+    }
 }
 
 void DrawArea::mousePressEvent(QMouseEvent *event)
@@ -52,9 +72,48 @@ void DrawArea::paintEvent(QPaintEvent *event)
         if (background == palette().color(QPalette::Window)) {
             painter.fillRect(bx + 1, by + 1, bw - 1, bh - 1, Qt::Dense7Pattern);
         }
-        painter.drawPixmap(width() / 2 - icon->width() / 2,
-                           height() / 2 - icon->height() / 2,
-                           icon->getPixmap());
+        const QPixmap preview = adaptivePreviewMode == AdaptivePreviewThemed
+                ? icon->getThemedPixmap()
+                : icon->getPixmap();
+        const QRectF iconBounds(width() / 2 - preview.width() / 2,
+                                height() / 2 - preview.height() / 2,
+                                preview.width(),
+                                preview.height());
+        if (icon->isAdaptiveIcon() && previewShape != PreviewShapeNone) {
+            QPainterPath clip;
+            const qreal size = qMin(iconBounds.width(), iconBounds.height());
+            const QRectF square(iconBounds.center().x() - size / 2,
+                                iconBounds.center().y() - size / 2,
+                                size,
+                                size);
+            if (previewShape == PreviewShapeCircle) {
+                clip.addEllipse(square);
+            } else if (previewShape == PreviewShapeRoundedSquare) {
+                clip.addRoundedRect(square, size * 0.22, size * 0.22);
+            } else {
+                const qreal soft = size * 0.16;
+                clip.moveTo(square.center().x(), square.top());
+                clip.cubicTo(square.right() - soft, square.top(),
+                             square.right(), square.top() + soft,
+                             square.right(), square.center().y());
+                clip.cubicTo(square.right(), square.bottom() - soft,
+                             square.right() - soft, square.bottom(),
+                             square.center().x(), square.bottom());
+                clip.cubicTo(square.left() + soft, square.bottom(),
+                             square.left(), square.bottom() - soft,
+                             square.left(), square.center().y());
+                clip.cubicTo(square.left(), square.top() + soft,
+                             square.left() + soft, square.top(),
+                             square.center().x(), square.top());
+                clip.closeSubpath();
+            }
+            painter.save();
+            painter.setClipPath(clip);
+            painter.drawPixmap(iconBounds.topLeft(), preview);
+            painter.restore();
+        } else {
+            painter.drawPixmap(iconBounds.topLeft(), preview);
+        }
         painter.drawRect(bx, by, bw, bh);
         painter.setPen(Qt::lightGray);
         painter.drawRect(bx - 1, by - 1, bw + 2, bh + 2);
@@ -64,6 +123,14 @@ void DrawArea::paintEvent(QPaintEvent *event)
     }
 }
 
+void DrawArea::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::PaletteChange) {
+        syncPaletteBackground();
+    }
+    QLabel::changeEvent(event);
+}
+
 void DrawArea::setAllowHover(bool allow)
 {
     QString style =
@@ -71,7 +138,7 @@ void DrawArea::setAllowHover(bool allow)
         "no-repeat bottom left;"
         "border: 1px solid gray; }"
     ;
-    if (allow) style += "DrawArea::hover { background-color: white; }";
+    if (allow) style += "DrawArea::hover { background-color: palette(base); }";
     setStyleSheet(style);
     setCursor(allow ? Qt::PointingHandCursor : Qt::ArrowCursor);
 }

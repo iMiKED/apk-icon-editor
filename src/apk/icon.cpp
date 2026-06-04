@@ -38,6 +38,7 @@ Icon::Icon(QString filename, Type type, Scope scope, EntryRole entryRole)
             case Ldpi: dpi = "ldpi"; break;
             case Mdpi: dpi = "mdpi"; break;
             case Hdpi: dpi = "hdpi"; break;
+            case Tvdpi: dpi = "tvdpi"; break;
             case Xhdpi: dpi = "xhdpi"; break;
             case Xxhdpi: dpi = "xxhdpi"; break;
             case Xxxhdpi: dpi = "xxxhdpi"; break;
@@ -52,6 +53,7 @@ Icon::Icon(QString filename, Type type, Scope scope, EntryRole entryRole)
             if (qualifier == "ldpi") { this->type = Ldpi; break; }
             else if (qualifier == "mdpi") { this->type = Mdpi; break; }
             else if (qualifier == "hdpi") { this->type = Hdpi; break; }
+            else if (qualifier == "tvdpi") { this->type = Tvdpi; break; }
             else if (qualifier == "xhdpi") { this->type = Xhdpi; break; }
             else if (qualifier == "xxhdpi") { this->type = Xxhdpi; break; }
             else if (qualifier == "xxxhdpi") { this->type = Xxxhdpi; break; }
@@ -70,6 +72,7 @@ Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTarge
         case Ldpi: dpi = "ldpi"; break;
         case Mdpi: dpi = "mdpi"; break;
         case Hdpi: dpi = "hdpi"; break;
+        case Tvdpi: dpi = "tvdpi"; break;
         case Xhdpi: dpi = "xhdpi"; break;
         case Xxhdpi: dpi = "xxhdpi"; break;
         case Xxxhdpi: dpi = "xxxhdpi"; break;
@@ -272,7 +275,9 @@ bool Icon::isAdaptiveIcon() const
 QString Icon::getTitle() const
 {
     if (type == TvBanner) {
-        return tr("TV Banner");
+        return getQualifiers().isEmpty()
+            ? tr("TV Banner")
+            : tr("TV Banner") + " - " + getQualifiers().join(" - ").toUpper();
     }
     return getQualifiers().join(" - ").toUpper();
 }
@@ -366,6 +371,18 @@ QString Icon::getToolTip() const
 QPixmap Icon::getPixmap()
 {
     return pixmapFx;
+}
+
+QPixmap Icon::getThemedPixmap() const
+{
+    return adaptiveDescriptor.monochromePreview.isNull()
+            ? pixmapFx
+            : adaptiveDescriptor.monochromePreview;
+}
+
+bool Icon::hasThemedPixmap() const
+{
+    return !adaptiveDescriptor.monochromePreview.isNull();
 }
 
 const QStringList &Icon::getQualifiers() const

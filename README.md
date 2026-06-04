@@ -34,12 +34,29 @@ If APK Icon Editor Reborn saves you time, you can support the fork author:
 - Sign and optimize APK;
 - Supported image formats: PNG, ICO, GIF, JPG, BMP, WebP;
 - Parse application `roundIcon`, launcher activity aliases, and activity icon fallbacks;
-- Size presets for devices: *Android*, *BlackBerry*, *Amazon Kindle Fire*;
+- Cross-platform JSON icon size presets for *Android* and *Android TV / Google TV*;
+- Light, Dark and System theme modes, with an experimental themed frameless title bar on Windows;
 - Cloud storage upload: *Dropbox*, *Google Drive*, *Microsoft OneDrive*;
 - Multilingual interface.
 
+## Translations
+APK Icon Editor Reborn uses its own Crowdin localization project: [apk-icon-editor-reborn](https://crowdin.com/project/apk-icon-editor-reborn).
+
+The repository includes Qt Linguist source files and a Crowdin configuration:
+
+- source strings: `lang/apk-icon-editor.ts`;
+- imported translation baseline: `lang/translations/apk-icon-editor.<lang>.ts`;
+- Crowdin config: `crowdin.yml`.
+
+To enable synchronization, create the Crowdin project under your account, then add `CROWDIN_PROJECT_ID` and `CROWDIN_PERSONAL_TOKEN` as GitHub repository secrets. The manual `Crowdin localization` workflow can upload sources/translations and create translation update PRs.
+
+## Icon Size Presets
+The `Icon size preset` list is loaded from the shared cross-platform `icon-size-presets.json` file shipped with the application. Each active preset defines launcher sizes for the density buckets, density-aware TV banner sizes, optional hints, and an optional icon path relative to the shared application data directory.
+
+Preset icons live next to that JSON file under `gfx/devices/`. Built-in Android presets remain available as a fallback when `icon-size-presets.json` is missing or invalid, and embedded icons are used if an external preset icon cannot be loaded. Retired BlackBerry and Kindle Fire presets are kept in the JSON `legacy` section but are not shown in the active preset list.
+
 ## 3.0.0 Beta Status
-The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta3` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, and vector foreground previews are rendered in-app.
+The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta4` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, and vector foreground previews are rendered in-app.
 
 Adaptive/vector previews are intended for display, replacement, export, and safe APK repacking. The editor shows adaptive icon metadata in tooltips and logs, including the launcher entry, XML descriptor, foreground, background, monochrome layer when present, preview source, and write-back target.
 
@@ -48,6 +65,20 @@ Adaptive/vector previews are intended for display, replacement, export, and safe
 Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
 
 Split APK resources are currently supported for preview only. If an adaptive icon uses a resource from a split APK, the tooltip and logs mark it as read-only and replacement/repacking of that split APK set is intentionally blocked. Classic single-APK repacking remains supported.
+
+## 3.0.0-beta4 Release Notes
+Highlights:
+
+- Moved localization to the APK Icon Editor Reborn Crowdin project and refreshed the translation baseline.
+- Added adaptive XML rendering support for inline drawable bitmap layers.
+- Fixed split APK probing so ordinary APK folders are not scanned slowly and empty split metadata entries are ignored.
+- Added a responsive busy indicator while the Icons tab is building the icon list.
+- Added preview-only themed monochrome mode for adaptive icons that provide a monochrome layer.
+- Moved icon size presets to a shared cross-platform JSON config and added current Android TV / Google TV density-aware sizes.
+- Added Light, Dark and System application theme modes.
+- Added an experimental Windows frameless themed title bar with custom window controls, resize cursors, hover states, and maximize/restore behavior.
+- Fixed dark theme rendering for menu selection indicators, checkbox and radio indicators, spin box arrows, combo boxes, and the Icon size preset dropdown arrow.
+- Fixed dark theme repainting for the Icons list background and stabilized the Icon size preset combo box layout.
 
 ## 3.0.0-beta3 Release Notes
 Highlights:

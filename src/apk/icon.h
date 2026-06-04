@@ -18,6 +18,7 @@ struct AdaptiveIconDescriptor {
     QString monochromePath;
     QColor monochromeColor;
     bool monochromeRenderable = false;
+    QPixmap monochromePreview;
     QString previewSource;
     QString previewPath;
     QString customForegroundRef;
@@ -40,6 +41,7 @@ public:
         Ldpi,
         Mdpi,
         Hdpi,
+        Tvdpi,
         Xhdpi,
         Xxhdpi,
         Xxxhdpi,
@@ -72,6 +74,8 @@ public:
     QString getTitle() const;                       ///< Returns the user-friendly icon title.
     QString getToolTip() const;
     QPixmap getPixmap();                            ///< Returns the icon with the applied visual effects.
+    QPixmap getThemedPixmap() const;                ///< Returns the themed monochrome icon preview if available.
+    bool hasThemedPixmap() const;                   ///< Returns whether themed monochrome preview is available.
     QString getFilename() const;                    ///< Returns the icon filename.
     QString getAdaptiveXmlPath() const;
     const AdaptiveIconDescriptor &getAdaptiveDescriptor() const;

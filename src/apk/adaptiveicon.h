@@ -29,6 +29,7 @@ private:
     static QPixmap renderDrawableXml(const ResourceResolver &resolver, const QString &filePath, Icon::Type type, const QSize &size);
     static QPixmap renderDrawableElement(const ResourceResolver &resolver, const QDomElement &node, Icon::Type type, const QSize &size);
     static QString drawableAttr(const QDomElement &node);
+    static QString srcAttr(const QDomElement &node);
     static QColor resolveColorValue(const ResourceResolver &resolver, const QString &value);
     static qreal dimensionAttr(const QString &value, qreal fallback = 0.0);
     static QPainterPath shapePath(const QDomElement &node, const QSize &size);

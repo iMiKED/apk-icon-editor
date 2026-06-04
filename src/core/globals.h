@@ -78,7 +78,7 @@ namespace Url {
     const QString VERSION   = "https://api.github.com/repos/iMiKED/apk-icon-editor/releases?per_page=10";
     const QString UPDATE    = WEBSITE + "/releases";
     const QString CONTACT   = WEBSITE + "/issues";
-    const QString TRANSLATE = "https://crowdin.com/project/apk-icon-editor";
+    const QString TRANSLATE = "https://crowdin.com/project/apk-icon-editor-reborn";
     const QString DONATE    = WEBSITE + "#support-the-project";
     const QString JRE       = "https://www.java.com/en/download/manual.jsp";
     const QString JDK       = "https://adoptium.net/temurin/releases/";

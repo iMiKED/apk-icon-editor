@@ -1,11 +1,18 @@
 #include "apkfile.h"
 #include "adaptiveicon.h"
 #include "globals.h"
+#include <QApplication>
 #include <QDir>
 #include <QDirIterator>
+#include <QEventLoop>
 #include <QFileInfo>
 #include <QTextStream>
 #include <QDebug>
+
+static void keepIconListUiResponsive()
+{
+    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+}
 
 static QString resourceKey(const QString &type, const QString &name)
 {
@@ -65,10 +72,13 @@ Apk::File::File(const QString &contentsPath, const QStringList &splitContentsPat
     ResourceResolver resolver(this->contentsPath, this->splitContentsPaths);
     foreach (const Manifest::IconEntry &entry, launcherIconEntries) {
         addAdaptiveIcons(resolver, ResourceRef(entry.value), Icon::ScopeActivity, entryRoleFor(entry));
+        keepIconListUiResponsive();
     }
     const bool appAdaptiveIcon = addAdaptiveIcons(resolver, ResourceRef(appIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationIcon);
+    keepIconListUiResponsive();
     if (!appAdaptiveIcon && !appRoundIconAttribute.isEmpty()) {
         addAdaptiveIcons(resolver, ResourceRef(appRoundIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationRoundIcon);
+        keepIconListUiResponsive();
     }
 
     const QStringList drawableExtensions = QStringList() << "png" << "jpg" << "jpeg" << "gif" << "webp";
@@ -147,6 +157,7 @@ Apk::File::File(const QString &contentsPath, const QStringList &splitContentsPat
                     titlesModel.add(resource.filePath(), appLabelKey);
                 }
             }
+            keepIconListUiResponsive();
         }
     }
 }
@@ -244,6 +255,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             << Icon::Ldpi
             << Icon::Mdpi
             << Icon::Hdpi
+            << Icon::Tvdpi
             << Icon::Xhdpi
             << Icon::Xxhdpi
             << Icon::Xxxhdpi;
@@ -320,6 +332,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
             thumbnail.addPixmap(previewPixmap);
         }
         iconsModel.add(result.xmlPath, previewPixmap, saveTargets, descriptor, type, scope, entryRole);
+        keepIconListUiResponsive();
         added = true;
     }
 
@@ -341,6 +354,7 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
 
             iconsModel.add(fallback.filePath, fallback.type, scope, entryRole);
             addedFiles.append(fallback.filePath);
+            keepIconListUiResponsive();
             added = true;
         }
     }
@@ -449,6 +463,7 @@ QString Apk::File::getIconPath(Icon::Type type)
         case Icon::Ldpi: qualifier = "ldpi"; break;
         case Icon::Mdpi: qualifier = "mdpi"; break;
         case Icon::Hdpi: qualifier = "hdpi"; break;
+        case Icon::Tvdpi: qualifier = "tvdpi"; break;
         case Icon::Xhdpi: qualifier = "xhdpi"; break;
         case Icon::Xxhdpi: qualifier = "xxhdpi"; break;
         case Icon::Xxxhdpi: qualifier = "xxxhdpi"; break;

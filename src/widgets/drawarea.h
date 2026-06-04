@@ -18,6 +18,18 @@ class DrawArea : public QLabel {
     Q_OBJECT
 
 public:
+    enum PreviewShape {
+        PreviewShapeNone,
+        PreviewShapeCircle,
+        PreviewShapeRoundedSquare,
+        PreviewShapeSquircle
+    };
+
+    enum AdaptivePreviewMode {
+        AdaptivePreviewNormal,
+        AdaptivePreviewThemed
+    };
+
     explicit DrawArea(QWidget *parent = 0);
 
     /// Draws the specified \c icon in the preview area.
@@ -34,7 +46,19 @@ public:
 
     /// Sets the background color to \c color.
     /// If the \c color differs from the default one, grid dots are not painted.
-    void setBackground(QColor color) { if (color != QColor::Invalid) background = color; }
+    void setBackground(QColor color) { if (color != QColor::Invalid) { background = color; customBackground = true; } }
+
+    /// Resets the preview background to the current application palette.
+    void resetBackground();
+
+    /// Updates the preview background after palette changes unless the user selected a custom color.
+    void syncPaletteBackground();
+
+    /// Clips adaptive icon previews to the specified launcher shape.
+    void setPreviewShape(PreviewShape shape) { previewShape = shape; repaint(); }
+
+    /// Sets the adaptive icon preview mode.
+    void setAdaptivePreviewMode(AdaptivePreviewMode mode) { adaptivePreviewMode = mode; repaint(); }
 
     /// Returns the current icon.
     Icon *getIcon() const { return icon; }
@@ -46,11 +70,15 @@ signals:
 protected:
     void mousePressEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *event);
+    void changeEvent(QEvent *event);
 
 private:
     Icon *icon;        ///< Currently previewed icon.
     QColor background; ///< Preview area background color.
+    bool customBackground; ///< Whether the preview background was selected by the user.
     QSize bounds;      ///< Size of the template border.
+    PreviewShape previewShape; ///< Optional adaptive icon preview clipping shape.
+    AdaptivePreviewMode adaptivePreviewMode; ///< Normal or themed adaptive icon preview mode.
 
     /// Enables or disables the mouse hover widget styling.
     void setAllowHover(bool allow);

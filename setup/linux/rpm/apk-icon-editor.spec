@@ -1,10 +1,10 @@
-%global app_version 3.0.0-beta3
+%global app_version 3.0.0-beta4
 %global _missing_build_ids_terminate_build 0
 %global debug_package %{nil}
 
 Name:           apk-icon-editor-reborn
 Version:        3.0.0
-Release:        0.beta3%{?dist}
+Release:        0.beta4%{?dist}
 Summary:        Simple APK resource editor
 
 License:        GPL-3.0-or-later
@@ -44,6 +44,9 @@ qmake6 PREFIX=%{_prefix} "DEFINES+=CI"
 %{_datadir}/icons/hicolor/*/mimetypes/application-vnd.android.package-archive.png
 
 %changelog
+* Fri May 22 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta4
+- Continue beta work with configurable device presets and localization updates.
+
 * Thu May 14 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta3
 - Renamed application and binary package to APK Icon Editor Reborn.
 - Added resource table alias support for adaptive XML launcher icons.
