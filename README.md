@@ -78,6 +78,7 @@ Highlights:
 - Added Light, Dark and System application theme modes.
 - Added an experimental Windows frameless themed title bar with custom window controls, resize cursors, hover states, and maximize/restore behavior.
 - Fixed dark theme rendering for menu selection indicators, checkbox and radio indicators, spin box arrows, combo boxes, and the Icon size preset dropdown arrow.
+- Fixed dark theme repainting for the Icons list background and stabilized the Icon size preset combo box layout.
 
 ## 3.0.0-beta3 Release Notes
 Highlights:
