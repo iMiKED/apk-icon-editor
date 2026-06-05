@@ -1,3 +1,9 @@
+apk-icon-editor-reborn (3.0.0~beta4.1-1) unstable; urgency=low
+
+  * Restore native macOS/Linux window chrome and fix Windows light theme restore.
+
+ -- iMiKED <M-I-B@yandex.ru>  Sat, 06 Jun 2026 01:40:00 +0700
+
 apk-icon-editor-reborn (3.0.0~beta4-1) unstable; urgency=low
 
   * Continue beta work with configurable device presets and localization updates.

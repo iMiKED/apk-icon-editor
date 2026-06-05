@@ -8,7 +8,7 @@
 !define VERSIONMINOR 0
 !define VERSIONPATCH 0
 !define VERSION "${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONPATCH}"
-!define VERSIONDISPLAY "${VERSION}-beta4"
+!define VERSIONDISPLAY "${VERSION}-beta4.1"
 !define ABOUTURL "https://github.com/iMiKED/apk-icon-editor"
 !define UPDATEURL "https://github.com/iMiKED/apk-icon-editor/releases"
 !define EXE "$INSTDIR\apk-icon-editor-reborn.exe"

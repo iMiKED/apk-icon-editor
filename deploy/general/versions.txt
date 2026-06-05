@@ -1,6 +1,11 @@
 # Version History
 
 
+## 3.0.0-beta4.1
+* Restored native macOS and Linux window chrome and theming by keeping the frameless title bar, Windows accent border and custom theme styling Windows-only.
+* Fixed switching from Dark to Light theme on Windows so native light palette colors are restored correctly.
+* Added v3.0.0-beta4.1 GitHub Release notes for hotfix prerelease publishing.
+
 ## 3.0.0-beta4
 * Moved localization to the APK Icon Editor Reborn Crowdin project and added the source/translation synchronization workflow.
 * Refreshed the Reborn translation baseline for the currently supported languages.

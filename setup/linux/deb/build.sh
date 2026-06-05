@@ -4,7 +4,7 @@ export DEBEMAIL="M-I-B@yandex.ru"
 export DEBFULLNAME="iMiKED"
 
 PACKAGE="apk-icon-editor-reborn"
-VERSION="3.0.0~beta4"
+VERSION="3.0.0~beta4.1"
 
 clean() {
     rm ../apk-icon-editor-reborn_*.tar.xz ../apk-icon-editor-reborn_*.tar.gz ../apk-icon-editor-reborn_*.dsc ../apk-icon-editor-reborn_*.changes ../apk-icon-editor-reborn_*.build 2> /dev/null
