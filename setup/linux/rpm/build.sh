@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-APP_VERSION="3.0.0-beta4"
+APP_VERSION="3.0.0-beta4.1"
 
 cd "$(dirname "$0")/../../.."
 

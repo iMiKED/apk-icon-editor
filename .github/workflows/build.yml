@@ -12,7 +12,7 @@ permissions:
 
 env:
   QT_VERSION: 6.8.3
-  APP_VERSION: 3.0.0-beta4
+  APP_VERSION: 3.0.0-beta4.1
 
 jobs:
   desktop:

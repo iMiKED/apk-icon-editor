@@ -9,6 +9,7 @@ find . -name "Makefile*" -type f -delete
 
 QT_BIN="${QT_BIN:-$HOME/Qt/6.8.3/macos/bin}"
 ARTIFACT_SUFFIX="${MACOS_ARTIFACT_SUFFIX:-}"
+APP_VERSION="${APP_VERSION:-3.0.0-beta4.1}"
 
 "$QT_BIN/qmake" "DEFINES+=CI" && make || { echo "Could not build the project."; exit 2; }
 "$QT_BIN/macdeployqt" bin/macosx/apk-icon-editor-reborn.app || { echo "Could not deploy the project."; exit 3; }
@@ -20,5 +21,5 @@ find "bin/macosx/apk-icon-editor-reborn.app" -name ".DS_Store" -type f -delete
 
 mkdir "setup/macosx/build"
 cp -R bin/macosx/apk-icon-editor-reborn.app "setup/macosx/build/APK Icon Editor Reborn.app"
-ditto -c -k --sequesterRsrc --keepParent "setup/macosx/build/APK Icon Editor Reborn.app" "setup/macosx/build/apk-icon-editor-reborn_3.0.0-beta4${ARTIFACT_SUFFIX}.app.zip"
-appdmg setup/macosx/appdmg.json "setup/macosx/build/apk-icon-editor-reborn_3.0.0-beta4${ARTIFACT_SUFFIX}.dmg" || { echo "Could not create installer."; exit 4; }
+ditto -c -k --sequesterRsrc --keepParent "setup/macosx/build/APK Icon Editor Reborn.app" "setup/macosx/build/apk-icon-editor-reborn_${APP_VERSION}${ARTIFACT_SUFFIX}.app.zip"
+appdmg setup/macosx/appdmg.json "setup/macosx/build/apk-icon-editor-reborn_${APP_VERSION}${ARTIFACT_SUFFIX}.dmg" || { echo "Could not create installer."; exit 4; }

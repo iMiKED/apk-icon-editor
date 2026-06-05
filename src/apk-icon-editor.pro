@@ -4,7 +4,7 @@ CONFIG += c++11
 
 TARGET = apk-icon-editor-reborn
 VERSION = 3.0.0
-APP_VERSION = 3.0.0-beta4
+APP_VERSION = 3.0.0-beta4.1
 
 QMAKE_TARGET_PRODUCT = APK Icon Editor Reborn
 QMAKE_TARGET_COMPANY = Alexander Gorishnyak / iMiKED
