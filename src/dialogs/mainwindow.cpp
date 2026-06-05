@@ -1028,6 +1028,7 @@ static void setWindowsDarkTitleBar(QWidget *widget, bool dark, bool forceNativeF
 #else
     Q_UNUSED(widget)
     Q_UNUSED(dark)
+    Q_UNUSED(forceNativeFrameRefresh)
 #endif
 }
 
@@ -1056,7 +1057,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     init_languages();
     init_devices();
     init_slots();
+#ifdef Q_OS_WIN
     qApp->installEventFilter(this);
+#endif
 
     apk_close();
 
@@ -1121,6 +1124,8 @@ void MainWindow::init_core()
     manualUpdateCheck = false;
     framelessResizeCursorActive = false;
     accentBorderOverlay = NULL;
+    customTitleBar = NULL;
+    mainMenuBar = NULL;
 
     dropbox = new Dropbox(this);
     gdrive = new GoogleDrive(this);
@@ -1143,11 +1148,15 @@ void MainWindow::init_gui()
 
     // Main Window:
 
+#ifdef Q_OS_WIN
     setWindowFlag(Qt::FramelessWindowHint, true);
     setMouseTracking(true);
+#endif
     splitter = new QSplitter(this);
     setCentralWidget(splitter);
     setAcceptDrops(true);
+
+#ifdef Q_OS_WIN
     accentBorderOverlay = new AccentBorderOverlay(this);
 
     customTitleBar = new FramelessTitleBar(this, this);
@@ -1159,6 +1168,10 @@ void MainWindow::init_gui()
     topBarLayout->addWidget(customTitleBar);
     topBarLayout->addWidget(mainMenuBar);
     setMenuWidget(topBar);
+#else
+    mainMenuBar = new QMenuBar(this);
+    setMenuBar(mainMenuBar);
+#endif
 
     QMenuBar *menu = mainMenuBar;
     menuFile = new QMenu(this);
@@ -1270,7 +1283,9 @@ void MainWindow::init_gui()
     menuSett->addAction(actKeys);
     menuSett->addSeparator();
     menuSett->addMenu(menuLang);
+#ifdef Q_OS_WIN
     menuSett->addMenu(menuTheme);
+#endif
     menuSett->addAction(actAutoUpdate);
     menuSett->addSeparator();
 #ifndef Q_OS_UNIX
@@ -1857,6 +1872,10 @@ void MainWindow::setLanguage(QString lang)
 
 void MainWindow::setTheme(QString theme)
 {
+#ifndef Q_OS_WIN
+    Q_UNUSED(theme)
+    theme = THEME_SYSTEM;
+#endif
     if (theme != THEME_LIGHT && theme != THEME_DARK && theme != THEME_SYSTEM) {
         theme = THEME_SYSTEM;
     }
@@ -1873,8 +1892,7 @@ void MainWindow::setTheme(QString theme)
 void MainWindow::applyTheme(QString theme)
 {
     const QString styleName = defaultStyleName();
-    const QPalette basePalette = defaultPalette();
-    Q_UNUSED(basePalette)
+#ifdef Q_OS_WIN
     const bool dark = theme == THEME_DARK || (theme == THEME_SYSTEM && isSystemDark());
     if (dark) {
         if (QStyle *style = QStyleFactory::create("Fusion")) {
@@ -1907,6 +1925,26 @@ void MainWindow::applyTheme(QString theme)
     }
     scheduleWindowsDarkTitleBars(dark);
     updateAccentBorderOverlay();
+#else
+    Q_UNUSED(theme)
+    if (!styleName.isEmpty()) {
+        if (QStyle *style = QStyleFactory::create(styleName)) {
+            qApp->setStyle(style);
+        }
+    }
+    qApp->setPalette(defaultPalette());
+    qApp->setStyleSheet(QString());
+    if (listIcons) {
+        const QPalette nativePalette = defaultPalette();
+        listIcons->setPalette(nativePalette);
+        listIcons->viewport()->setPalette(nativePalette);
+        listIcons->viewport()->setAutoFillBackground(true);
+        listIcons->viewport()->update();
+    }
+    if (devices) {
+        devices->update();
+    }
+#endif
     drawArea->syncPaletteBackground();
 }
 
