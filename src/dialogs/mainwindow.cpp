@@ -1893,6 +1893,8 @@ void MainWindow::applyTheme(QString theme)
 {
     const QString styleName = defaultStyleName();
 #ifdef Q_OS_WIN
+    const QPalette nativePalette = defaultPalette();
+    Q_UNUSED(nativePalette)
     const bool dark = theme == THEME_DARK || (theme == THEME_SYSTEM && isSystemDark());
     if (dark) {
         if (QStyle *style = QStyleFactory::create("Fusion")) {

@@ -28,6 +28,7 @@
 * Approved all Russian translations in Crowdin, exported only approved strings, and regenerated the runtime translation file.
 * Completed remaining beta4 strings for all supported localizations, uploaded them to Crowdin, and regenerated runtime translation files.
 * Restored native macOS and Linux window chrome and theming by keeping the frameless title bar, Windows accent border and custom theme styling Windows-only.
+* Fixed switching from Dark to Light theme on Windows so native light palette colors are restored correctly.
 
 ## 3.0.0-beta3
 * Added resource table alias resolution from resources.arsc for adaptive XML icons.
