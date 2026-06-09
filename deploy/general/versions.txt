@@ -1,6 +1,10 @@
 # Version History
 
 
+## 3.0.0-beta5
+* Added preview and export support for standalone XML launcher icons such as vector drawable application icons.
+* Kept standalone XML/vector launcher icon replacement disabled until safe write-back support is implemented.
+
 ## 3.0.0-beta4.1
 * Restored native macOS and Linux window chrome and theming by keeping the frameless title bar, Windows accent border and custom theme styling Windows-only.
 * Fixed switching from Dark to Light theme on Windows so native light palette colors are restored correctly.

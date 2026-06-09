@@ -31,6 +31,15 @@ struct AdaptiveIconDescriptor {
     bool usesCustomForeground() const { return !customForegroundRef.isEmpty(); }
 };
 
+struct XmlDrawableIconDescriptor {
+    QString xmlPath;
+    QString resourceRef;
+    QString rootTag;
+    QString previewSource;
+
+    bool isValid() const { return !xmlPath.isEmpty(); }
+};
+
 class Icon : public QObject
 {
     Q_OBJECT
@@ -65,6 +74,7 @@ public:
     explicit Icon(QString filename, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
+    explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const XmlDrawableIconDescriptor &xmlDrawableDescriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -79,12 +89,14 @@ public:
     QString getFilename() const;                    ///< Returns the icon filename.
     QString getAdaptiveXmlPath() const;
     const AdaptiveIconDescriptor &getAdaptiveDescriptor() const;
+    QString getXmlDrawablePath() const;
     Type getType() const;
     Scope getScope() const;
     EntryRole getEntryRole() const;
     QString getEntryRoleTitle() const;
     int getEntryPriority() const;
     bool isAdaptiveIcon() const;
+    bool isXmlDrawableIcon() const;
 
     bool revert();                                  ///< Reverts the original icon (loaded from the original filename).
     int width() const { return pixmap.width(); }    ///< Returns the icon width.
@@ -124,6 +136,7 @@ private:
     QString filePath; ///< Stores the pixmap original filename. Used to revert the original pixmap.
     QStringList saveTargets;
     AdaptiveIconDescriptor adaptiveDescriptor;
+    XmlDrawableIconDescriptor xmlDrawableDescriptor;
     QStringList qualifiers;
     Type type;
     Scope scope;

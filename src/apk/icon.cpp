@@ -93,6 +93,12 @@ Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTarge
     this->adaptiveDescriptor = adaptiveDescriptor;
 }
 
+Icon::Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const XmlDrawableIconDescriptor &xmlDrawableDescriptor, Type type, Scope scope, EntryRole entryRole)
+    : Icon(filename, pixmap, saveTargets, type, scope, entryRole)
+{
+    this->xmlDrawableDescriptor = xmlDrawableDescriptor;
+}
+
 bool Icon::load(QString filename)
 {
     filePath = filename;
@@ -112,6 +118,9 @@ bool Icon::save(QString filename)
         const char *format = needsFormatHint ? "PNG" : NULL;
         if (isAdaptiveIcon()) {
             qDebug().noquote() << "Exporting adaptive icon preview:\n" + getToolTip();
+            qDebug().noquote() << "Export file:" << Path::display(filename);
+        } else if (isXmlDrawableIcon()) {
+            qDebug().noquote() << "Exporting XML drawable icon preview:\n" + getToolTip();
             qDebug().noquote() << "Export file:" << Path::display(filename);
         }
         QDir().mkpath(QFileInfo(filename).absolutePath());
@@ -162,6 +171,10 @@ bool Icon::replace(QPixmap pixmap)
     }
     if (isAdaptiveIcon() && adaptiveDescriptor.usesReadOnlySplitResources) {
         qWarning().noquote() << "Adaptive icon replacement blocked because it uses read-only split APK resources:\n" + getToolTip();
+        return false;
+    }
+    if (isXmlDrawableIcon()) {
+        qWarning().noquote() << "XML drawable icon replacement blocked because write-back is not supported yet:\n" + getToolTip();
         return false;
     }
     if (isAdaptiveIcon()) {
@@ -226,6 +239,11 @@ const AdaptiveIconDescriptor &Icon::getAdaptiveDescriptor() const
     return adaptiveDescriptor;
 }
 
+QString Icon::getXmlDrawablePath() const
+{
+    return xmlDrawableDescriptor.xmlPath;
+}
+
 Icon::Type Icon::getType() const
 {
     return type;
@@ -272,6 +290,11 @@ bool Icon::isAdaptiveIcon() const
     return adaptiveDescriptor.isValid();
 }
 
+bool Icon::isXmlDrawableIcon() const
+{
+    return xmlDrawableDescriptor.isValid();
+}
+
 QString Icon::getTitle() const
 {
     if (type == TvBanner) {
@@ -284,6 +307,30 @@ QString Icon::getTitle() const
 
 QString Icon::getToolTip() const
 {
+    if (isXmlDrawableIcon()) {
+        QStringList lines;
+        lines << tr("XML drawable launcher icon");
+        lines << "";
+        lines << tr("Launcher entry:") << getEntryRoleTitle();
+        lines << "";
+        lines << tr("XML:") << Path::display(xmlDrawableDescriptor.xmlPath);
+        if (!xmlDrawableDescriptor.resourceRef.isEmpty()) {
+            lines << tr("Resource:") << xmlDrawableDescriptor.resourceRef;
+        }
+        if (!xmlDrawableDescriptor.rootTag.isEmpty()) {
+            lines << tr("Root tag:") << xmlDrawableDescriptor.rootTag;
+        }
+        if (!xmlDrawableDescriptor.previewSource.isEmpty()) {
+            lines << "";
+            lines << tr("Preview source:") << xmlDrawableDescriptor.previewSource;
+        }
+        lines << "";
+        lines << tr("Write-back:");
+        lines << tr("Mode: preview/export only");
+        lines << tr("Replacement is not supported for XML/vector launcher icons yet.");
+        return lines.join("\n");
+    }
+
     if (!isAdaptiveIcon()) {
         return tr("Bitmap icon") + "\n\n" + tr("Launcher entry:") + "\n" + getEntryRoleTitle() + "\n\n" + Path::display(filePath);
     }

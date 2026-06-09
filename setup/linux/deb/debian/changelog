@@ -1,3 +1,9 @@
+apk-icon-editor-reborn (3.0.0~beta5-1) unstable; urgency=low
+
+  * Add preview and export support for standalone XML launcher icons.
+
+ -- iMiKED <M-I-B@yandex.ru>  Wed, 10 Jun 2026 03:00:00 +0700
+
 apk-icon-editor-reborn (3.0.0~beta4.1-1) unstable; urgency=low
 
   * Restore native macOS/Linux window chrome and fix Windows light theme restore.

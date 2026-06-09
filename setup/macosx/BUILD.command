@@ -9,7 +9,7 @@ find . -name "Makefile*" -type f -delete
 
 QT_BIN="${QT_BIN:-$HOME/Qt/6.8.3/macos/bin}"
 ARTIFACT_SUFFIX="${MACOS_ARTIFACT_SUFFIX:-}"
-APP_VERSION="${APP_VERSION:-3.0.0-beta4.1}"
+APP_VERSION="${APP_VERSION:-3.0.0-beta5}"
 
 "$QT_BIN/qmake" "DEFINES+=CI" && make || { echo "Could not build the project."; exit 2; }
 "$QT_BIN/macdeployqt" bin/macosx/apk-icon-editor-reborn.app || { echo "Could not deploy the project."; exit 3; }

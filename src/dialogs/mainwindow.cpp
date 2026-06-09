@@ -2168,6 +2168,18 @@ bool MainWindow::icon_open(QString filename)
         return false;
     }
 
+    if (icon->isXmlDrawableIcon()) {
+        QMessageBox box(this);
+        box.setIcon(QMessageBox::Information);
+        box.setWindowTitle(tr("XML Drawable Icon"));
+        box.setText(tr("This XML/vector launcher icon can be previewed and exported, but replacement is not supported yet."));
+        box.setDetailedText(icon->getToolTip());
+        box.setStandardButtons(QMessageBox::Ok);
+        box.exec();
+        qDebug().noquote() << "XML drawable icon replacement blocked: write-back is not supported yet.";
+        return false;
+    }
+
     if (filename.isEmpty()) {
         filename = QFileDialog::getOpenFileName(this, tr("Import Icon"), NULL, Image::Formats::openDialogFilter());
         if (filename.isEmpty()) {
