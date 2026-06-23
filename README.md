@@ -70,7 +70,9 @@ Split APK resources are currently supported for preview only. If an adaptive ico
 Highlights:
 
 - Added preview and export support for standalone XML launcher icons, including vector drawable application icons.
+- Rendered standalone XML/vector launcher icons through the existing Android drawable renderer, including drawable-gradient fills used by tested launcher icons.
 - Kept standalone XML/vector launcher icon replacement disabled until safe write-back support is implemented.
+- Reduced Windows startup theme flicker by avoiding delayed DWM frame refreshes during the initial window show.
 
 ## 3.0.0-beta4.1 Release Notes
 Highlights:
