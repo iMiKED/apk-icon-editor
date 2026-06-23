@@ -1,10 +1,10 @@
-%global app_version 3.0.0-beta4.1
+%global app_version 3.0.0-beta5
 %global _missing_build_ids_terminate_build 0
 %global debug_package %{nil}
 
 Name:           apk-icon-editor-reborn
 Version:        3.0.0
-Release:        0.beta4.1%{?dist}
+Release:        0.beta5%{?dist}
 Summary:        Simple APK resource editor
 
 License:        GPL-3.0-or-later
@@ -44,6 +44,9 @@ qmake6 PREFIX=%{_prefix} "DEFINES+=CI"
 %{_datadir}/icons/hicolor/*/mimetypes/application-vnd.android.package-archive.png
 
 %changelog
+* Wed Jun 10 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta5
+- Add preview and export support for standalone XML launcher icons.
+
 * Sat Jun 06 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta4.1
 - Restore native macOS/Linux window chrome and fix Windows light theme restore.
 

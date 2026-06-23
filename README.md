@@ -56,7 +56,7 @@ The `Icon size preset` list is loaded from the shared cross-platform `icon-size-
 Preset icons live next to that JSON file under `gfx/devices/`. Built-in Android presets remain available as a fallback when `icon-size-presets.json` is missing or invalid, and embedded icons are used if an external preset icon cannot be loaded. Retired BlackBerry and Kindle Fire presets are kept in the JSON `legacy` section but are not shown in the active preset list.
 
 ## 3.0.0 Beta Status
-The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta4.1` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, and vector foreground previews are rendered in-app.
+The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta5` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, vector foreground previews, and standalone XML/vector launcher icon previews are rendered in-app.
 
 Adaptive/vector previews are intended for display, replacement, export, and safe APK repacking. The editor shows adaptive icon metadata in tooltips and logs, including the launcher entry, XML descriptor, foreground, background, monochrome layer when present, preview source, and write-back target.
 
@@ -65,6 +65,14 @@ Adaptive/vector previews are intended for display, replacement, export, and safe
 Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
 
 Split APK resources are currently supported for preview only. If an adaptive icon uses a resource from a split APK, the tooltip and logs mark it as read-only and replacement/repacking of that split APK set is intentionally blocked. Classic single-APK repacking remains supported.
+
+## 3.0.0-beta5 Release Notes
+Highlights:
+
+- Added preview and export support for standalone XML launcher icons, including vector drawable application icons.
+- Rendered standalone XML/vector launcher icons through the existing Android drawable renderer, including drawable-gradient fills used by tested launcher icons.
+- Kept standalone XML/vector launcher icon replacement disabled until safe write-back support is implemented.
+- Reduced Windows startup theme flicker by avoiding delayed DWM frame refreshes during the initial window show.
 
 ## 3.0.0-beta4.1 Release Notes
 Highlights:

@@ -19,6 +19,7 @@ public:
     };
 
     static Result resolve(const ResourceResolver &resolver, const ResourceRef &iconRef, Icon::Type type, const QSize &size);
+    static QPixmap renderDrawableXml(const ResourceResolver &resolver, const QString &filePath, Icon::Type type, const QSize &size);
 
 private:
     static bool parseXml(const QString &xmlPath, ResourceRef *background, ResourceRef *foreground);
@@ -26,7 +27,6 @@ private:
     static QRectF adaptiveLayerRect(const QSize &size);
     static QSize adaptiveLayerSize(const QSize &size);
     static ResourceResolver::Value resolveLayer(const ResourceResolver &resolver, const ResourceRef &ref, Icon::Type type, const QSize &size, QPixmap *pixmap);
-    static QPixmap renderDrawableXml(const ResourceResolver &resolver, const QString &filePath, Icon::Type type, const QSize &size);
     static QPixmap renderDrawableElement(const ResourceResolver &resolver, const QDomElement &node, Icon::Type type, const QSize &size);
     static QString drawableAttr(const QDomElement &node);
     static QString srcAttr(const QDomElement &node);

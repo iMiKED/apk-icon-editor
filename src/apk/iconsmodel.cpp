@@ -62,6 +62,23 @@ void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStri
     emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
 }
 
+void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const XmlDrawableIconDescriptor &xmlDrawableDescriptor, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole)
+{
+    Icon roleProbe(QString(), type, scope, entryRole);
+    qDebug().noquote() << QString("Added XML drawable %1: %2").arg(roleProbe.getEntryRoleTitle(), Path::display(filename));
+    beginInsertRows(QModelIndex(), icons.count(), icons.count());
+        Icon *icon = new Icon(filename, pixmap, saveTargets, xmlDrawableDescriptor, type, scope, entryRole);
+        icons.append(icon);
+        connect(icon, &Icon::updated, [=]() {
+            QModelIndex index = this->index(icons.indexOf(icon), 0);
+            emit dataChanged(index, index);
+        });
+    endInsertRows();
+
+    sortIcons();
+    emit dataChanged(index(0, 0), index(icons.count() - 1, 0));
+}
+
 void IconsModel::sortIcons()
 {
     std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
