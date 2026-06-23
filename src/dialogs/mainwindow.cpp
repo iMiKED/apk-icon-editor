@@ -1123,6 +1123,9 @@ void MainWindow::init_core()
     recent = NULL;
     manualUpdateCheck = false;
     framelessResizeCursorActive = false;
+    windowsThemePrimed = false;
+    windowsInitialShowHandled = false;
+    windowsSkipInitialActivationRefresh = false;
     accentBorderOverlay = NULL;
     customTitleBar = NULL;
     mainMenuBar = NULL;
@@ -1896,6 +1899,7 @@ void MainWindow::applyTheme(QString theme)
     const QPalette nativePalette = defaultPalette();
     Q_UNUSED(nativePalette)
     const bool dark = theme == THEME_DARK || (theme == THEME_SYSTEM && isSystemDark());
+    const bool initialThemeApply = !windowsThemePrimed;
     if (dark) {
         if (QStyle *style = QStyleFactory::create("Fusion")) {
             qApp->setStyle(new DarkProxyStyle(style));
@@ -1925,7 +1929,12 @@ void MainWindow::applyTheme(QString theme)
         }
         customTitleBar->update();
     }
-    scheduleWindowsDarkTitleBars(dark);
+    if (initialThemeApply) {
+        setWindowsDarkTitleBars(dark);
+    } else {
+        scheduleWindowsDarkTitleBars(dark);
+    }
+    windowsThemePrimed = true;
     updateAccentBorderOverlay();
 #else
     Q_UNUSED(theme)
@@ -2850,6 +2859,24 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
         QWidget *widget = qobject_cast<QWidget *>(object);
         if (widget && widget->isWindow()) {
             const bool dark = currentTheme == THEME_DARK || (currentTheme == THEME_SYSTEM && isSystemDark());
+            const bool initialMainWindowShow = widget == this
+                && event->type() == QEvent::Show
+                && !windowsInitialShowHandled;
+            const bool initialMainWindowActivation = widget == this
+                && windowsSkipInitialActivationRefresh
+                && (event->type() == QEvent::WindowActivate
+                    || event->type() == QEvent::ActivationChange);
+            if (initialMainWindowShow || initialMainWindowActivation) {
+                setWindowsDarkTitleBar(widget, dark);
+                if (initialMainWindowShow) {
+                    windowsInitialShowHandled = true;
+                    windowsSkipInitialActivationRefresh = true;
+                    QTimer::singleShot(750, this, [this]() {
+                        windowsSkipInitialActivationRefresh = false;
+                    });
+                }
+                return QMainWindow::eventFilter(object, event);
+            }
             const bool forceNativeFrameRefresh = event->type() == QEvent::Show
                 || event->type() == QEvent::Hide
                 || event->type() == QEvent::Close

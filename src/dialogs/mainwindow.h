@@ -362,6 +362,9 @@ private:
     QString currentTheme;
     QString currentPath;
     bool framelessResizeCursorActive;
+    bool windowsThemePrimed;
+    bool windowsInitialShowHandled;
+    bool windowsSkipInitialActivationRefresh;
 };
 
 #endif // MAINWINDOW_H
