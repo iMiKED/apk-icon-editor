@@ -16,7 +16,14 @@ void IconsProxy::setSourceModel(QAbstractItemModel *model)
         connect(model, &QAbstractItemModel::dataChanged, this, [this](const QModelIndex &first, const QModelIndex &last) {
             for (int row = first.row(); row <= last.row(); ++row) {
                 const QModelIndex mapped = mapFromSource(sourceModel()->index(row, 0));
-                if (mapped.isValid()) emit dataChanged(mapped, mapped);
+                if (!mapped.isValid()) continue;
+                emit dataChanged(mapped, mapped);
+                for (Node *ancestor = node(mapped)->parent; ancestor != &root; ancestor = ancestor->parent) {
+                    if (ancestor->previewSource == mapToSource(mapped)) {
+                        const QModelIndex header = nodeIndex(ancestor);
+                        emit dataChanged(header, header, { Qt::DecorationRole });
+                    }
+                }
             }
         });
         connect(model, &QObject::destroyed, this, [this]() { rebuild(); });
@@ -65,10 +72,14 @@ void IconsProxy::rebuild()
             leaf->parent = parent;
             leaf->source = source;
             parent->children << leaf;
+            // Source rows are density-sorted; use the largest variant for each branch.
+            if (parent != &root) parent->previewSource = source;
             leaves.insert(icon, leaf);
         }
     }
     for (Node *family : families) {
+        Node *previewGroup = adaptiveGroups.value(family, legacyGroups.value(family));
+        family->previewSource = previewGroup->previewSource;
         for (Node *group : family->children) {
             group->title += QString(" (%1)").arg(group->children.count());
         }
@@ -131,6 +142,7 @@ QVariant IconsProxy::data(const QModelIndex &index, int role) const
         return item->source.data(role);
     }
     if (role == Qt::DisplayRole || role == Qt::ToolTipRole) return item->title;
+    if (role == Qt::DecorationRole) return item->previewSource.data(role);
     if (role == Qt::FontRole) {
         QFont font;
         font.setBold(true);

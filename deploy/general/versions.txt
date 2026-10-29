@@ -5,6 +5,7 @@
 * Released version 3.0.0 without the beta suffix and synchronized platform package versions.
 * Fixed update version comparison so stable 3.0.0 is newer than 3.0.0-beta versions.
 * Separated adaptive XML launcher icons and their legacy bitmap alternatives into expandable groups in the Icons tab.
+* Added small, automatically refreshed icon thumbnails beside launcher branch and Adaptive/Legacy group headings.
 * Show adaptive XML previews by default instead of substituting a same-name legacy bitmap, fixing the incorrect Futuba icon.
 * Added a replacement dialog with current/new previews and an explicit, unchecked-by-default option to update legacy bitmap alternatives.
 * Preserve legacy resources during adaptive-only replacement and avoid rewriting unchanged bitmap files when packing an APK.

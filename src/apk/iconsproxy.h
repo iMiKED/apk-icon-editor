@@ -31,6 +31,7 @@ private:
         Node *parent = nullptr;
         QList<Node *> children;
         QPersistentModelIndex source;
+        QPersistentModelIndex previewSource;
         QString title;
         bool expanded = false;
         ~Node() { qDeleteAll(children); }

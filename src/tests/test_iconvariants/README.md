@@ -10,7 +10,7 @@ QT_QPA_PLATFORM=offscreen ./test_iconvariants
 
 On Windows, use a VS 2022 x64 developer prompt with Qt 6.8.3 in `PATH`, then run `qmake`, `nmake`, and `release\test_iconvariants.exe`. Ensure the Qt WebP plugin is available through `QT_PLUGIN_PATH`.
 
-Synthetic fixtures cover adaptive-first selection, tree model validity, fallback labels, unchanged bitmap preservation, explicit legacy updates, shared foreground detachment, read-only split resources, and replacement dialog defaults/cancellation.
+Synthetic fixtures cover adaptive-first selection, tree model validity, branch thumbnails and their live updates, fallback labels, unchanged bitmap preservation, explicit legacy updates, shared foreground detachment, read-only split resources, and replacement dialog defaults/cancellation. All six launcher entry roles have independent header previews; header decorations stay at 16x16 while individual icon rows retain 32x32 decorations.
 
 Optional local integration tests use these environment variables:
 

@@ -1687,7 +1687,13 @@ void MainWindow::init_slots()
         iconsProxy->setDevice(device);
         setCurrentIcon(listIcons->currentIndex());
     });
-    connect(iconsProxy, &IconsProxy::dataChanged, [=]() { setCurrentIcon(listIcons->currentIndex()); });
+    connect(iconsProxy, &IconsProxy::dataChanged, this, [this](const QModelIndex &first, const QModelIndex &last) {
+        const QModelIndex current = listIcons->currentIndex();
+        if (current.isValid() && current.parent() == first.parent()
+                && current.row() >= first.row() && current.row() <= last.row()) {
+            setCurrentIcon(current);
+        }
+    });
     connect(iconsProxy, &IconsProxy::rowsInserted, [=]() { setCurrentIcon(listIcons->currentIndex()); });
     connect(iconsProxy, &IconsProxy::rowsRemoved, [=]() { setCurrentIcon(listIcons->currentIndex()); });
     connect(listIcons->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::setCurrentIcon);

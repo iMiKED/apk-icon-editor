@@ -12,6 +12,13 @@
 #include "iconsproxy.h"
 #include "adaptivereplacementdialog.h"
 
+class TestDecorationDelegate : public DecorationDelegate
+{
+public:
+    using DecorationDelegate::DecorationDelegate;
+    using DecorationDelegate::initStyleOption;
+};
+
 class TestIconVariants : public QObject
 {
     Q_OBJECT
@@ -83,12 +90,95 @@ private slots:
         QVERIFY(!legacy.data(IconsProxy::DefaultExpandedRole).toBool());
         QCOMPARE(proxy.rowCount(adaptive), 7);
         QCOMPARE(proxy.rowCount(legacy), 2);
+        QCOMPARE(qvariant_cast<QPixmap>(family.data(Qt::DecorationRole)).toImage(), icons.last()->getPixmap().toImage());
+        QCOMPARE(qvariant_cast<QPixmap>(adaptive.data(Qt::DecorationRole)).toImage(), icons.last()->getPixmap().toImage());
+        QCOMPARE(qvariant_cast<QPixmap>(legacy.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::green));
+        TestDecorationDelegate delegate(QSize(32, 32));
+        QStyleOptionViewItem option;
+        delegate.initStyleOption(&option, family);
+        QCOMPARE(option.decorationSize, QSize(16, 16));
+        delegate.initStyleOption(&option, legacy);
+        QCOMPARE(option.decorationSize, QSize(16, 16));
+        delegate.initStyleOption(&option, proxy.defaultIcon());
+        QCOMPARE(option.decorationSize, QSize(32, 32));
         QCOMPARE(proxy.mapToSource(proxy.defaultIcon()).internalPointer(), static_cast<void *>(icons.last()));
         QCOMPARE(icons.first()->width(), 36);
         QVERIFY(!proxy.mapToSource(family).isValid());
         const QString exported = dir.path() + "/export.png";
         QVERIFY(icons.last()->save(exported));
         QCOMPARE(QImage(exported).pixelColor(96, 96), QColor(Qt::red));
+    }
+
+    void branchPreviewsTrackChanges()
+    {
+        QTemporaryDir dir;
+        fixture(dir.path());
+        Apk::File apk(dir.path());
+        IconsProxy proxy;
+        proxy.setSourceModel(&apk.iconsModel);
+        QAbstractItemModelTester tester(&proxy, QAbstractItemModelTester::FailureReportingMode::QtTest);
+        const QModelIndex family = proxy.index(0, 0);
+        const QModelIndex adaptive = proxy.index(0, 0, family);
+        const QModelIndex legacy = proxy.index(1, 0, family);
+        Icon *source = adaptiveIcons(apk.iconsModel).last();
+        Icon *legacySource = apk.iconsModel.legacyAlternatives(source).last();
+        QSignalSpy changed(&proxy, &IconsProxy::dataChanged);
+        const auto headerChanged = [&changed](const QModelIndex &header) {
+            for (const auto &arguments : changed) {
+                if (arguments.at(0).value<QModelIndex>() == header
+                        && arguments.at(2).value<QList<int>>().contains(Qt::DecorationRole)) return true;
+            }
+            return false;
+        };
+        QVERIFY(source->replace(solid(Qt::blue)));
+        QVERIFY(headerChanged(family));
+        QVERIFY(headerChanged(adaptive));
+        QVERIFY(!headerChanged(legacy));
+        QCOMPARE(qvariant_cast<QPixmap>(family.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::blue));
+        QCOMPARE(qvariant_cast<QPixmap>(legacy.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::green));
+
+        changed.clear();
+        QVERIFY(legacySource->replace(solid(Qt::yellow)));
+        QVERIFY(headerChanged(legacy));
+        QVERIFY(!headerChanged(family));
+        QCOMPARE(qvariant_cast<QPixmap>(legacy.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::yellow));
+
+        changed.clear();
+        QVERIFY(source->revert());
+        QVERIFY(headerChanged(family));
+        QVERIFY(headerChanged(adaptive));
+        QCOMPARE(qvariant_cast<QPixmap>(family.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::red));
+
+        for (Icon *icon : adaptiveIcons(apk.iconsModel)) QVERIFY(apk.iconsModel.remove(icon));
+        const QModelIndex fallbackFamily = proxy.index(0, 0);
+        QCOMPARE(proxy.rowCount(fallbackFamily), 1);
+        QCOMPARE(qvariant_cast<QPixmap>(fallbackFamily.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::yellow));
+    }
+
+    void everyLauncherBranchHasItsOwnPreview()
+    {
+        QTemporaryDir dir;
+        fixture(dir.path());
+        Apk::File apk(dir.path());
+        const AdaptiveIconDescriptor descriptor = adaptiveIcons(apk.iconsModel).last()->getAdaptiveDescriptor();
+        const QList<QColor> colors = { Qt::red, Qt::green, Qt::blue, Qt::cyan, Qt::magenta, Qt::yellow };
+        IconsModel model;
+        for (int role = Icon::EntryApplicationIcon; role <= Icon::EntryActivityAliasRoundIcon; ++role) {
+            const Icon::Scope scope = role <= Icon::EntryApplicationRoundIcon ? Icon::ScopeApplication : Icon::ScopeActivity;
+            model.add(descriptor.xmlPath, solid(colors.at(role)), QStringList(), descriptor,
+                      Icon::Xxxhdpi, scope, static_cast<Icon::EntryRole>(role));
+        }
+        IconsProxy proxy;
+        proxy.setSourceModel(&model);
+        QCOMPARE(proxy.rowCount(), 2);
+        proxy.setShowActivities(true);
+        QCOMPARE(proxy.rowCount(), colors.size());
+        for (int row = 0; row < proxy.rowCount(); ++row) {
+            const QModelIndex family = proxy.index(row, 0);
+            const QImage preview = qvariant_cast<QPixmap>(family.data(Qt::DecorationRole)).toImage();
+            QCOMPARE(preview.pixelColor(96, 96), colors.at(row));
+            QCOMPARE(qvariant_cast<QPixmap>(proxy.index(0, 0, family).data(Qt::DecorationRole)).toImage(), preview);
+        }
     }
 
     void unchangedAndAdaptiveOnlyPreserveLegacy()
@@ -170,6 +260,8 @@ private slots:
         QVERIFY(legacy.data().toString().contains("Adaptive preview unavailable"));
         QVERIFY(legacy.data(IconsProxy::DefaultExpandedRole).toBool());
         QCOMPARE(proxy.rowCount(legacy), 2);
+        QCOMPARE(qvariant_cast<QPixmap>(legacy.parent().data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::green));
+        QCOMPARE(qvariant_cast<QPixmap>(legacy.data(Qt::DecorationRole)).toImage().pixelColor(96, 96), QColor(Qt::green));
     }
 
     void replacementDialogIsOptIn()
@@ -279,6 +371,10 @@ private slots:
             tree.show();
             QCoreApplication::processEvents();
             QVERIFY(tree.grab().save(screenshots + "/icons-tree.png"));
+            tree.setExpanded(proxy.index(1, 0, proxy.index(0, 0)), true);
+            tree.resize(420, 700);
+            QCoreApplication::processEvents();
+            QVERIFY(tree.grab().save(screenshots + "/icons-tree-legacy.png"));
             AdaptiveReplacementDialog dialog(app, solid(Qt::blue), 7, legacy);
             dialog.show();
             QCoreApplication::processEvents();
