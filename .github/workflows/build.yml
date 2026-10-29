@@ -12,7 +12,7 @@ permissions:
 
 env:
   QT_VERSION: 6.8.3
-  APP_VERSION: 3.0.0-beta5
+  APP_VERSION: 3.0.0
 
 jobs:
   desktop:
@@ -173,12 +173,16 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           notes_file="deploy/general/release-notes/${GITHUB_REF_NAME}.md"
-          notes_args=(--notes "Automated prerelease build.")
+          notes_args=(--notes "Automated release build.")
+          release_args=()
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            release_args+=(--prerelease)
+          fi
           if [ -f "$notes_file" ]; then
             notes_args=(--notes-file "$notes_file")
           fi
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
-            gh release create "$GITHUB_REF_NAME" --prerelease --title "$GITHUB_REF_NAME" "${notes_args[@]}"
+            gh release create "$GITHUB_REF_NAME" "${release_args[@]}" --title "$GITHUB_REF_NAME" "${notes_args[@]}"
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor-reborn-3.0.0-0.beta1.fc40.x86_64.rpm" -y || true
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor-3.0.0-0.beta1.fc40.src.rpm" -y || true
           gh release delete-asset "$GITHUB_REF_NAME" "apk-icon-editor_3.0.0.beta1-1_amd64.deb" -y || true

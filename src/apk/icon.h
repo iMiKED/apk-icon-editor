@@ -8,6 +8,7 @@
 #include <QStringList>
 
 struct AdaptiveIconDescriptor {
+    QString resourceRef;
     QString xmlPath;
     QString foregroundRef;
     QString foregroundPath;
@@ -29,6 +30,13 @@ struct AdaptiveIconDescriptor {
     bool isValid() const { return !xmlPath.isEmpty(); }
     bool needsXmlPatch() const { return !xmlPath.isEmpty() && !customForegroundRef.isEmpty(); }
     bool usesCustomForeground() const { return !customForegroundRef.isEmpty(); }
+};
+
+struct LegacyIconDescriptor {
+    QString resourceRef;
+    QString adaptiveXmlPath;
+    bool readOnly = false;
+    bool isValid() const { return !adaptiveXmlPath.isEmpty(); }
 };
 
 struct XmlDrawableIconDescriptor {
@@ -75,6 +83,7 @@ public:
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     explicit Icon(QString filename, const QPixmap &pixmap, const QStringList &saveTargets, const XmlDrawableIconDescriptor &xmlDrawableDescriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
+    explicit Icon(QString filename, const LegacyIconDescriptor &descriptor, Type type = Unknown, Scope scope = ScopeApplication, EntryRole entryRole = EntryApplicationIcon);
     bool load(QString filename);
     bool save(QString filename = QString());
     bool replace(QPixmap pixmap);
@@ -97,6 +106,10 @@ public:
     int getEntryPriority() const;
     bool isAdaptiveIcon() const;
     bool isXmlDrawableIcon() const;
+    bool isLegacyIcon() const { return legacyDescriptor.isValid(); }
+    bool isReadOnly() const;
+    QString getResourceRef() const;
+    QString getFamilyPath() const;
 
     bool revert();                                  ///< Reverts the original icon (loaded from the original filename).
     int width() const { return pixmap.width(); }    ///< Returns the icon width.
@@ -137,6 +150,7 @@ private:
     QStringList saveTargets;
     AdaptiveIconDescriptor adaptiveDescriptor;
     XmlDrawableIconDescriptor xmlDrawableDescriptor;
+    LegacyIconDescriptor legacyDescriptor;
     QStringList qualifiers;
     Type type;
     Scope scope;

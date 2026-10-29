@@ -20,7 +20,7 @@ public:
 
     Device(QString title = QString(),
            QIcon thumbnail = QIcon(),
-           short ldpi = 32,
+           short ldpi = 36,
            short mdpi = 48,
            short hdpi = 72,
            short xhdpi = 96,

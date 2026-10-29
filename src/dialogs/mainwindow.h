@@ -8,7 +8,7 @@
 
 #include <QMainWindow>
 #include <QSplitter>
-#include <QListView>
+#include <QTreeView>
 #include <QStackedWidget>
 #include <QTableView>
 #include <QComboBox>
@@ -231,7 +231,7 @@ private:
 
     // MVC:
 
-    QListView *listIcons;
+    QTreeView *listIcons;
     QStackedWidget *iconsStack;
     QLabel *iconsLoadingLabel;
     BusyIndicator *iconsLoadingIndicator;

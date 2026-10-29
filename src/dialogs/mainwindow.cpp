@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "apkfile.h"
 #include "decorationdelegate.h"
+#include "adaptivereplacementdialog.h"
 #include <QHeaderView>
 #include <QHBoxLayout>
 #include <QContextMenuEvent>
@@ -819,10 +820,10 @@ static QString darkStyleSheet()
         "QHeaderView::section { background-color: #3f3f46; color: #f1f1f1; border: 1px solid #55555a; padding: 4px; }"
         "QTableView, QListView, QTreeView, QPlainTextEdit, QTextEdit, QLineEdit, QSpinBox, QComboBox {"
         " background-color: #1e1e1e; color: #f1f1f1; border: 1px solid #55555a; selection-background-color: %1; selection-color: #ffffff; }"
-        "QListView#iconsList { background-color: #1e1e1e; alternate-background-color: #1e1e1e; outline: 0px; }"
-        "QListView#iconsList::item { background-color: #1e1e1e; color: #f1f1f1; padding: 1px; }"
-        "QListView#iconsList::item:hover:!selected { background-color: #252526; color: #f1f1f1; }"
-        "QListView#iconsList::item:selected, QListView#iconsList::item:selected:active, QListView#iconsList::item:selected:!active {"
+        "QTreeView#iconsList { background-color: #1e1e1e; alternate-background-color: #1e1e1e; outline: 0px; }"
+        "QTreeView#iconsList::item { background-color: #1e1e1e; color: #f1f1f1; padding: 1px; }"
+        "QTreeView#iconsList::item:hover:!selected { background-color: #252526; color: #f1f1f1; }"
+        "QTreeView#iconsList::item:selected, QTreeView#iconsList::item:selected:active, QTreeView#iconsList::item:selected:!active {"
         " background-color: %1; color: #ffffff; }"
         "QComboBox { min-height: 22px; padding: 3px 28px 3px 5px; }"
         "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right; top: 0px; right: 0px; bottom: 0px; width: 24px; border: none; background: transparent; }"
@@ -1392,7 +1393,10 @@ void MainWindow::init_gui()
     layoutDevices->addWidget(devicesLabel);
     layoutDevices->addWidget(devices);
 
-    listIcons = new QListView(this);
+    listIcons = new QTreeView(this);
+    listIcons->setHeaderHidden(true);
+    listIcons->setIndentation(16);
+    listIcons->setExpandsOnDoubleClick(true);
     listIcons->setObjectName("iconsList");
     listIcons->addActions(menuIcon->actions());
     listIcons->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -1401,6 +1405,17 @@ void MainWindow::init_gui()
     listIcons->setItemDelegate(new DecorationDelegate(QSize(32, 32), this));
     iconsProxy = new IconsProxy(this);
     listIcons->setModel(iconsProxy);
+    connect(iconsProxy, &IconsProxy::modelReset, this, [this]() {
+        for (int row = 0; row < iconsProxy->rowCount(); ++row) {
+            const QModelIndex family = iconsProxy->index(row, 0);
+            listIcons->setExpanded(family, family.data(IconsProxy::DefaultExpandedRole).toBool());
+            for (int child = 0; child < iconsProxy->rowCount(family); ++child) {
+                const QModelIndex group = iconsProxy->index(child, 0, family);
+                listIcons->setExpanded(group, group.data(IconsProxy::DefaultExpandedRole).toBool());
+            }
+        }
+        listIcons->setCurrentIndex(iconsProxy->defaultIcon());
+    });
     setCurrentIcon(QModelIndex());
 
     QWidget *iconsLoading = new QWidget(this);
@@ -2018,8 +2033,10 @@ void MainWindow::setCurrentIcon(const QModelIndex &index)
     Icon *icon = nullptr;
 
     if (apk && index.isValid()) {
-
         icon = static_cast<Icon *>(iconsProxy->mapToSource(index).internalPointer());
+    }
+    disconnect(effects, 0, 0, 0);
+    if (icon) {
         drawArea->setIcon(icon);
         if (icon && icon->isAdaptiveIcon()) {
             qDebug().noquote() << "Selected adaptive icon:\n" + icon->getToolTip();
@@ -2029,7 +2046,6 @@ void MainWindow::setCurrentIcon(const QModelIndex &index)
         const QSize size = device->getIconSize(*icon).size;
         drawArea->setBounds(size.width(), size.height());
 
-        disconnect(effects, 0, 0, 0);
         connect(effects, SIGNAL(colorActivated(bool)), icon,     SLOT(setColorize(bool)), Qt::DirectConnection);
         connect(effects, SIGNAL(rotate(int)),          icon,     SLOT(setAngle(int)),     Qt::DirectConnection);
         connect(effects, SIGNAL(flipX(bool)),          icon,     SLOT(setFlipX(bool)),    Qt::DirectConnection);
@@ -2050,14 +2066,15 @@ void MainWindow::setCurrentIcon(const QModelIndex &index)
     }
 
     drawArea->setIcon(icon);
-    actIconRemove->setEnabled(icon);
-    actIconOpen->setEnabled(icon);
+    const bool editable = icon && !icon->isReadOnly();
+    actIconRemove->setEnabled(editable && !icon->isAdaptiveIcon());
+    actIconOpen->setEnabled(editable);
     actIconSave->setEnabled(icon);
-    actIconScale->setEnabled(icon);
-    actIconResize->setEnabled(icon);
-    actIconRevert->setEnabled(icon);
-    actIconEffect->setEnabled(icon);
-    actIconClone->setEnabled(icon);
+    actIconScale->setEnabled(editable);
+    actIconResize->setEnabled(editable);
+    actIconRevert->setEnabled(editable);
+    actIconEffect->setEnabled(editable);
+    actIconClone->setEnabled(editable);
 }
 
 void MainWindow::setActiveApk(QString filename)
@@ -2136,7 +2153,7 @@ void MainWindow::apk_unpacked(Apk::File *apk)
     tableManifest->setModel(&apk->manifestModel);
     tableTitles->setModel(&apk->titlesModel);
     tableTitles->resizeColumnsToContents();
-    listIcons->setCurrentIndex(listIcons->model()->index(0, 0));
+    listIcons->setCurrentIndex(iconsProxy->defaultIcon());
     setIconsLoading(false);
     connect(&apk->manifestModel, &ManifestModel::dataChanged, [=]() { setWindowModified(true); });
     connect(&apk->titlesModel, &TitlesModel::dataChanged, [=]() { setWindowModified(true); });
@@ -2202,47 +2219,37 @@ bool MainWindow::icon_open(QString filename)
         return false;
     }
 
+    bool updateLegacy = false;
     if (icon->isAdaptiveIcon()) {
-        const QString text = tr("This is an adaptive XML icon. Replace Icon will update the foreground layer only; the background layer from the APK will be preserved.");
-        const QString details = icon->getToolTip();
-        QMessageBox box(this);
-        box.setIcon(QMessageBox::Information);
-        box.setWindowTitle(tr("Adaptive Icon Replacement"));
-        box.setText(text);
-        box.setDetailedText(details);
-        box.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        box.setDefaultButton(QMessageBox::Ok);
-        if (box.exec() != QMessageBox::Ok) {
+        QSet<Icon::Type> densities;
+        for (int row = 0; row < apk->iconsModel.rowCount(); ++row) {
+            const Icon *member = static_cast<Icon *>(apk->iconsModel.index(row, 0).internalPointer());
+            if (member->getAdaptiveXmlPath() == icon->getAdaptiveXmlPath()) densities.insert(member->getType());
+        }
+        AdaptiveReplacementDialog box(icon, imported, densities.count(), apk->iconsModel.legacyAlternatives(icon), this);
+        if (box.exec() != QDialog::Accepted) {
             qDebug().noquote() << "Adaptive icon replacement cancelled:" << Path::display(icon->getAdaptiveXmlPath());
             return false;
         }
+        updateLegacy = box.updateLegacy();
         qDebug().noquote() << "Adaptive icon replacement confirmed: foreground-only; background layer is preserved.";
     }
 
-    QPixmap backup = icon->getPixmap();
+    const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
+    const QSize size = device->getIconSize(*icon).size;
+    if (size.isValid() && imported.size() != size) {
+        const int result = QMessageBox::warning(this, tr("Resize?"),
+                                               tr("Icon you are trying to load is off-size.\nResize automatically?"),
+                                               QMessageBox::Yes, QMessageBox::No, QMessageBox::Cancel);
+        if (result == QMessageBox::Cancel) return false;
+        if (result == QMessageBox::Yes) {
+            imported = imported.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        }
+    }
 
     if (icon->replace(imported)) {
         repaint();
-        const Device *device = static_cast<Device *>(devices->model()->index(devices->currentIndex(), 0).internalPointer());
-        const QSize size = device->getIconSize(*icon).size;
-
-        if (icon->width() != size.width() || icon->height() != size.height()) {
-            int result = QMessageBox::warning(this, tr("Resize?"),
-                                              tr("Icon you are trying to load is off-size.\nResize automatically?"),
-                                              QMessageBox::Yes, QMessageBox::No, QMessageBox::Cancel);
-            switch (result) {
-            case QMessageBox::Yes:
-                icon->resize(size);
-                break;
-            case QMessageBox::No:
-                break;
-            default:
-                // Restore previous icon:
-                icon->replace(backup);
-                return false;
-            }
-        }
-        apk->iconsModel.updateAdaptiveFamily(icon);
+        apk->iconsModel.updateAdaptiveFamily(icon, updateLegacy);
         setWindowModified(true);
         return true;
     }

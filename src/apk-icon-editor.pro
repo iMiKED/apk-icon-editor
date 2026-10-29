@@ -4,7 +4,7 @@ CONFIG += c++11
 
 TARGET = apk-icon-editor-reborn
 VERSION = 3.0.0
-APP_VERSION = 3.0.0-beta5
+APP_VERSION = 3.0.0
 
 QMAKE_TARGET_PRODUCT = APK Icon Editor Reborn
 QMAKE_TARGET_COMPANY = Alexander Gorishnyak / iMiKED
@@ -15,6 +15,8 @@ DEFINES += APP='"\\\"$$QMAKE_TARGET_PRODUCT\\\""'
 DEFINES += VER=\\\"$$APP_VERSION\\\"
 GIT_COMMIT = $$system(git -C $$PWD/.. rev-parse --short HEAD)
 GIT_COMMIT_URL = https://github.com/iMiKED/apk-icon-editor/commit/$$GIT_COMMIT
+LOCAL_CHANGES = $$system(git -C $$PWD/.. status --porcelain -uno)
+!isEmpty(LOCAL_CHANGES): DEFINES += LOCAL_CHANGES
 !isEmpty(GIT_COMMIT) {
     DEFINES += GIT_COMMIT=\\\"$$GIT_COMMIT\\\"
     DEFINES += GIT_COMMIT_URL=\\\"$$GIT_COMMIT_URL\\\"

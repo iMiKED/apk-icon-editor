@@ -13,12 +13,14 @@ public:
     ~IconsModel();
 
     void add(const QString &filename, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
+    void add(const QString &filename, const LegacyIconDescriptor &descriptor, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole);
     void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
     void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const AdaptiveIconDescriptor &adaptiveDescriptor, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
     void add(const QString &filename, const QPixmap &pixmap, const QStringList &saveTargets, const XmlDrawableIconDescriptor &xmlDrawableDescriptor, Icon::Type type = Icon::Unknown, Icon::Scope scope = Icon::ScopeApplication, Icon::EntryRole entryRole = Icon::EntryApplicationIcon);
     bool remove(Icon *icon);
     void clone(Icon *source);
-    void updateAdaptiveFamily(Icon *source);
+    void updateAdaptiveFamily(Icon *source, bool updateLegacy = false);
+    QList<Icon *> legacyAlternatives(const Icon *source) const;
     void save();
     bool hasIcon(Icon::Type type, Icon::Scope scope = Icon::ScopeApplication) const;
 

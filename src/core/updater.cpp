@@ -7,6 +7,7 @@
 #include <QDesktopServices>
 #include <QRegularExpression>
 #include <QThread>
+#include <QVersionNumber>
 
 // Updater
 
@@ -33,28 +34,43 @@ void Updater::download() const
 
 bool Updater::compare(QString v1, QString v2)
 {
-    // Unit test is available for this function.
+    static const QRegularExpression version("^v?([0-9]+(?:\\.[0-9]+)*)(?:-([^+]+))?(?:\\+.*)?$",
+                                             QRegularExpression::CaseInsensitiveOption);
+    const auto first = version.match(v1.trimmed());
+    const auto second = version.match(v2.trimmed());
+    if (!first.hasMatch() || !second.hasMatch()) return false;
+    const int base = QVersionNumber::compare(QVersionNumber::fromString(first.captured(1)).normalized(),
+                                             QVersionNumber::fromString(second.captured(1)).normalized());
+    if (base != 0) return base > 0;
 
-    QStringList segments1 = v1.split(QRegularExpression("\\D"));
-    QStringList segments2 = v2.split(QRegularExpression("\\D"));
-
-    for (qsizetype i = 0; i < segments1.size(); ++i) {
-
-        if (segments2.size() <= i) {
-            segments2.push_back("0");
+    const QString pre1 = first.captured(2).toLower();
+    const QString pre2 = second.captured(2).toLower();
+    // A final release is newer than every prerelease of the same base version.
+    if (pre1.isEmpty() || pre2.isEmpty()) return !pre2.isEmpty() && pre1.isEmpty();
+    const auto parts = [](const QString &text) {
+        QStringList result;
+        auto matches = QRegularExpression("[0-9]+|[a-z]+").globalMatch(text);
+        while (matches.hasNext()) result << matches.next().captured();
+        return result;
+    };
+    const QStringList a = parts(pre1);
+    const QStringList b = parts(pre2);
+    for (qsizetype i = 0; i < qMin(a.size(), b.size()); ++i) {
+        if (a.at(i) == b.at(i)) continue;
+        const bool numericA = a.at(i).at(0).isDigit();
+        const bool numericB = b.at(i).at(0).isDigit();
+        if (numericA != numericB) return !numericA;
+        if (numericA) {
+            QString na = a.at(i), nb = b.at(i);
+            while (na.size() > 1 && na.startsWith('0')) na.remove(0, 1);
+            while (nb.size() > 1 && nb.startsWith('0')) nb.remove(0, 1);
+            if (na.size() != nb.size()) return na.size() > nb.size();
+            if (na == nb) continue;
+            return na > nb;
         }
-
-        const int SEGMENT1 = segments1.at(i).toInt();
-        const int SEGMENT2 = segments2.at(i).toInt();
-
-        if (SEGMENT1 == SEGMENT2) {
-            continue;
-        }
-        else {
-            return (SEGMENT1 > SEGMENT2);
-        }
+        return a.at(i) > b.at(i);
     }
-    return false;
+    return a.size() > b.size();
 }
 
 // UpdateWorker

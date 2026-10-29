@@ -1,10 +1,10 @@
-%global app_version 3.0.0-beta5
+%global app_version 3.0.0
 %global _missing_build_ids_terminate_build 0
 %global debug_package %{nil}
 
 Name:           apk-icon-editor-reborn
 Version:        3.0.0
-Release:        0.beta5%{?dist}
+Release:        1%{?dist}
 Summary:        Simple APK resource editor
 
 License:        GPL-3.0-or-later
@@ -44,6 +44,9 @@ qmake6 PREFIX=%{_prefix} "DEFINES+=CI"
 %{_datadir}/icons/hicolor/*/mimetypes/application-vnd.android.package-archive.png
 
 %changelog
+* Thu Oct 29 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-1
+- Release 3.0.0 with separate adaptive and legacy launcher icons.
+
 * Wed Jun 10 2026 iMiKED <M-I-B@yandex.ru> - 3.0.0-0.beta5
 - Add preview and export support for standalone XML launcher icons.
 

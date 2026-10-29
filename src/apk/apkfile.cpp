@@ -102,8 +102,9 @@ Apk::File::File(const QString &contentsPath, const QStringList &splitContentsPat
     }
     const bool appAdaptiveIcon = addAdaptiveIcons(resolver, ResourceRef(appIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationIcon);
     keepIconListUiResponsive();
-    if (!appAdaptiveIcon && !appRoundIconAttribute.isEmpty()) {
-        addAdaptiveIcons(resolver, ResourceRef(appRoundIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationRoundIcon);
+    bool appAdaptiveRoundIcon = false;
+    if (!appRoundIconAttribute.isEmpty()) {
+        appAdaptiveRoundIcon = addAdaptiveIcons(resolver, ResourceRef(appRoundIconAttribute), Icon::ScopeApplication, Icon::EntryApplicationRoundIcon);
         keepIconListUiResponsive();
     }
 
@@ -134,6 +135,14 @@ Apk::File::File(const QString &contentsPath, const QStringList &splitContentsPat
                         thumbnail.addFile(icon);
                         iconsModel.add(icon, Icon::Unknown, Icon::ScopeApplication, Icon::EntryApplicationIcon);
                     }
+                }
+
+                // Parse classic application round icons:
+
+                if (!appAdaptiveRoundIcon && !appRoundIconAttribute.isEmpty()
+                        && categoryTitle == ResourceRef(appRoundIconAttribute).type()
+                        && resource.baseName() == ResourceRef(appRoundIconAttribute).name() && !isAdaptiveLayer) {
+                    iconsModel.add(resource.filePath(), Icon::Unknown, Icon::ScopeApplication, Icon::EntryApplicationRoundIcon);
                 }
 
                 // Parse application banners:
@@ -290,6 +299,15 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
 
     bool added = false;
     if (rootTag == "adaptive-icon") {
+        QList<ResourceResolver::Candidate> legacyCandidates;
+        QStringList legacyPaths;
+        for (const ResourceResolver::Candidate &candidate : resolver.candidates(iconRef)) {
+            if (candidate.isBitmap && !legacyPaths.contains(candidate.filePath)
+                    && !QPixmap(candidate.filePath).isNull()) {
+                legacyCandidates << candidate;
+                legacyPaths << candidate.filePath;
+            }
+        }
         const QList<Icon::Type> types = QList<Icon::Type>()
                 << Icon::Ldpi
                 << Icon::Mdpi
@@ -311,30 +329,13 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
 
             QStringList saveTargets;
             AdaptiveIconDescriptor descriptor = result.descriptor;
+            descriptor.resourceRef = iconRef.original();
             applySplitResourcePolicy(&descriptor);
-            QPixmap previewPixmap = result.pixmap;
-            bool usesReadyBitmapPreview = false;
-            const ResourceResolver::Value directBitmap = resolver.resolveBitmap(iconRef, type);
-            if (directBitmap.found) {
-                const QPixmap directPixmap(directBitmap.filePath);
-                if (!directPixmap.isNull()) {
-                    previewPixmap = directPixmap;
-                    usesReadyBitmapPreview = true;
-                    descriptor.previewSource = "ready bitmap with the same resource id";
-                    descriptor.previewPath = directBitmap.filePath;
-                    applySplitResourcePolicy(&descriptor);
-                    if (isBaseResourcePath(directBitmap.filePath)) {
-                        saveTargets.append(directBitmap.filePath);
-                    } else if (isSplitResourcePath(directBitmap.filePath)) {
-                        qDebug().noquote() << "Adaptive icon ready bitmap is from a read-only split resource:" << Path::display(directBitmap.filePath);
-                    }
-                    qDebug().noquote() << "Adaptive icon preview uses ready bitmap resource:" << Path::display(directBitmap.filePath);
-                }
-            }
-            if (!usesReadyBitmapPreview) {
-                descriptor.previewSource = "composed XML layers with AOSP-style layer inset";
-            }
-            if (!descriptor.foregroundPath.isEmpty()) {
+            const QPixmap previewPixmap = result.pixmap;
+            descriptor.previewSource = "composed XML layers with AOSP-style layer inset";
+            // A foreground may alias a legacy file. Detach it before editing so
+            // the legacy alternative is only changed by the explicit opt-in.
+            if (!descriptor.foregroundPath.isEmpty() && !legacyPaths.contains(descriptor.foregroundPath)) {
                 if (isBaseResourcePath(descriptor.foregroundPath)) {
                     saveTargets.append(descriptor.foregroundPath);
                 } else if (isSplitResourcePath(descriptor.foregroundPath)) {
@@ -367,11 +368,26 @@ bool Apk::File::addAdaptiveIcons(const ResourceResolver &resolver, const Resourc
                 adaptiveLayerRefs.insert(monochromeKey);
             }
             saveTargets.removeDuplicates();
-            if (scope == Icon::ScopeApplication) {
+            if (scope == Icon::ScopeApplication && (entryRole == Icon::EntryApplicationIcon || thumbnail.isNull())) {
                 thumbnail.addPixmap(previewPixmap);
             }
             iconsModel.add(result.xmlPath, previewPixmap, saveTargets, descriptor, type, scope, entryRole);
             keepIconListUiResponsive();
+            added = true;
+        }
+        if (!added && !legacyCandidates.isEmpty()) {
+            qWarning().noquote() << "Adaptive preview unavailable; showing legacy alternatives for" << iconRef.original();
+        }
+        for (const ResourceResolver::Candidate &candidate : legacyCandidates) {
+            LegacyIconDescriptor descriptor;
+            descriptor.resourceRef = iconRef.original();
+            descriptor.adaptiveXmlPath = xml.filePath;
+            descriptor.readOnly = !isBaseResourcePath(candidate.filePath);
+            iconsModel.add(candidate.filePath, descriptor, candidate.type, scope, entryRole);
+            if (!added && scope == Icon::ScopeApplication) thumbnail.addFile(candidate.filePath);
+        }
+        if (!legacyCandidates.isEmpty()) {
+            adaptiveLayerRefs.insert(resourceKey(iconRef));
             added = true;
         }
     }

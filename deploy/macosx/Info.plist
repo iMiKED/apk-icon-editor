@@ -9,9 +9,9 @@
 	<key>CFBundleName</key>
 	<string>APK Icon Editor Reborn</string>
 	<key>CFBundleVersion</key>
-	<string>3.0.0-beta3</string>
+	<string>3.0.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.0.0-beta3</string>
+	<string>3.0.0</string>
 	<key>CFBundleExecutable</key>
 	<string>apk-icon-editor-reborn</string>
 	<key>CFBundleIdentifier</key>

@@ -12,7 +12,7 @@ This repository contains **APK Icon Editor Reborn**, a fork of the original [APK
 [![Ozon Bank](https://img.shields.io/badge/Ozon%20Bank-SBP%20transfer-005BFF)](https://finance.ozon.ru/apps/sbp/ozonbankpay/019a0a87-1f4a-7df8-97c7-ef32ebf9a0e3)
 
 ## Description
-**APK Icon Editor Reborn** is a cross-platform APK editor designed to edit and replace APK resources such as icons, strings, images, application name and version. This fork modernizes the original Qt application for current build toolchains and adds beta support for adaptive XML launcher icons decoded by Apktool.
+**APK Icon Editor Reborn** is a cross-platform APK editor designed to edit and replace APK resources such as icons, strings, images, application name and version. This fork modernizes the original Qt application for current build toolchains and supports adaptive XML launcher icons decoded by Apktool.
 
 ## Support The Project
 If APK Icon Editor Reborn saves you time, you can support the fork author:
@@ -55,12 +55,18 @@ The `Icon size preset` list is loaded from the shared cross-platform `icon-size-
 
 Preset icons live next to that JSON file under `gfx/devices/`. Built-in Android presets remain available as a fallback when `icon-size-presets.json` is missing or invalid, and embedded icons are used if an external preset icon cannot be loaded. Retired BlackBerry and Kindle Fire presets are kept in the JSON `legacy` section but are not shown in the active preset list.
 
-## 3.0.0 Beta Status
-The 3.0 beta branch moves the project to Qt 6.8 LTS, Apktool 3.0.2, and current platform packaging. Version `3.0.0-beta5` continues adaptive XML icon handling without requiring `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to `base.apk`; color backgrounds, percent insets, WebP launcher layers, vector foreground previews, and standalone XML/vector launcher icon previews are rendered in-app.
+## Version 3.0.0
+Version `3.0.0` is the first non-beta Reborn release, using Qt 6.8 LTS, a patched Apktool 3.0.3 snapshot, and current platform packaging. Icon rendering does not require a separate `aapt2`: resources are resolved from Apktool-decoded files, values aliases, simple `resources.arsc` aliases/scalar values, and compatible read-only split APK resources stored next to the base APK. Color backgrounds, percent insets, WebP launcher layers, vector foreground previews, and standalone XML/vector launcher icon previews are rendered in-app.
+
+The Icons tab separates **Adaptive XML** and **Bitmap - Legacy** alternatives under each launcher resource. Adaptive is expanded and selected by default; Legacy is collapsed and contains only existing bitmap resources. A same-name legacy image may differ completely from the adaptive icon, as in Futuba, and no longer overrides its preview. APKs with only bitmap icons retain the simple list. If adaptive rendering fails, available legacy alternatives are explicitly labeled as a fallback.
 
 Adaptive/vector previews are intended for display, replacement, export, and safe APK repacking. The editor shows adaptive icon metadata in tooltips and logs, including the launcher entry, XML descriptor, foreground, background, monochrome layer when present, preview source, and write-back target.
 
 `Write-back` means the real resource that will be changed before Apktool rebuilds the APK. Classic bitmap icons are written back to the selected PNG/WebP file. Adaptive XML icons are saved through an explicit foreground-only strategy: existing bitmap foreground layers are replaced in place, while vector/XML foregrounds get a generated custom bitmap foreground resource and the adaptive XML is updated to reference it. Background layers are preserved to avoid breaking the original adaptive icon structure.
+
+The replacement dialog shows the current icon and new foreground. **Also update legacy bitmap alternatives** is unchecked by default: adaptive-only replacement leaves legacy files untouched. Enabling it also copies the replacement image to that adaptive resource's legacy alternatives at their existing sizes. Selecting, previewing, exporting, or packing unchanged icons does not modify the original bitmap files. Split-resource alternatives remain read-only. Preview masks and themed monochrome mode remain independent of the Adaptive/Legacy resource selection.
+
+See [3.0.0 release notes](deploy/general/release-notes/v3.0.0.md) and the complete [version history](deploy/general/versions.txt).
 
 Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
 
@@ -132,8 +138,8 @@ GitHub Actions are prepared to build the following packages:
 ## Requirements
 #### Recommended:
 - [JDK 64-bit 17](https://adoptium.net/temurin/releases/) (or later) or another current JDK available in `PATH`.
-- [Qt 6.8.3 LTS](https://download.qt.io/archive/qt/6.8/6.8.3/) for building the 3.0 beta branch.
-- [Apktool 3.0.2](https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_3.0.2.jar) is bundled as `deploy/general/apktool.jar`.
+- [Qt 6.8.3 LTS](https://download.qt.io/archive/qt/6.8/6.8.3/) for building version 3.0.
+- A patched Apktool `v3.0.3-11-79b63384-SNAPSHOT` build from [upstream PR #4209](https://github.com/iBotPeaches/Apktool/pull/4209) is bundled as `deploy/general/apktool.jar`.
 #### Note for macOS users:
 - Install a full JDK instead of a JRE so `java` and `javac` are available in `PATH`.
 

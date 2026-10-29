@@ -7,6 +7,20 @@ IconsModel::~IconsModel()
     qDeleteAll(icons);
 }
 
+void IconsModel::add(const QString &filename, const LegacyIconDescriptor &descriptor, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole)
+{
+    beginInsertRows(QModelIndex(), icons.count(), icons.count());
+    Icon *icon = new Icon(filename, descriptor, type, scope, entryRole);
+    icons.append(icon);
+    connect(icon, &Icon::updated, this, [this, icon]() {
+        const QModelIndex changed = index(icons.indexOf(icon), 0);
+        emit dataChanged(changed, changed);
+    });
+    endInsertRows();
+    sortIcons();
+    qDebug().noquote() << "Added legacy" << icon->getEntryRoleTitle() << Path::display(filename);
+}
+
 void IconsModel::add(const QString &filename, Icon::Type type, Icon::Scope scope, Icon::EntryRole entryRole)
 {
     // Add:
@@ -81,12 +95,21 @@ void IconsModel::add(const QString &filename, const QPixmap &pixmap, const QStri
 
 void IconsModel::sortIcons()
 {
-    std::sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
+    emit layoutAboutToBeChanged();
+    const QModelIndexList oldIndexes = persistentIndexList();
+    std::stable_sort(icons.begin(), icons.end(), [](const Icon *a, const Icon *b) -> bool {
         if (a->getEntryPriority() != b->getEntryPriority()) {
             return a->getEntryPriority() < b->getEntryPriority();
         }
+        if (a->isLegacyIcon() != b->isLegacyIcon()) return !a->isLegacyIcon();
         return a->getType() < b->getType();
     });
+    QModelIndexList newIndexes;
+    for (const QModelIndex &old : oldIndexes) {
+        newIndexes << index(icons.indexOf(static_cast<Icon *>(old.internalPointer())), 0);
+    }
+    changePersistentIndexList(oldIndexes, newIndexes);
+    emit layoutChanged();
 }
 
 bool IconsModel::remove(Icon *icon)
@@ -110,7 +133,14 @@ bool IconsModel::remove(Icon *icon)
 void IconsModel::clone(Icon *source)
 {
     if (source) {
+        if (source->isAdaptiveIcon()) {
+            updateAdaptiveFamily(source);
+            return;
+        }
         foreach (Icon *icon, icons) {
+            if (icon->isReadOnly() || icon->isAdaptiveIcon()) continue;
+            if (source->isLegacyIcon() && icon->getFamilyPath() != source->getFamilyPath()) continue;
+            if (!source->isLegacyIcon() && icon->isLegacyIcon()) continue;
             if (icon->getType() != Icon::Unknown) {
                 if ((source->getType() == Icon::TvBanner) == (icon->getType() == Icon::TvBanner)) {
                     icon->replace(source->getPixmap());
@@ -120,7 +150,17 @@ void IconsModel::clone(Icon *source)
     }
 }
 
-void IconsModel::updateAdaptiveFamily(Icon *source)
+QList<Icon *> IconsModel::legacyAlternatives(const Icon *source) const
+{
+    QList<Icon *> result;
+    if (!source || !source->isAdaptiveIcon()) return result;
+    for (Icon *icon : icons) {
+        if (icon->isLegacyIcon() && icon->getFamilyPath() == source->getFamilyPath()) result << icon;
+    }
+    return result;
+}
+
+void IconsModel::updateAdaptiveFamily(Icon *source, bool updateLegacy)
 {
     if (!source || !source->isAdaptiveIcon()) {
         return;
@@ -134,6 +174,14 @@ void IconsModel::updateAdaptiveFamily(Icon *source)
         }
         icon->replace(sourcePixmap.scaled(icon->width(), icon->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     }
+    if (updateLegacy) {
+        for (Icon *icon : legacyAlternatives(source)) {
+            if (!icon->isReadOnly()) {
+                icon->replace(sourcePixmap.scaled(icon->width(), icon->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            }
+        }
+    }
+    qDebug() << "Adaptive family replacement: update legacy =" << updateLegacy;
 }
 
 void IconsModel::save()
@@ -167,6 +215,9 @@ Icon *IconsModel::last()
 
 Icon *IconsModel::getLargestIcon()
 {
+    for (auto it = icons.crbegin(); it != icons.crend(); ++it) {
+        if ((*it)->getEntryRole() == Icon::EntryApplicationIcon && (*it)->isAdaptiveIcon()) return *it;
+    }
     for (int i = icons.size() - 1; i >= 0; --i) {
         Icon *icon = icons.at(i);
         if (icon->getScope() == Icon::ScopeApplication && icon->getType() != Icon::TvBanner) {
@@ -181,7 +232,7 @@ bool IconsModel::setData(const QModelIndex &index, const QVariant &value, int ro
     Q_UNUSED(role);
     if (index.isValid()) {
         Icon *icon = icons.at(index.row());
-        icon->setPixmap(value.value<QPixmap>());
+        if (!icon->replace(value.value<QPixmap>())) return false;
         emit dataChanged(index, index);
         return true;
     }
@@ -213,6 +264,5 @@ QModelIndex IconsModel::index(int row, int column, const QModelIndex &parent) co
 
 int IconsModel::rowCount(const QModelIndex &parent) const
 {
-    Q_UNUSED(parent);
-    return icons.count();
+    return parent.isValid() ? 0 : icons.count();
 }
