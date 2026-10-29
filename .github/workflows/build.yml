@@ -52,7 +52,9 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip aqtinstall
-          python -m aqt install-qt windows desktop $env:QT_VERSION win64_msvc2022_64 --outputdir C:\Qt --archives qtbase qttools qtimageformats
+          python -m aqt install-qt windows desktop $env:QT_VERSION win64_msvc2022_64 --outputdir C:\Qt --archives qtbase qttools --modules qtimageformats
+          if ($LASTEXITCODE -ne 0) { throw "Qt installation failed." }
+          if (-not (Test-Path "C:\Qt\$env:QT_VERSION\msvc2022_64\plugins\imageformats\qwebp.dll")) { throw "Qt WebP module is missing." }
           "C:\Qt\$env:QT_VERSION\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Build Windows
@@ -121,7 +123,8 @@ jobs:
         if: matrix.target == 'macos'
         run: |
           python -m pip install --upgrade pip aqtinstall
-          python -m aqt install-qt mac desktop "$QT_VERSION" clang_64 --outputdir "$HOME/Qt" --archives qtbase qttools qtimageformats
+          python -m aqt install-qt mac desktop "$QT_VERSION" clang_64 --outputdir "$HOME/Qt" --archives qtbase qttools --modules qtimageformats
+          test -f "$HOME/Qt/$QT_VERSION/macos/plugins/imageformats/libqwebp.dylib"
 
       - name: Install macOS packaging tools
         if: matrix.target == 'macos'
