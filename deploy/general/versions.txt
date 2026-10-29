@@ -11,6 +11,7 @@
 * Keep legacy resources from split APKs read-only and label the legacy fallback when an adaptive preview cannot be rendered.
 * Show application roundIcon alternatives separately from the application icon.
 * Aligned the built-in LDPI render size with the Android preset (36x36).
+* Included WebP image-format plugins in Windows/macOS packages and declared the runtime plugin dependency for Linux DEB/RPM packages.
 
 ## 3.0.0-beta5
 * Replaced bundled Apktool 3.0.2 with a patched Apktool v3.0.3-11-79b63384-SNAPSHOT build from upstream PR #4209 to decode APKs containing NUL-only resource strings.

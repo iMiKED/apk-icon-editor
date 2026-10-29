@@ -18,6 +18,7 @@ BuildRequires:  qt6-qttools-devel
 BuildRequires:  zlib-devel
 Requires:       java-17-openjdk-devel
 Requires:       hicolor-icon-theme
+Requires:       qt6-qtimageformats
 
 %description
 APK Icon Editor Reborn is a cross-platform APK editor designed to edit and replace APK

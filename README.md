@@ -68,6 +68,8 @@ The replacement dialog shows the current icon and new foreground. **Also update 
 
 See [3.0.0 release notes](deploy/general/release-notes/v3.0.0.md) and the complete [version history](deploy/general/versions.txt).
 
+Windows and macOS packages include the Qt WebP plugin. Linux DEB/RPM packages declare the image-format plugin dependency; the Linux TAR archive requires system Qt 6 libraries and image-format plugins.
+
 Resource candidate diagnostics show how the editor chooses decoded APK resources. Candidates are scored by density and qualifiers, and the resource with the lowest `score` is selected.
 
 Split APK resources are currently supported for preview only. If an adaptive icon uses a resource from a split APK, the tooltip and logs mark it as read-only and replacement/repacking of that split APK set is intentionally blocked. Classic single-APK repacking remains supported.

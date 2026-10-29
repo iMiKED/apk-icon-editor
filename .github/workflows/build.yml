@@ -52,7 +52,7 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip aqtinstall
-          python -m aqt install-qt windows desktop $env:QT_VERSION win64_msvc2022_64 --outputdir C:\Qt --archives qtbase qttools
+          python -m aqt install-qt windows desktop $env:QT_VERSION win64_msvc2022_64 --outputdir C:\Qt --archives qtbase qttools qtimageformats
           "C:\Qt\$env:QT_VERSION\msvc2022_64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Build Windows
@@ -64,7 +64,10 @@ jobs:
           if (-not $vs) { throw "Visual Studio C++ toolchain was not found." }
           $vcvars = Join-Path $vs 'VC\Auxiliary\Build\vcvars64.bat'
           & cmd.exe /d /s /c "call `"$vcvars`" && cd /d `"$pwd`" && qmake `"DEFINES+=CI`" && nmake"
+          if ($LASTEXITCODE -ne 0) { throw "Windows build failed." }
           windeployqt --release --no-compiler-runtime bin\win64\apk-icon-editor-reborn.exe
+          if ($LASTEXITCODE -ne 0) { throw "Qt deployment failed." }
+          if (-not (Test-Path bin\win64\imageformats\qwebp.dll)) { throw "WebP plugin is missing." }
           Compress-Archive -Path bin\win64\* -DestinationPath "apk-icon-editor-reborn_${env:APP_VERSION}_win64.zip" -Force
 
       - name: Upload Windows artifact
@@ -78,7 +81,20 @@ jobs:
         if: matrix.target == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential debhelper devscripts dh-make qt6-base-dev qt6-tools-dev-tools zlib1g-dev default-jdk-headless zipalign
+          sudo apt-get install -y build-essential debhelper devscripts dh-make qt6-base-dev qt6-tools-dev-tools qt6-image-formats-plugins zlib1g-dev default-jdk-headless zipalign
+
+      - name: Test icon variants and version comparison
+        if: matrix.target == 'linux'
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          for project in test_iconvariants test_version; do
+            mkdir -p "$RUNNER_TEMP/$project"
+            cd "$RUNNER_TEMP/$project"
+            qmake6 "$GITHUB_WORKSPACE/src/tests/$project/$project.pro"
+            make -j2
+            "./$project"
+          done
 
       - name: Build Debian package
         if: matrix.target == 'linux'
@@ -105,7 +121,7 @@ jobs:
         if: matrix.target == 'macos'
         run: |
           python -m pip install --upgrade pip aqtinstall
-          python -m aqt install-qt mac desktop "$QT_VERSION" clang_64 --outputdir "$HOME/Qt" --archives qtbase qttools
+          python -m aqt install-qt mac desktop "$QT_VERSION" clang_64 --outputdir "$HOME/Qt" --archives qtbase qttools qtimageformats
 
       - name: Install macOS packaging tools
         if: matrix.target == 'macos'
@@ -121,6 +137,7 @@ jobs:
         run: |
           chmod +x setup/macosx/BUILD.command
           setup/macosx/BUILD.command
+          test -f "bin/macosx/apk-icon-editor-reborn.app/Contents/PlugIns/imageformats/libqwebp.dylib"
 
       - name: Upload macOS artifacts
         if: matrix.target == 'macos'
