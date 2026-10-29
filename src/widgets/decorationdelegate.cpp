@@ -6,6 +6,16 @@ DecorationDelegate::DecorationDelegate(const QSize &size, QObject *parent) : QSt
     decorationSize = size;
 }
 
+QSize DecorationDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QStyleOptionViewItem opt(option);
+    initStyleOption(&opt, index);
+    QSize size = QStyledItemDelegate::sizeHint(opt, index);
+    const int textHeight = (opt.text.count('\n') + 1) * opt.fontMetrics.height() + 8;
+    size.setHeight(qMax(textHeight, opt.icon.isNull() ? 24 : opt.decorationSize.height() + 4));
+    return size;
+}
+
 void DecorationDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                const QModelIndex &index) const
 {
@@ -25,27 +35,38 @@ void DecorationDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
     painter->save();
     painter->fillRect(opt.rect, fill);
+    painter->setFont(opt.font);
 
     const int margin = 4;
     QRect content = opt.rect.adjusted(margin, 0, -margin, 0);
+    const QStringList lines = opt.text.split('\n');
+    int top = content.center().y() - lines.size() * opt.fontMetrics.height() / 2;
+    const int iconTop = index.model()->hasChildren(index)
+        ? top + (opt.fontMetrics.height() - opt.decorationSize.height()) / 2
+        : content.top() + (content.height() - opt.decorationSize.height()) / 2;
     QRect iconRect(content.left(),
-                   content.top() + (content.height() - decorationSize.height()) / 2,
-                   decorationSize.width(),
-                   decorationSize.height());
+                   iconTop,
+                   opt.decorationSize.width(),
+                   opt.decorationSize.height());
     const QIcon::Mode iconMode = opt.state & QStyle::State_Enabled
         ? selected ? QIcon::Selected : QIcon::Normal
         : QIcon::Disabled;
     opt.icon.paint(painter, iconRect, Qt::AlignCenter, iconMode, QIcon::Off);
 
-    QRect textRect = content.adjusted(decorationSize.width() + margin * 2, 0, 0, 0);
+    QRect textRect = content.adjusted(opt.icon.isNull() ? 0 : opt.decorationSize.width() + margin * 2, 0, 0, 0);
     painter->setPen(text);
-    painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft,
-                      opt.fontMetrics.elidedText(opt.text, Qt::ElideRight, textRect.width()));
+    for (const QString &line : lines) {
+        painter->drawText(QRect(textRect.left(), top, textRect.width(), opt.fontMetrics.height()),
+                         Qt::AlignVCenter | Qt::AlignLeft,
+                         opt.fontMetrics.elidedText(line, Qt::ElideRight, textRect.width()));
+        top += opt.fontMetrics.height();
+    }
     painter->restore();
 }
 
 void DecorationDelegate::initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const
 {
     QStyledItemDelegate::initStyleOption(option, index);
-    option->decorationSize = decorationSize;
+    option->text.replace(QChar::LineSeparator, QChar::LineFeed);
+    option->decorationSize = index.model()->hasChildren(index) ? QSize(16, 16) : decorationSize;
 }

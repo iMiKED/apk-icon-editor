@@ -1,4 +1,4 @@
-QT += testlib network
+QT += testlib network widgets
 
 TARGET = test_version
 CONFIG += console
@@ -11,4 +11,4 @@ SOURCES += test_version.cpp \
 
 HEADERS += ../../core/updater.h
 
-DEFINES += VER=0 # Dummy define to satifsy updater.cpp dependency
+DEFINES += VER=\\\"0\\\"

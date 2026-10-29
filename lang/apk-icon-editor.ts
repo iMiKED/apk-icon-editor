@@ -4,6 +4,10 @@
 <context>
     <name>About</name>
     <message>
+      <source>Includes local changes</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/dialogs/about.cpp" line="+96"/>
         <source>About</source>
         <translation type="unfinished"></translation>
@@ -355,6 +359,14 @@
 </context>
 <context>
     <name>Icon</name>
+    <message>
+      <source>Legacy bitmap alternative</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Read-only split APK resource</source>
+      <translation type="unfinished"></translation>
+    </message>
     <message>
         <location filename="../src/apk/icon.cpp" line="+244"/>
         <source>Application icon</source>
@@ -1245,6 +1257,76 @@ Download?</source>
         <location line="+4"/>
         <source>Update server returned HTTP %1.</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>IconsProxy</name>
+    <message>
+      <source>Adaptive XML</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Bitmap - Legacy</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Adaptive preview unavailable</source>
+      <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>AdaptiveReplacementDialog</name>
+    <message>
+      <source>Adaptive Icon Replacement</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Current icon</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>New foreground</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Background:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Keep original</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Densities:</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>%1 variants</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Also update legacy bitmap alternatives</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>No legacy alternatives</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Legacy alternatives include read-only split resources</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Legacy: %1 files will be updated</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Legacy: %1 files unchanged</source>
+      <translation type="unfinished"></translation>
+    </message>
+    <message>
+      <source>Replace</source>
+      <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

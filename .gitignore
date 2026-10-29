@@ -23,4 +23,9 @@
 *.DS_Store
 Makefile*
 moc_*.cpp
+moc_predefs.h
+*.moc
+/src/tests/*/release/
+/src/tests/*/debug/
+/src/tests/*/target_wrapper.bat
 qrc_*.cpp

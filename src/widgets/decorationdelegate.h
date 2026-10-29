@@ -9,6 +9,7 @@ class DecorationDelegate : public QStyledItemDelegate {
 
 public:
     explicit DecorationDelegate(const QSize &size, QObject *parent = 0);
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 protected:
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const Q_DECL_OVERRIDE;

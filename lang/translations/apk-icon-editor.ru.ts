@@ -4,6 +4,10 @@
   <context>
     <name>About</name>
     <message>
+      <source>Includes local changes</source>
+      <translation>Содержит локальные изменения</translation>
+    </message>
+    <message>
       <location filename="../src/dialogs/about.cpp" line="+96"/>
       <source>About</source>
       <translation>О программе</translation>
@@ -355,6 +359,14 @@
   </context>
   <context>
     <name>Icon</name>
+    <message>
+      <source>Legacy bitmap alternative</source>
+      <translation>Растровая альтернатива Legacy</translation>
+    </message>
+    <message>
+      <source>Read-only split APK resource</source>
+      <translation>Ресурс split APK только для чтения</translation>
+    </message>
     <message>
       <location filename="../src/apk/icon.cpp" line="+244"/>
       <source>Application icon</source>
@@ -1254,4 +1266,74 @@ Download?</source>
       <translation>Сервер обновлений вернул HTTP %1.</translation>
     </message>
   </context>
+<context>
+    <name>IconsProxy</name>
+    <message>
+      <source>Adaptive XML</source>
+      <translation>Адаптивная XML</translation>
+    </message>
+    <message>
+      <source>Bitmap - Legacy</source>
+      <translation>Растровая - Legacy</translation>
+    </message>
+    <message>
+      <source>Adaptive preview unavailable</source>
+      <translation>Адаптивная иконка недоступна</translation>
+    </message>
+</context>
+<context>
+    <name>AdaptiveReplacementDialog</name>
+    <message>
+      <source>Adaptive Icon Replacement</source>
+      <translation>Замена адаптивной иконки</translation>
+    </message>
+    <message>
+      <source>Current icon</source>
+      <translation>Текущая иконка</translation>
+    </message>
+    <message>
+      <source>New foreground</source>
+      <translation>Новый передний план</translation>
+    </message>
+    <message>
+      <source>Background:</source>
+      <translation>Фон:</translation>
+    </message>
+    <message>
+      <source>Keep original</source>
+      <translation>Сохранить исходный</translation>
+    </message>
+    <message>
+      <source>Densities:</source>
+      <translation>Плотности:</translation>
+    </message>
+    <message>
+      <source>%1 variants</source>
+      <translation>Вариантов: %1</translation>
+    </message>
+    <message>
+      <source>Also update legacy bitmap alternatives</source>
+      <translation>Также обновить растровые альтернативы</translation>
+    </message>
+    <message>
+      <source>No legacy alternatives</source>
+      <translation>Растровых альтернатив нет</translation>
+    </message>
+    <message>
+      <source>Legacy alternatives include read-only split resources</source>
+      <translation>Растровые альтернативы содержат ресурсы сплитов только для чтения</translation>
+    </message>
+    <message>
+      <source>Legacy: %1 files will be updated</source>
+      <translation>Legacy: будет обновлено файлов: %1</translation>
+    </message>
+    <message>
+      <source>Legacy: %1 files unchanged</source>
+      <translation>Legacy: файлов без изменений: %1</translation>
+    </message>
+    <message>
+      <source>Replace</source>
+      <translation>Заменить</translation>
+    </message>
+</context>
 </TS>

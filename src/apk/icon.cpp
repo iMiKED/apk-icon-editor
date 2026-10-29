@@ -105,6 +105,30 @@ bool Icon::load(QString filename)
     return revert();
 }
 
+Icon::Icon(QString filename, const LegacyIconDescriptor &descriptor, Type type, Scope scope, EntryRole entryRole)
+    : Icon(filename, type, scope, entryRole)
+{
+    legacyDescriptor = descriptor;
+}
+
+bool Icon::isReadOnly() const
+{
+    return isXmlDrawableIcon() || legacyDescriptor.readOnly
+            || (isAdaptiveIcon() && adaptiveDescriptor.usesReadOnlySplitResources);
+}
+
+QString Icon::getResourceRef() const
+{
+    if (isAdaptiveIcon()) return adaptiveDescriptor.resourceRef;
+    if (isLegacyIcon()) return legacyDescriptor.resourceRef;
+    return xmlDrawableDescriptor.resourceRef;
+}
+
+QString Icon::getFamilyPath() const
+{
+    return isAdaptiveIcon() ? adaptiveDescriptor.xmlPath : legacyDescriptor.adaptiveXmlPath;
+}
+
 bool Icon::save(QString filename)
 {
     if (pixmap.isNull()) {
@@ -127,6 +151,9 @@ bool Icon::save(QString filename)
         return getPixmap().save(filename, format, 100);
     }
 
+    if (isReadOnly() || !modified) {
+        return true;
+    }
     if (virtualIcon && saveTargets.isEmpty()) {
         if (isAdaptiveIcon() && adaptiveDescriptor.usesReadOnlySplitResources) {
             qWarning().noquote() << "Adaptive icon write-back skipped because it uses read-only split APK resources:\n" + getToolTip();
@@ -166,7 +193,7 @@ bool Icon::save(QString filename)
 
 bool Icon::replace(QPixmap pixmap)
 {
-    if (pixmap.isNull()) {
+    if (pixmap.isNull() || legacyDescriptor.readOnly) {
         return false;
     }
     if (isAdaptiveIcon() && adaptiveDescriptor.usesReadOnlySplitResources) {
@@ -197,6 +224,7 @@ bool Icon::replace(QPixmap pixmap)
 
 bool Icon::resize(QSize size)
 {
+    if (isReadOnly()) return false;
     setPixmap(pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     modified = true;
     emit updated();
@@ -332,7 +360,11 @@ QString Icon::getToolTip() const
     }
 
     if (!isAdaptiveIcon()) {
-        return tr("Bitmap icon") + "\n\n" + tr("Launcher entry:") + "\n" + getEntryRoleTitle() + "\n\n" + Path::display(filePath);
+        return (isLegacyIcon() ? tr("Legacy bitmap alternative") : tr("Bitmap icon"))
+                + "\n\n" + tr("Launcher entry:") + "\n" + getEntryRoleTitle()
+                + (getResourceRef().isEmpty() ? QString() : "\n" + getResourceRef())
+                + "\n\n" + Path::display(filePath)
+                + (legacyDescriptor.readOnly ? "\n\n" + tr("Read-only split APK resource") : QString());
     }
 
     QStringList lines;
@@ -397,7 +429,7 @@ QString Icon::getToolTip() const
     lines << "";
     lines << tr("Write-back:");
     lines << tr("Mode: foreground-only replacement");
-    if (!adaptiveDescriptor.foregroundPath.isEmpty()) {
+    if (!adaptiveDescriptor.usesCustomForeground() && !adaptiveDescriptor.foregroundPath.isEmpty()) {
         lines << tr("Target: existing bitmap foreground");
     } else {
         lines << tr("Target: custom bitmap foreground");

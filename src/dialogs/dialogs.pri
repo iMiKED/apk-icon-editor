@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD
 
 SOURCES += $$PWD/mainwindow.cpp \
+           $$PWD/adaptivereplacementdialog.cpp \
            $$PWD/dialogs.cpp \
            $$PWD/tooldialog.cpp \
            $$PWD/keymanager.cpp \
@@ -9,6 +10,7 @@ SOURCES += $$PWD/mainwindow.cpp \
            $$PWD/authors.cpp
 
 HEADERS += $$PWD/mainwindow.h \
+           $$PWD/adaptivereplacementdialog.h \
            $$PWD/dialogs.h \
            $$PWD/tooldialog.h \
            $$PWD/keymanager.h \

@@ -1,10 +1,24 @@
 # Version History
 
 
+## 3.0.0
+* Fixed update version comparison so stable 3.0.0 is newer than 3.0.0-beta versions.
+* Separated adaptive XML launcher icons and their legacy bitmap alternatives into expandable groups in the Icons tab.
+* Added small, automatically refreshed icon thumbnails beside launcher branch and Adaptive/Legacy group headings.
+* Show adaptive XML previews by default instead of substituting a same-name legacy bitmap.
+* Added a replacement dialog with current/new previews and an explicit, unchecked-by-default option to update legacy bitmap alternatives.
+* Preserve legacy resources during adaptive-only replacement and avoid rewriting unchanged bitmap files when packing an APK.
+* Keep legacy resources from split APKs read-only and label the legacy fallback when an adaptive preview cannot be rendered.
+* Show application roundIcon alternatives separately from the application icon.
+* Aligned the built-in LDPI render size with the Android preset (36x36).
+* Included WebP image-format plugins in Windows/macOS packages and declared the runtime plugin dependency for Linux DEB/RPM packages.
+
 ## 3.0.0-beta5
+* Replaced bundled Apktool 3.0.2 with a patched Apktool v3.0.3-11-79b63384-SNAPSHOT build from upstream PR #4209 to decode APKs containing NUL-only resource strings.
 * Added preview and export support for standalone XML launcher icons such as vector drawable application icons.
 * Kept standalone XML/vector launcher icon replacement disabled until safe write-back support is implemented.
 * Reduced Windows startup theme flicker by avoiding delayed DWM frame refreshes during the initial window show.
+
 
 ## 3.0.0-beta4.1
 * Restored native macOS and Linux window chrome and theming by keeping the frameless title bar, Windows accent border and custom theme styling Windows-only.
@@ -18,9 +32,7 @@
 * Fixed split APK probing to follow manifest split metadata and ignore split metadata entries with empty split names.
 * Added progress and an Icons tab busy indicator while the icon list is being built.
 * Kept the Icons busy indicator responsive while the icon list is being built.
-
 * Added preview-only adaptive icon launcher shape masks without changing APK resources.
-
 * Added preview-only themed monochrome mode for adaptive icons that provide a monochrome layer.
 * Added Light, Dark and System application theme modes.
 * Added an experimental Windows frameless themed title bar with custom window controls.
@@ -41,7 +53,6 @@
 ## 3.0.0-beta3
 * Added resource table alias resolution from resources.arsc for adaptive XML icons.
 * Fixed adaptive icon rendering for APKs whose launcher foreground is a resources.arsc alias, such as Snapseed.
-
 * Fixed resource resolution when an APK provides both a direct XML resource and a default values alias for the same launcher icon.
 * Added adaptive XML rendering support for drawable color XML files and percent-based inset drawables.
 * Renamed application branding and package/binary names to APK Icon Editor Reborn.

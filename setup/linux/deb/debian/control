@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/iMiKED/apk-icon-editor
 
 Package: apk-icon-editor-reborn
 Architecture: any
-Depends: zipalign, default-jdk-headless | java17-runtime-headless | java17-runtime, ${shlibs:Depends}, ${misc:Depends}
+Depends: zipalign, qt6-image-formats-plugins, default-jdk-headless | java17-runtime-headless | java17-runtime, ${shlibs:Depends}, ${misc:Depends}
 Description: Simple APK resource editor
  APK editor designed to easily change
  APK icons, name, version and other resources.
